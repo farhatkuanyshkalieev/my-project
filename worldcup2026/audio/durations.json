@@ -1,0 +1,22 @@
+{
+ "scenes": [
+  "title",
+  "hosts",
+  "numbers",
+  "cities",
+  "opening",
+  "format",
+  "final",
+  "outro"
+ ],
+ "durations": {
+  "title": 5.677278911564626,
+  "hosts": 5.189659863945578,
+  "numbers": 6.884716553287982,
+  "cities": 6.0836281179138325,
+  "opening": 9.05578231292517,
+  "format": 12.701315192743763,
+  "final": 7.732244897959184,
+  "outro": 6.6525170068027215
+ }
+}
