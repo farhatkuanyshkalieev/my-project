@@ -22,7 +22,7 @@ export const HDR = (hex, k) => new THREE.Color(hex).multiplyScalar(k);
 const fonts = [];
 export async function loadFonts() {
   const L = new TTFLoader();
-  for (const f of ['fonts/montserrat-cyrillic-900-normal.woff', 'fonts/montserrat-latin-900-normal.woff']) {
+  for (const f of ['/fonts/montserrat-cyrillic-900-normal.woff', '/fonts/montserrat-latin-900-normal.woff']) {
     fonts.push(new FontLoader().parse(await L.loadAsync(f)));
   }
 }
