@@ -1,0 +1,6 @@
+node_modules/
+out/chunk_*
+out/chunks.txt
+out/render.log
+out/stills/beat_*.png
+out/stills/at_*.png

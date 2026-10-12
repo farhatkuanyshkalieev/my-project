@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FOLD Showreel</title>
+<style>
+@font-face{font-family:Geist;font-weight:900;src:url(data:font/woff2;base64,__GEIST_BLACK__) format('woff2')}
+@font-face{font-family:Geist;font-weight:500;src:url(data:font/woff2;base64,__GEIST_MEDIUM__) format('woff2')}
+html,body{margin:0;background:#0B0B0C;overflow:hidden}
+canvas{display:block;width:1920px;height:1080px}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+'use strict';
+/* FOLD — one vermilion square is folded, beat by beat, into type, form, space, data and its own name.
+   120 BPM, 30 beats, 15 s. window.seek(t) draws frame t from scratch: no timers, no carried state. */
+const GLYPHS = /*__GLYPHS__*/null;
+
+// ───────────────────────────── core
+const W = 1920, H = 1080, CX = W / 2, CY = H / 2, DUR = 15, SPB = 0.5;
+const RGB = { k: [11, 11, 12], w: [243, 241, 236], v: [255, 74, 28], c: [45, 59, 255] };
+const css = (a) => `rgb(${a[0] | 0},${a[1] | 0},${a[2] | 0})`;
+const COL = { k: css(RGB.k), w: css(RGB.w), v: css(RGB.v), c: css(RGB.c) };
+const mixc = (a, b, u) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u];
+const clamp = (x, a = 0, b = 1) => (x < a ? a : x > b ? b : x);
+const lerp = (a, b, u) => a + (b - a) * u;
+const lerp2 = (a, b, u) => [lerp(a[0], b[0], u), lerp(a[1], b[1], u)];
+
+// exponential ease-out, normalised so it lands exactly on 1
+const expo = (k = 10) => (x) => (x <= 0 ? 0 : x >= 1 ? 1 : (1 - Math.pow(2, -k * x)) / (1 - Math.pow(2, -k)));
+const eo = expo(10), eo7 = expo(7);
+// damped spring step response (zeta ~0.8: settles with ~1-2% overshoot, never bouncy)
+function spring(dt, w = 20, z = 0.8) {
+  if (dt <= 0) return 0;
+  const wd = w * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w * dt) * (Math.cos(wd * dt) + ((z * w) / wd) * Math.sin(wd * dt));
+}
+const tw = (t, t0, d, f = eo) => f(clamp((t - t0) / d));
+
+const cv = document.getElementById('c');
+const X = cv.getContext('2d');
+const BUF = {};
+const buf = (name) => BUF[name] || (BUF[name] = Object.assign(document.createElement('canvas'), { width: W, height: H }));
+function fresh(name) {
+  const g = buf(name).getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.globalAlpha = 1;
+  g.globalCompositeOperation = 'source-over';
+  g.clearRect(0, 0, W, H);
+  return g;
+}
+
+// ───────────────────────────── motion blur
+// Directional blur that follows speed and direction: the layer is re-drawn at n instants
+// across the shutter and averaged. n scales with the on-screen displacement.
+const SHUTTER = 1 / 90;
+const nFor = (px) => (px < 1.5 ? 1 : px < 10 ? 3 : px < 40 ? 5 : 15); // 255/n stays integral
+function pxEst(fn, t) {
+  const a = fn(t - SHUTTER / 2), b = fn(t + SHUTTER / 2);
+  let m = 0;
+  for (let i = 0; i < Math.min(a.length, b.length); i++) m = Math.max(m, Math.hypot(a[i][0] - b[i][0], a[i][1] - b[i][1]));
+  return m;
+}
+function mblur(ctx, t, px, draw) {
+  const n = nFor(px);
+  if (n === 1) { draw(ctx, t); return; }
+  const acc = fresh('acc');
+  for (let i = 0; i < n; i++) {
+    const l = fresh('lay');
+    draw(l, t + SHUTTER * ((i + 0.5) / n - 0.5));
+    acc.globalCompositeOperation = 'lighter';
+    acc.globalAlpha = 1 / n;
+    acc.drawImage(buf('lay'), 0, 0);
+  }
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.drawImage(buf('acc'), 0, 0);
+  ctx.restore();
+}
+
+// ───────────────────────────── type (Geist Black outlines)
+const P2 = {};
+function gpath(ch) {
+  if (P2[ch]) return P2[ch];
+  const p = new Path2D();
+  for (const c of GLYPHS.chars[ch].cmds) {
+    if (c[0] === 'M') p.moveTo(c[1], c[2]);
+    else if (c[0] === 'L') p.lineTo(c[1], c[2]);
+    else if (c[0] === 'Q') p.quadraticCurveTo(c[1], c[2], c[3], c[4]);
+    else if (c[0] === 'C') p.bezierCurveTo(c[1], c[2], c[3], c[4], c[5], c[6]);
+    else p.closePath();
+  }
+  return (P2[ch] = p);
+}
+function glyph(ctx, ch, x, y, s) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s / 1000, s / 1000);
+  ctx.fill(gpath(ch));
+  ctx.restore();
+}
+const inkU = (wd) => {
+  const g = GLYPHS.words[wd], a = g[0], b = g[g.length - 1];
+  return b[1] + GLYPHS.chars[b[0]].bb[2] - (a[1] + GLYPHS.chars[a[0]].bb[0]);
+};
+// lay out a word centred on its ink box, (cx, cy) = centre of the cap height
+function lay(wd, s, cx, cy, track = 0) {
+  const g = GLYPHS.words[wd], k = s / 1000;
+  const L = (g[0][1] + GLYPHS.chars[g[0][0]].bb[0]) * k;
+  const R = (g[g.length - 1][1] + GLYPHS.chars[g[g.length - 1][0]].bb[2]) * k + track * (g.length - 1);
+  const ox = cx - (L + R) / 2, base = cy + (GLYPHS.cap * k) / 2;
+  return g.map(([ch, x], i) => {
+    const bb = GLYPHS.chars[ch].bb, lx = ox + x * k + track * i;
+    return { ch, x: lx, y: base, s, ink: [lx + bb[0] * k, base + bb[1] * k, lx + bb[2] * k, base + bb[3] * k] };
+  });
+}
+// left-aligned on ink at x, baseline y
+function layL(wd, s, x, y) {
+  const L = lay(wd, s, 0, 0), dx = x - L[0].ink[0], dy = y - L[0].y;
+  return L.map((l) => ({ ...l, x: l.x + dx, y: l.y + dy, ink: [l.ink[0] + dx, l.ink[1] + dy, l.ink[2] + dx, l.ink[3] + dy] }));
+}
+const drawWord = (ctx, L) => L.forEach((l) => glyph(ctx, l.ch, l.x, l.y, l.s));
+
+// ───────────────────────────── vector shapes for morphing
+const N = 192;
+function contours(ch, s, ox, oy) {
+  const k = s / 1000, out = [];
+  let cur = null, px = 0, py = 0;
+  const P = (x, y) => [ox + x * k, oy + y * k];
+  for (const c of GLYPHS.chars[ch].cmds) {
+    if (c[0] === 'M') { cur = [P(c[1], c[2])]; out.push(cur); px = c[1]; py = c[2]; }
+    else if (c[0] === 'L') { px = c[1]; py = c[2]; cur.push(P(px, py)); }
+    else if (c[0] === 'Q') {
+      for (let i = 1; i <= 10; i++) { const u = i / 10, a = (1 - u) * (1 - u), b = 2 * u * (1 - u), d = u * u; cur.push(P(a * px + b * c[1] + d * c[3], a * py + b * c[2] + d * c[4])); }
+      px = c[3]; py = c[4];
+    } else if (c[0] === 'C') {
+      for (let i = 1; i <= 12; i++) { const u = i / 12, v = 1 - u; cur.push(P(v * v * v * px + 3 * v * v * u * c[1] + 3 * v * u * u * c[3] + u * u * u * c[5], v * v * v * py + 3 * v * v * u * c[2] + 3 * v * u * u * c[4] + u * u * u * c[6])); }
+      px = c[5]; py = c[6];
+    }
+  }
+  return out.filter((p) => p.length > 2);
+}
+function resample(pts, n = N) {
+  const m = pts.length, cum = [0];
+  let tot = 0;
+  for (let i = 0; i < m; i++) { const a = pts[i], b = pts[(i + 1) % m]; tot += Math.hypot(b[0] - a[0], b[1] - a[1]); cum.push(tot); }
+  const out = [];
+  let j = 0;
+  for (let i = 0; i < n; i++) {
+    const tg = (tot * i) / n;
+    while (j < m - 1 && cum[j + 1] < tg) j++;
+    const a = pts[j], b = pts[(j + 1) % m], sl = cum[j + 1] - cum[j], u = sl > 0 ? (tg - cum[j]) / sl : 0;
+    out.push([a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]);
+  }
+  return out;
+}
+const area = (p) => { let s = 0; for (let i = 0; i < p.length; i++) { const a = p[i], b = p[(i + 1) % p.length]; s += a[0] * b[1] - b[0] * a[1]; } return s / 2; };
+const centroid = (p) => { let x = 0, y = 0; for (const q of p) { x += q[0]; y += q[1]; } return [x / p.length, y / p.length]; };
+const bbox = (p) => { let a = [1e9, 1e9, -1e9, -1e9]; for (const q of p) a = [Math.min(a[0], q[0]), Math.min(a[1], q[1]), Math.max(a[2], q[0]), Math.max(a[3], q[1])]; return a; };
+const shift = (p, dx, dy) => p.map((q) => [q[0] + dx, q[1] + dy]);
+const lerpPts = (a, b, u) => a.map((q, i) => [q[0] + (b[i][0] - q[0]) * u, q[1] + (b[i][1] - q[1]) * u]);
+// reorder pts so it best matches ref point-for-point (same winding, best cyclic offset)
+function align(ref, pts) {
+  let q = pts;
+  const ar = area(ref), aq = area(q);
+  if (Math.abs(ar) > 1e-3 && Math.abs(aq) > 1e-3 && Math.sign(ar) !== Math.sign(aq)) q = q.slice().reverse();
+  const n = q.length;
+  let best = 0, bd = Infinity;
+  for (let s = 0; s < n; s++) {
+    let d = 0;
+    for (let i = 0; i < n; i += 3) { const a = ref[i], b = q[(i + s) % n]; d += (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2; }
+    if (d < bd) { bd = d; best = s; }
+  }
+  return q.map((_, i) => q[(i + best) % n]);
+}
+const dot = (x = 0, y = 0) => Array.from({ length: N }, () => [x, y]);
+const circ = (r, cx = 0, cy = 0, ry = r) => Array.from({ length: N }, (_, i) => { const a = -Math.PI / 2 + (2 * Math.PI * i) / N; return [cx + r * Math.cos(a), cy + ry * Math.sin(a)]; });
+const sqr = (s) => resample([[0, -s / 2], [s / 2, -s / 2], [s / 2, s / 2], [-s / 2, s / 2], [-s / 2, -s / 2]]);
+const tri = (s) => { const h = (s * Math.sqrt(3)) / 2; return resample([[0, -h / 2], [s / 2, h / 2], [-s / 2, h / 2]]); };
+const halfDisc = (r) => { const v = []; for (let i = 0; i <= 64; i++) { const a = Math.PI + (Math.PI * i) / 64; v.push([r * Math.cos(a), r / 2 + r * Math.sin(a)]); } return resample(v); };
+const diamond = (d) => resample([[0, -d], [d, 0], [0, d], [-d, 0]]);
+function rrPoly(x0, y0, x1, y1, r) {
+  const v = [[(x0 + x1) / 2, y0]];
+  const arc = (cx, cy, a0) => { for (let i = 0; i <= 10; i++) { const a = a0 + (Math.PI / 2) * (i / 10); v.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } };
+  arc(x1 - r, y0 + r, -Math.PI / 2); arc(x1 - r, y1 - r, 0); arc(x0 + r, y1 - r, Math.PI / 2); arc(x0 + r, y0 + r, Math.PI);
+  return resample(v);
+}
+function fillShape(ctx, o, h, col) {
+  ctx.beginPath();
+  ctx.moveTo(o[0][0], o[0][1]);
+  for (let i = 1; i < o.length; i++) ctx.lineTo(o[i][0], o[i][1]);
+  ctx.closePath();
+  if (h) { ctx.moveTo(h[0][0], h[0][1]); for (let i = 1; i < h.length; i++) ctx.lineTo(h[i][0], h[i][1]); ctx.closePath(); }
+  ctx.fillStyle = col;
+  ctx.fill('evenodd');
+}
+function letterShape(l) {
+  const cs = contours(l.ch, l.s, l.x, l.y).sort((a, b) => Math.abs(area(b)) - Math.abs(area(a)));
+  const o = resample(cs[0]), bb = bbox(o), c = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2];
+  return { c, o: shift(o, -c[0], -c[1]), h: cs[1] ? shift(resample(cs[1]), -c[0], -c[1]) : dot(), hole: cs[1] ? resample(cs[1]) : null };
+}
+
+// ───────────────────────────── page-fold (true perspective flap, drawn in strips)
+// A = frame before, B = frame after. horizontal axis at CY (side -1: top flap falls down, +1: bottom flap rises)
+// vertical axis at CX (side -1: left flap swings right, +1: right flap swings left)
+const FOCAL = 2300, STRIPS = 96;
+function fold(ctx, A, B, p, vertical, side) {
+  const th = Math.PI * p, c = Math.cos(th), s = Math.sin(th);
+  const half = vertical ? W / 2 : H / 2, span = vertical ? H : W, mid = vertical ? CY : CX;
+  const part = (img, from, to) => {
+    if (vertical) ctx.drawImage(img, from, 0, to - from, H, from, 0, to - from, H);
+    else ctx.drawImage(img, 0, from, W, to - from, 0, from, W, to - from);
+  };
+  const flapSide = side < 0 ? [0, half] : [half, 2 * half];
+  const restSide = side < 0 ? [half, 2 * half] : [0, half];
+  part(B, flapSide[0], flapSide[1]);
+  part(A, restSide[0], restSide[1]);
+  if (p >= 1) { part(B, restSide[0], restSide[1]); return; }
+  const front = th < Math.PI / 2, src = front ? A : B, sh = half / STRIPS;
+  const edge = [];
+  for (let k = 0; k < STRIPS; k++) {
+    const d0 = k * sh, d1 = (k + 1) * sh;
+    const sc0 = FOCAL / (FOCAL - d0 * s), sc1 = FOCAL / (FOCAL - d1 * s), scm = (sc0 + sc1) / 2;
+    // the flap's front carries A's flap-side half; its back carries B's opposite half
+    const srcFrom = front === (side < 0) ? half - d1 : half + d0;
+    const a0 = half + side * d0 * c * sc0, a1 = half + side * d1 * c * sc1;
+    const lo = Math.min(a0, a1), len = Math.abs(a1 - a0) + 0.8;
+    const ds = span * scm, dpos = mid - ds / 2;
+    if (vertical) ctx.drawImage(src, srcFrom, 0, sh, H, lo, dpos, len, ds);
+    else ctx.drawImage(src, 0, srcFrom, W, sh, dpos, lo, ds, len);
+    if (k === 0) edge.push([half, mid - span / 2 * sc0], [half, mid + span / 2 * sc0]);
+    if (k === STRIPS - 1) edge.push([a1, mid + span / 2 * sc1], [a1, mid - span / 2 * sc1]);
+  }
+  // flat paper shading on the flap
+  ctx.beginPath();
+  edge.forEach(([a, b], i) => { const x = vertical ? a : b, y = vertical ? b : a; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+  ctx.closePath();
+  ctx.fillStyle = `rgba(0,0,0,${0.38 * s})`;
+  ctx.fill();
+}
+const foldEdge = (p, vertical, side) => {
+  const th = Math.PI * p, half = vertical ? W / 2 : H / 2, sc = FOCAL / (FOCAL - half * Math.sin(th));
+  const a = half + side * half * Math.cos(th) * sc, b = (vertical ? H : W) / 2 * sc;
+  return vertical ? [[a, CY - b], [a, CY + b]] : [[CX - b, a], [CX + b, a]];
+};
+
+// ═════════════════════════════ A · KINETIC TYPE (beats 1–6, 0–3 s; beats 1–4 are the hook)
+const BW = 1400, BHt = 440, SB = 400;
+const L_FOLD = lay('FOLD', SB, CX, CY), L_ONE = lay('ONE', SB, CX, CY);
+const L_SHAPE = lay('SHAPE', Math.min(SB, (1250 / inkU('SHAPE')) * 1000), CX, CY);
+const L_INTO = lay('INTO', SB, CX, CY);
+const L_ANY = lay('ANY', 790, CX, CY);
+const L_FORM = lay('FORM', 430, CX, CY);
+const FORM_COL = [COL.v, COL.c, COL.w, COL.w];
+
+// the counter of the A — the camera pushes through it
+const A_HOLE = (() => {
+  const l = L_ANY[0];
+  const cs = contours('A', l.s, l.x, l.y).sort((a, b) => Math.abs(area(b)) - Math.abs(area(a)));
+  const hole = resample(cs[1]), c = centroid(hole);
+  const inside = (x, y) => { let r = false; for (let i = 0, j = hole.length - 1; i < hole.length; j = i++) { const a = hole[i], b = hole[j]; if ((a[1] > y) !== (b[1] > y) && x < ((b[0] - a[0]) * (y - a[1])) / (b[1] - a[1]) + a[0]) r = !r; } return r; };
+  let K = 4;
+  while (K < 400 && ![[-1, -1], [1, -1], [1, 1], [-1, 1]].every(([sx, sy]) => inside(c[0] + (sx * CX) / K, c[1] + (sy * CY) / K))) K *= 1.04;
+  return { c, K: K * 1.15 };
+})();
+
+const bandMask = (c) => { c.beginPath(); c.rect(CX - BW / 2, CY - BHt / 2, BW, BHt); c.clip(); };
+function band(c, w, h, col, L, reveal = 1) {
+  c.fillStyle = col;
+  c.fillRect(CX - w / 2, CY - h / 2, w, h);
+  c.save();
+  c.beginPath();
+  const rv = Math.min(h, BHt * reveal);
+  c.rect(CX - w / 2, CY - rv / 2, w, rv);
+  c.clip();
+  c.fillStyle = COL.k;
+  drawWord(c, L);
+  c.restore();
+}
+
+function typeLayer(c, t) {
+  if (t < 0.5) { // 1 · square springs open into a band; FOLD is cut out of it
+    const t0 = t - 0.012; // starts just after frame 0's shutter so the loop frame is a clean, still square
+    const a = spring(t0, 17, 0.82), b = spring(t0 - 0.05, 17, 0.82);
+    band(c, lerp(140, BW, a), lerp(140, BHt, b), COL.v, L_FOLD, spring(t0 - 0.1, 16, 0.85));
+  } else if (t < 1.0) { // 2 · split-flap fold → ONE on cobalt
+    const A = fresh('sA'), B = fresh('sB');
+    band(A, BW, BHt, COL.v, L_FOLD);
+    band(B, BW, BHt, COL.c, L_ONE);
+    fold(c, buf('sA'), buf('sB'), tw(t, 0.5, 0.42, eo7), false, -1);
+  } else if (t < 1.5) { // 3 · slot roll: the band rises out, SHAPE rolls up letter by letter
+    c.save(); bandMask(c);
+    const e = tw(t, 1.0, 0.36);
+    c.translate(0, -BHt * 1.03 * e); band(c, BW, BHt, COL.c, L_ONE); c.translate(0, BHt * 1.03 * e);
+    c.fillStyle = COL.w;
+    L_SHAPE.forEach((l, j) => glyph(c, l.ch, l.x, l.y + BHt * 1.05 * (1 - tw(t, 1.0 + 0.035 * j, 0.42)), l.s));
+    c.restore();
+  } else if (t < 2.0) { // 4 · SHAPE drops away, INTO snaps in from wide tracking
+    c.save(); bandMask(c); c.fillStyle = COL.w;
+    L_SHAPE.forEach((l, j) => glyph(c, l.ch, l.x, l.y + BHt * 1.05 * tw(t, 1.5 + 0.02 * j, 0.3), l.s));
+    const e = tw(t, 1.5, 0.45);
+    L_INTO.forEach((l, j) => glyph(c, l.ch, l.x + (j - 1.5) * 1500 * (1 - e), l.y, l.s));
+    c.restore();
+  } else if (t < 2.5) { // 5 · the stack scrolls: INTO falls, ANY drops in at full height
+    c.fillStyle = COL.w;
+    const e = tw(t, 2.0, 0.36, eo7);
+    L_INTO.forEach((l) => glyph(c, l.ch, l.x, l.y + 1150 * e, l.s));
+    L_ANY.forEach((l, j) => glyph(c, l.ch, l.x, l.y - 1150 * (1 - tw(t, 2.0 + 0.045 * j, 0.42)), l.s));
+  } else { // 6 · push through the counter of the A; FORM is waiting inside
+    const e = tw(t, 2.5, 0.46, expo(8)), P = A_HOLE.c, s = Math.exp(Math.log(A_HOLE.K) * e);
+    c.save();
+    c.setTransform(s, 0, 0, s, lerp(P[0], CX, e) - P[0] * s, lerp(P[1], CY, e) - P[1] * s);
+    c.fillStyle = COL.w;
+    drawWord(c, L_ANY);
+    c.translate(P[0], P[1]); c.scale(1 / A_HOLE.K, 1 / A_HOLE.K); c.translate(-CX, -CY);
+    L_FORM.forEach((l, i) => { c.fillStyle = FORM_COL[i]; glyph(c, l.ch, l.x, l.y, l.s); });
+    c.restore();
+  }
+}
+function typePts(t) {
+  if (t < 0.5) { const a = spring(t - 0.012, 17, 0.82); return [[CX + lerp(70, BW / 2, a), CY]]; }
+  if (t < 1.0) return foldEdge(tw(t, 0.5, 0.42, eo7), false, -1);
+  if (t < 1.5) return L_SHAPE.map((l, j) => [0, BHt * (1 - tw(t, 1.0 + 0.035 * j, 0.42))]).concat([[0, BHt * tw(t, 1.0, 0.36)]]);
+  if (t < 2.0) return [[1500 * 1.5 * (1 - tw(t, 1.5, 0.45)), 0], [0, BHt * tw(t, 1.5, 0.3)]];
+  if (t < 2.5) return L_ANY.map((l, j) => [0, 1150 * tw(t, 2.0 + 0.045 * j, 0.42)]).concat([[0, 1150 * tw(t, 2.0, 0.36, eo7)]]);
+  const e = tw(t, 2.5, 0.46, expo(8));
+  return [[Math.log(A_HOLE.K) * e * 1100, 0]];
+}
+
+// ═════════════════════════════ B · SHAPE MORPH (beats 7–12, 3–6 s)
+const SLOT = (j) => CX + (j - 1.5) * 330;
+const ROW = (j) => CX + (j - 1.5) * 283;
+const QUAD = [[-100, -100], [-100, 100], [100, -100], [100, 100]]; // row position → quadrant
+const PRIM = [sqr(220), circ(128), tri(276), halfDisc(150)];
+const RADII = [96, 138, 112, 150];
+const OBJ = L_FORM.map((l, i) => {
+  const ls = letterShape(l), j = (i + 1) % 4;
+  const K0 = { o: ls.o, h: ls.h, x: ls.c[0], y: ls.c[1], r: 0 };
+  const K1 = { o: align(K0.o, PRIM[i]), h: dot(), x: SLOT(i), y: CY, r: 0 };
+  const K2 = { o: align(K1.o, PRIM[j]), h: dot(), x: SLOT(j), y: CY, r: 0 };
+  const K3 = { o: align(K2.o, circ(RADII[j])), h: dot(), x: SLOT(j), y: CY, r: 0 };
+  const K4 = { o: align(K3.o, diamond(141.42)), h: dot(), x: ROW(j), y: CY, r: 0 };
+  const K5 = { o: K4.o, h: dot(), x: CX + QUAD[j][0], y: CY + QUAD[j][1], r: Math.PI / 4 };
+  return { col: FORM_COL[i], j, K: [K0, K1, K2, K3, K4, K5] };
+});
+// per-transition clocks (staggered per object)
+const MT = [
+  null,
+  (i, t) => spring(t - (3.0 + 0.045 * i), 21, 0.8),
+  (i, t) => tw(t, 3.5 + 0.03 * i, 0.45),
+  (i, t) => tw(t, 4.0 + 0.05 * OBJ[i].j, 0.44, eo7),
+  (i, t) => spring(t - (4.5 + 0.03 * OBJ[i].j), 20, 0.82),
+  (i, t) => tw(t, 5.0 + 0.03 * OBJ[i].j, 0.44),
+];
+const MSTART = [0, 3.0, 3.5, 4.0, 4.5, 5.0];
+function objState(i, t) {
+  const o = OBJ[i];
+  let k = 0;
+  for (let q = 1; q < 6; q++) if (MT[q](i, t) > 0) k = q;
+  if (k === 0) return { ...o.K[0], sx: 1 };
+  const a = o.K[k - 1], b = o.K[k], u = MT[k](i, t);
+  const st = { o: lerpPts(a.o, b.o, u), h: lerpPts(a.h, b.h, u), x: lerp(a.x, b.x, u), y: lerp(a.y, b.y, u), r: lerp(a.r, b.r, u), sx: 1 };
+  if (k === 2) st.y += (i === 3 ? -300 : 64) * Math.sin(Math.PI * clamp(u));
+  if (k === 3) st.sx = Math.cos(Math.PI * u) || 1e-4; // paper flip around the vertical axis
+  return st;
+}
+// 16 tiles: quadrant q splits into 2×2 with gutters, growing into a 4×4 floor plan
+const TILE = 120, PITCH = 144;
+const TILES = [];
+OBJ.forEach((o) => {
+  const q = QUAD[o.j];
+  for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) {
+    const col = (q[0] > 0 ? 2 : 0) + a, row = (q[1] > 0 ? 2 : 0) + b;
+    TILES.push({ rgb: RGB[{ [COL.v]: 'v', [COL.c]: 'c', [COL.w]: 'w' }[o.col]], col, row, from: [q[0] + (a - 0.5) * 100, q[1] + (b - 0.5) * 100], to: [(col - 1.5) * PITCH, (row - 1.5) * PITCH] });
+  }
+});
+const tileU = (tl, t) => spring(t - (5.5 + 0.02 * (tl.col + tl.row)), 20, 0.8);
+function morphLayer(c, t) {
+  if (t < 5.5) {
+    OBJ.forEach((o, i) => {
+      const st = objState(i, t);
+      c.save(); c.translate(st.x, st.y); c.rotate(st.r); c.scale(st.sx, 1);
+      fillShape(c, st.o, st.h, o.col);
+      c.restore();
+    });
+  } else {
+    TILES.forEach((tl) => {
+      const u = tileU(tl, t), p = lerp2(tl.from, tl.to, u), s = lerp(100, TILE, u);
+      c.fillStyle = css(tl.rgb);
+      c.fillRect(CX + p[0] - s / 2, CY + p[1] - s / 2, s, s);
+    });
+  }
+}
+function morphPts(t) {
+  if (t < 5.5) return OBJ.flatMap((o, i) => { const st = objState(i, t); return [0, 48, 96, 144].map((k) => { const q = st.o[k], cr = Math.cos(st.r), sr = Math.sin(st.r); return [st.x + (q[0] * st.sx) * cr - q[1] * sr, st.y + (q[0] * st.sx) * sr + q[1] * cr]; }); });
+  return TILES.map((tl) => { const u = tileU(tl, t); return [lerp(tl.from[0], tl.to[0], u) * 1.3, lerp(tl.from[1], tl.to[1], u) * 1.3]; });
+}
+
+// ═════════════════════════════ C · 2D → 3D (beats 13–18, 6–9 s)
+const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+const VALS = [0.42, 0.18, 0.66, 0.3, 0.55, 0.24, 0.78, 0.47, 0.36, 0.88, 0.6, 0.14, 0.72, 1.0, 0.5, 0.28];
+const BARH = (i) => 36 + VALS[i] * 300;
+const CHX = (k) => CX + (k - 7.5) * 68, BASE = 760, BARW = 46;
+const RANK = (() => { const idx = VALS.map((_, i) => i).sort((a, b) => VALS[a] - VALS[b]), r = []; idx.forEach((i, k) => (r[i] = k)); return r; })();
+TILES.forEach((tl) => {
+  tl.bar = tl.col * 4 + (3 - tl.row);
+  tl.hA = 70 + 330 * hash(tl.col * 7 + tl.row * 3 + 1) * (1 - 0.35 * Math.hypot(tl.col - 1.5, tl.row - 1.5) / 2.1);
+  tl.hB = 60 + 360 * hash(tl.col * 5 + tl.row * 11 + 9);
+});
+function cam3(t) {
+  const e12 = tw(t, 6.0, 0.45), e13 = spring(t - 6.5, 14, 0.85), e14 = spring(t - 7.0, 13, 0.82), e15 = spring(t - 7.5, 11, 0.86), e16 = tw(t, 8.0, 0.5);
+  let phi = lerp(lerp(lerp(90, 56, e12), 40, e14), 0, e16);
+  let yaw = lerp(lerp(lerp(0, -30, e14), -46, e15), 0, e16);
+  const m = lerp(lerp(1, 1.14, e13), 1, e16);
+  const D = lerp(2400, 40000, e16);
+  const ty = lerp(lerp(0, 120, e13), BASE - CY, e16); // look-at height: city centre → chart baseline at y=760
+  return { phi: (phi * Math.PI) / 180, yaw: (yaw * Math.PI) / 180, m, D, f: m * D, ty };
+}
+function proj(p, C) {
+  const x = p[0], y = p[1] - C.ty, z = p[2];
+  const cy = Math.cos(C.yaw), sy = Math.sin(C.yaw), cp = Math.cos(C.phi), sp = Math.sin(C.phi);
+  const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+  const y2 = y * cp + z1 * sp, z2 = -y * sp + z1 * cp + C.D;
+  return [CX + (C.f * x1) / z2, CY - (C.f * y2) / z2, z2, x1, y2];
+}
+const FACES = [[[0, 1, 3, 2], [0, 0, -1], 'front'], [[4, 6, 7, 5], [0, 0, 1], 'back'], [[0, 2, 6, 4], [-1, 0, 0], 'side'], [[1, 5, 7, 3], [1, 0, 0], 'side'], [[2, 3, 7, 6], [0, 1, 0], 'top']];
+function blocks(t) {
+  const e16 = spring(t - 8.0, 13, 0.9);
+  return TILES.map((tl) => {
+    const dist = Math.hypot(tl.col - 1.5, tl.row - 1.5);
+    let h = lerp(0, tl.hA, spring(t - (6.5 + 0.035 * dist), 15, 0.78));
+    h = lerp(h, tl.hB, spring(t - (7.5 + 0.04 * (tl.col + tl.row)), 15, 0.8));
+    const u = clamp(e16, 0, 1.2);
+    return {
+      x: lerp(tl.to[0], CHX(tl.bar) - CX, u), z: lerp(-tl.to[1], 0, u),
+      w: lerp(TILE, BARW, u), d: lerp(TILE, 8, u), h: lerp(h, BARH(tl.bar), u),
+      yaw: Math.PI * tw(t, 8.5 + 0.012 * tl.bar, 0.3), col: tl.rgb, back: RGB.w,
+    };
+  });
+}
+function drawBlocks(c, list, C) {
+  const cyw = Math.cos(C.yaw), syw = Math.sin(C.yaw), cp = Math.cos(C.phi), sp = Math.sin(C.phi);
+  const rotN = (n) => { const x1 = n[0] * cyw + n[2] * syw, z1 = -n[0] * syw + n[2] * cyw; return [x1, n[1] * cp + z1 * sp, -n[1] * sp + z1 * cp]; };
+  const items = list.map((b) => {
+    const cb = Math.cos(b.yaw), sb = Math.sin(b.yaw), P = [];
+    for (let i = 0; i < 8; i++) {
+      const lx = (i & 1 ? 0.5 : -0.5) * b.w, ly = i & 2 ? b.h : 0, lz = (i & 4 ? 0.5 : -0.5) * b.d;
+      P.push(proj([b.x + lx * cb + lz * sb, ly, b.z - lx * sb + lz * cb], C));
+    }
+    return { b, P, cb, sb, depth: proj([b.x, b.h / 2, b.z], C)[2] };
+  }).sort((a, b) => b.depth - a.depth);
+  for (const { b, P, cb, sb } of items) {
+    for (const [idx, n, kind] of FACES) {
+      const nc = rotN([n[0] * cb + n[2] * sb, n[1], -n[0] * sb + n[2] * cb]);
+      let fx = 0, fy = 0, fz = 0;
+      for (const k of idx) { fx += P[k][3]; fy += P[k][4]; fz += P[k][2]; }
+      if (nc[0] * fx + nc[1] * fy + nc[2] * fz >= 0) continue;
+      const q = idx.map((k) => P[k]);
+      const ar = Math.abs(area(q.map((p) => [p[0], p[1]])));
+      if (ar < 1.5) continue;
+      const facing = Math.max(0, -nc[2]);
+      let s = kind === 'top' ? 0 : kind === 'side' ? 0.5 : 0.3 * Math.sin(C.phi);
+      s = clamp(s + 0.4 * (1 - facing), 0, 0.72);
+      const col = css(mixc(kind === 'back' ? b.back : b.col, RGB.k, s));
+      c.beginPath(); c.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) c.lineTo(q[k][0], q[k][1]); c.closePath();
+      c.fillStyle = col; c.fill();
+      c.strokeStyle = col; c.lineWidth = 0.8; c.stroke();
+    }
+  }
+}
+const spaceLayer = (c, t) => drawBlocks(c, blocks(t), cam3(t));
+const spacePts = (t) => { const C = cam3(t); return blocks(t).flatMap((b) => [proj([b.x - b.w / 2, b.h, b.z - b.d / 2], C), proj([b.x + b.w / 2, b.h, b.z + b.d / 2], C)]); };
+
+// ═════════════════════════════ D · DATA / UI (beats 19–24, 9–12 s)
+const CARD = { x0: 280, y0: 196, x1: 1640, y1: 856, r: 30 };
+const RING0 = [CX, 560];
+const L_TITLE = lay('FOLD', 640, CX, CY);
+const O_SHAPE = letterShape(L_TITLE[1]);
+const O_C = O_SHAPE.c, O_RO = (() => { const b = bbox(O_SHAPE.o); return ((b[2] - b[0]) + (b[3] - b[1])) / 4; })();
+const O_RI = (() => { const b = bbox(O_SHAPE.h); return ((b[2] - b[0]) + (b[3] - b[1])) / 4; })();
+const CARD_POLY = rrPoly(CARD.x0, CARD.y0, CARD.x1, CARD.y1, CARD.r);
+const CARD_C = [(CARD.x0 + CARD.x1) / 2, (CARD.y0 + CARD.y1) / 2];
+const RING_OUT = align(shift(CARD_POLY, -CARD_C[0], -CARD_C[1]), circ(O_RO));
+const CARD_LOCAL = shift(CARD_POLY, -CARD_C[0], -CARD_C[1]);
+const PEAK = VALS.indexOf(1.0);
+const MS = 32;
+function rectPoly(xc, w, h) {
+  const x0 = xc - w / 2, x1 = xc + w / 2, y0 = BASE, y1 = BASE - h, v = [];
+  for (let i = 0; i < MS; i++) v.push([lerp(x0, x1, i / MS), y0]);
+  for (let i = 0; i < MS; i++) v.push([x1, lerp(y0, y1, i / MS)]);
+  for (let i = 0; i < MS; i++) v.push([lerp(x1, x0, i / MS), y1]);
+  for (let i = 0; i < MS; i++) v.push([x0, lerp(y1, y0, i / MS)]);
+  return v;
+}
+function secPoly(c, a0, a1, ri, ro) {
+  const v = [], P = (a, r) => [c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)];
+  for (let i = 0; i < MS; i++) v.push(P(lerp(a0, a1, i / MS), ri));
+  for (let i = 0; i < MS; i++) v.push(P(a1, lerp(ri, ro, i / MS)));
+  for (let i = 0; i < MS; i++) v.push(P(lerp(a1, a0, i / MS), ro));
+  for (let i = 0; i < MS; i++) v.push(P(a0, lerp(ro, ri, i / MS)));
+  return v;
+}
+function ringCenter(t) { return lerp2(RING0, O_C, tw(t, 11.5, 0.45)); }
+function barPoly(i, t) {
+  const k = RANK[i];
+  const x = lerp(CHX(i), CHX(k), tw(t, 9.5 + 0.01 * k, 0.45));
+  const rect = rectPoly(x, BARW, BARH(i));
+  if (t < 10.5) return rect;
+  const u = spring(t - (10.5 + 0.008 * k), 19, 0.86);
+  const e22 = tw(t, 11.0, 0.48), e23 = tw(t, 11.5, 0.4);
+  const rot = (Math.PI / 2) * e22, step = (2 * Math.PI) / 16, gap = 0.035;
+  const a0 = -Math.PI / 2 + k * step + gap / 2 + rot, a1 = a0 + step - gap;
+  let ri = lerp(92, 170, e22), ro = lerp(92 + BARH(i) * 0.5, 246, e22);
+  const mid = (ri + ro) / 2;
+  ri = lerp(ri, mid, e23); ro = lerp(ro, mid, e23);
+  return lerpPts(rect, secPoly(ringCenter(t), a0, a1, ri, ro), u);
+}
+function txt(c, s, x, y, size, weight, col, spacing = 0, align = 'left') {
+  c.font = `${weight} ${size}px Geist`;
+  c.letterSpacing = spacing + 'px';
+  c.textAlign = align;
+  c.textBaseline = 'alphabetic';
+  c.fillStyle = col;
+  c.fillText(s, x, y);
+}
+// a line of text that rises into / drops out of its own slot
+function slotTxt(c, t, tin, tout, s, x, y, size, weight, col, spacing = 0, align = 'left') {
+  const e = tw(t, tin, 0.4) - tw(t, tout, 0.28);
+  if (t < tin) return;
+  c.save();
+  c.beginPath(); c.rect(0, y - size * 1.05, W, size * 1.35); c.clip();
+  txt(c, s, x, y + (t < tout ? 1 : -1) * size * 1.3 * (1 - (t < tout ? tw(t, tin, 0.4) : 1 - tw(t, tout, 0.28))), size, weight, col, spacing, align);
+  c.restore();
+  return e;
+}
+function counter(c, t, x, y) {
+  const size = 92, lh = size * 1.1;
+  const stages = [[9.5, '000', '218'], [11.0, '218', '100']];
+  c.save();
+  c.beginPath(); c.rect(x - 10, y - size * 0.9, 420, size * 1.05); c.clip();
+  const out = tw(t, 11.5, 0.28);
+  c.translate(0, size * 1.2 * out);
+  c.font = `900 ${size}px Geist`; c.letterSpacing = '0px';
+  const dw = c.measureText('0').width;
+  const intro = 1 - tw(t, 9.0, 0.4);
+  c.translate(0, size * 1.2 * intro);
+  txt(c, '+', x, y, size, 900, COL.w);
+  const px = x + c.measureText('+').width + 4;
+  for (let d = 0; d < 3; d++) {
+    let pos = 0;
+    for (const [ts, a, b] of stages) {
+      const e = tw(t, ts + 0.05 * d, 0.48);
+      if (t >= ts) pos = lerp(+a[d], +b[d] + 10, e);
+      else if (ts === 9.5) pos = +a[d];
+    }
+    const base = Math.floor(pos), fr = pos - base;
+    for (let r = 0; r < 2; r++) txt(c, String((base + r) % 10), px + d * dw + dw / 2, y + (r - fr) * lh, size, 900, COL.w, 0, 'center');
+  }
+  txt(c, '%', px + 3 * dw + 4, y, size, 900, COL.w);
+  c.restore();
+}
+function dataLayer(c, t) {
+  // card: unfolds up and down from the baseline, later collapses into the ring
+  if (t < 11.5) {
+    const e = spring(t - 9.0, 15, 0.86), x0 = lerp(CHX(0) - 40, CARD.x0, e), x1 = lerp(CHX(15) + 40, CARD.x1, e), y0 = lerp(BASE, CARD.y0, e), y1 = lerp(BASE, CARD.y1, e);
+    c.fillStyle = COL.c;
+    c.beginPath(); c.roundRect(x0, y0, x1 - x0, y1 - y0, Math.min(CARD.r, (y1 - y0) / 2)); c.fill();
+  } else {
+    const u = tw(t, 11.5, 0.45), rc = ringCenter(t);
+    const sc = lerp2(CARD_C, rc, u);
+    const o = shift(lerpPts(CARD_LOCAL, RING_OUT, u), sc[0], sc[1]);
+    const h = circ(O_RI * u, sc[0], sc[1]);
+    fillShape(c, o, h, COL.c);
+  }
+  // grid + baseline
+  c.fillStyle = 'rgba(243,241,236,0.2)';
+  for (let k = 1; k <= 4; k++) {
+    const a = tw(t, 11.5 + 0.02 * k, 0.3), b = tw(t, 9.08 + 0.04 * k, 0.42);
+    const x0 = lerp(340, 1580, a), x1 = lerp(340, 1580, b);
+    if (x1 > x0) c.fillRect(x0, BASE - k * 95, x1 - x0, 1.5);
+  }
+  {
+    const a = tw(t, 10.5, 0.3), b = tw(t, 9.0, 0.42);
+    const x0 = lerp(340, 1580, a), x1 = lerp(340, 1580, b);
+    c.fillStyle = COL.w;
+    if (x1 > x0) c.fillRect(x0, BASE, x1 - x0, 2);
+  }
+  // bars → radial bars → ring segments
+  for (let i = 0; i < 16; i++) {
+    const p = barPoly(i, t);
+    fillShape(c, p, null, i === PEAK && t >= 10.5 ? COL.v : COL.w);
+    if (i === PEAK && t >= 10.0 && t < 10.5) {
+      const hh = BARH(i) * tw(t, 10.0, 0.4), x = p[0][0];
+      c.fillStyle = COL.v; c.fillRect(x, BASE - hh, BARW, hh);
+    }
+  }
+  // trend line through the sorted tops
+  if (t >= 10.0 && t < 10.8) {
+    const pts = []; const order = VALS.map((_, i) => i).sort((a, b) => VALS[a] - VALS[b]);
+    order.forEach((i, k) => pts.push([CHX(k), BASE - BARH(i) - 22]));
+    const segs = []; let tot = 0;
+    for (let k = 1; k < pts.length; k++) { const d = Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]); segs.push(d); tot += d; }
+    const b = tw(t, 10.0, 0.42) * tot, a = tw(t, 10.5, 0.22) * tot;
+    c.strokeStyle = COL.w; c.lineWidth = 3; c.lineJoin = 'round'; c.lineCap = 'round';
+    c.beginPath();
+    let acc = 0, started = false;
+    for (let k = 1; k < pts.length; k++) {
+      const s0 = acc, s1 = acc + segs[k - 1]; acc = s1;
+      const lo = Math.max(a, s0), hi = Math.min(b, s1);
+      if (hi <= lo) continue;
+      const pa = lerp2(pts[k - 1], pts[k], (lo - s0) / segs[k - 1]), pb = lerp2(pts[k - 1], pts[k], (hi - s0) / segs[k - 1]);
+      if (!started) { c.moveTo(pa[0], pa[1]); started = true; } else c.lineTo(pa[0], pa[1]);
+      c.lineTo(pb[0], pb[1]);
+    }
+    c.stroke();
+    let s = 0;
+    pts.forEach((p, k) => {
+      if (k > 0) s += segs[k - 1];
+      const r = 7 * spring(t - (10.0 + (0.42 * s) / tot * 0.6), 22, 0.8) * (1 - tw(t, 10.5, 0.2));
+      if (r > 0.2) { c.fillStyle = COL.w; c.beginPath(); c.arc(p[0], p[1], r, 0, 7); c.fill(); }
+    });
+  }
+  // tooltip on the peak
+  {
+    const sc = spring(t - 10.12, 20, 0.8) * (1 - tw(t, 10.5, 0.18));
+    if (sc > 0.01 && t < 10.9) {
+      const ax = CHX(15), ay = BASE - BARH(PEAK) - 44;
+      c.save(); c.translate(ax, ay); c.scale(sc, sc);
+      c.fillStyle = COL.w;
+      c.beginPath(); c.roundRect(-104, -66, 208, 54, 12); c.fill();
+      c.beginPath(); c.moveTo(-10, -13); c.lineTo(10, -13); c.lineTo(0, -1); c.fill();
+      txt(c, 'PEAK', -84, -32, 17, 500, COL.c, 2);
+      txt(c, '+218%', 84, -31, 24, 900, COL.k, 0, 'right');
+      c.restore();
+    }
+  }
+  // header + toggle
+  slotTxt(c, t, 9.12, 11.5, 'MOTION INDEX — WEEKLY', 336, 262, 20, 500, COL.w, 4);
+  counter(c, t, 330, 362);
+  {
+    const e = spring(t - 9.2, 16, 0.85) * (1 - tw(t, 11.5, 0.3)), k = spring(t - 10.5, 18, 0.82);
+    if (e > 0.01) {
+      c.save(); c.translate(1500, 266); c.scale(e, e);
+      c.strokeStyle = COL.w; c.lineWidth = 2;
+      c.beginPath(); c.roundRect(-100, -26, 200, 52, 26); c.stroke();
+      c.fillStyle = COL.w; c.beginPath(); c.roundRect(-96 + 96 * k, -22, 96, 44, 22); c.fill();
+      txt(c, 'BARS', -48, 7, 17, 500, css(mixc(RGB.c, RGB.w, k)), 2, 'center');
+      txt(c, 'RING', 48, 7, 17, 500, css(mixc(RGB.w, RGB.c, k)), 2, 'center');
+      c.restore();
+    }
+  }
+  ['W01', 'W06', 'W11', 'W16'].forEach((s, n) => slotTxt(c, t, 9.18 + 0.03 * n, 10.5, s, CHX(n * 5), 800, 16, 500, 'rgba(243,241,236,0.72)', 2, 'center'));
+}
+function dataPts(t) {
+  const pts = [];
+  for (let i = 0; i < 16; i++) { const p = barPoly(i, t); pts.push(p[0], p[MS * 2]); }
+  const e = spring(t - 9.0, 15, 0.86); pts.push([0, lerp(BASE, CARD.y0, e)]);
+  if (t >= 11.5) { const rc = ringCenter(t); pts.push(rc, [0, 300 * tw(t, 11.5, 0.45)]); }
+  return pts;
+}
+
+// ═════════════════════════════ E · END TITLE (beats 25–30, 12–15 s)
+const O_TARGET = { o: align(RING_OUT, O_SHAPE.o), h: align(circ(O_RI), O_SHAPE.h) };
+const RING_IN = circ(O_RI);
+function S1(c, t) {
+  c.fillStyle = COL.k; c.fillRect(0, 0, W, H);
+  const u = spring(t - 12.0, 24, 0.82);
+  fillShape(c, shift(lerpPts(RING_OUT, O_TARGET.o, u), O_C[0], O_C[1]), shift(lerpPts(RING_IN, O_TARGET.h, u), O_C[0], O_C[1]), COL.c);
+  c.fillStyle = COL.w;
+  L_TITLE.forEach((l, i) => {
+    if (i === 1) return;
+    const dir = i === 0 ? -1 : 1, e = spring(t - (12.0 + 0.04 * Math.max(0, i - 1)), 19, 0.84);
+    glyph(c, l.ch, l.x + dir * 1350 * (1 - e), l.y, l.s);
+  });
+}
+const L_S2 = lay('FOLD', 1000, CX + 0, CY);
+const L_S3a = layL('FO', 560, 150, 520), L_S3b = layL('LD', 560, 150, 520 + 108 + 398);
+const L_LOCK = (() => { const L = lay('FOLD', 300, 0, 0), wInk = L[3].ink[2] - L[0].ink[0], gw = wInk + 24 + 62; return lay('FOLD', 300, CX - gw / 2 + wInk / 2, CY - 30); })();
+const SQ_LOCK = { x: L_LOCK[3].ink[2] + 24, y: L_LOCK[0].y - 62, s: 62 };
+function meta(c, s, col) { txt(c, s, 64, 72, 18, 500, col, 4); txt(c, 'FOLD / 2026', W - 64, 72, 18, 500, col, 4, 'right'); }
+function S2(c) { c.fillStyle = COL.v; c.fillRect(0, 0, W, H); c.fillStyle = COL.k; drawWord(c, L_S2); meta(c, '02 — TYPE', COL.k); }
+function S3(c) { c.fillStyle = COL.c; c.fillRect(0, 0, W, H); c.fillStyle = COL.w; drawWord(c, L_S3a); drawWord(c, L_S3b); meta(c, '03 — FORM', COL.w); }
+function S4(c) {
+  c.fillStyle = COL.w; c.fillRect(0, 0, W, H);
+  L_TITLE.forEach((l, i) => { c.fillStyle = i === 1 ? COL.v : COL.k; glyph(c, l.ch, l.x, l.y, l.s); });
+  meta(c, '04 — SPACE', COL.k);
+}
+function S5(c, t) {
+  c.fillStyle = COL.k; c.fillRect(0, 0, W, H);
+  const m = tw(t, 14.62, 0.3);
+  const sq = { x: lerp(SQ_LOCK.x, CX - 70, m), y: lerp(SQ_LOCK.y, CY - 70, m), s: lerp(SQ_LOCK.s, 140, m) };
+  c.save();
+  c.beginPath(); c.rect(0, 0, sq.x, H); c.clip();
+  c.fillStyle = COL.w;
+  L_LOCK.forEach((l, i) => { const e = tw(t, 14.5 + 0.025 * (3 - i), 0.22); glyph(c, l.ch, l.x + (sq.x - l.ink[0]) * e, l.y, l.s); });
+  c.restore();
+  const sub = tw(t, 14.5, 0.22);
+  c.save(); c.beginPath(); c.rect(0, CY + 70, W, 50); c.clip();
+  txt(c, 'MOTION SHOWREEL — 2026', L_LOCK[0].ink[0] + 2, CY + 108 + 50 * sub, 24, 500, COL.w, 7);
+  c.restore();
+  c.fillStyle = COL.v; c.fillRect(sq.x, sq.y, sq.s, sq.s);
+}
+const STATES = [(c) => S1(c, 13), S2, S3, S4, (c) => S5(c, 14.0)];
+function titleLayer(c, t) {
+  if (t < 12.5) { S1(c, t); return; }
+  if (t >= 14.5) { S5(c, t); return; }
+  const k = Math.min(3, Math.floor((t - 12.5) / 0.5));
+  const vertical = k % 2 === 1, side = k < 2 ? -1 : 1;
+  STATES[k](fresh('sA')); STATES[k + 1](fresh('sB'));
+  fold(c, buf('sA'), buf('sB'), tw(t, 12.5 + 0.5 * k, 0.42, eo7), vertical, side);
+}
+function titlePts(t) {
+  if (t < 12.5) return [[1350 * (1 - spring(t - 12.0, 19, 0.84)), 0], [1350 * (1 - spring(t - 12.08, 19, 0.84)), 0], [0, 200 * spring(t - 12.0, 24, 0.82)]];
+  if (t >= 14.5) {
+    const m = tw(t, 14.62, 0.3);
+    return [[lerp(SQ_LOCK.x, CX - 70, m), lerp(SQ_LOCK.y, CY - 70, m)], [lerp(SQ_LOCK.x + SQ_LOCK.s, CX + 70, m), 0], [0, 50 * tw(t, 14.5, 0.22)]].concat(L_LOCK.map((l, i) => [600 * tw(t, 14.5 + 0.035 * (3 - i), 0.26), 0]));
+  }
+  const k = Math.min(3, Math.floor((t - 12.5) / 0.5));
+  return foldEdge(tw(t, 12.5 + 0.5 * k, 0.42, eo7), k % 2 === 1, k < 2 ? -1 : 1);
+}
+
+// ═════════════════════════════ timeline
+const SECTIONS = [
+  [0, typeLayer, typePts], [3, morphLayer, morphPts], [6, spaceLayer, spacePts], [9, dataLayer, dataPts], [12, titleLayer, titlePts],
+];
+window.seek = function (t) {
+  t = ((t % DUR) + DUR) % DUR;
+  let s = SECTIONS[0];
+  for (const q of SECTIONS) if (t >= q[0]) s = q;
+  X.setTransform(1, 0, 0, 1, 0, 0);
+  X.globalAlpha = 1;
+  X.globalCompositeOperation = 'source-over';
+  X.fillStyle = COL.k;
+  X.fillRect(0, 0, W, H);
+  const lo = s[0], hi = lo + 3;
+  const ct = (tt) => clamp(tt, lo, hi - 1e-6); // the shutter never reaches into another section
+  mblur(X, t, pxEst((tt) => s[2](ct(tt)), t), (c, tt) => s[1](c, ct(tt)));
+};
+
+// ═════════════════════════════ soundtrack (Web Audio, OfflineAudioContext)
+window.renderAudio = async function () {
+  const sr = 48000, ac = new OfflineAudioContext(2, sr * DUR, sr);
+  const master = ac.createGain(); master.gain.value = 0.8;
+  const comp = ac.createDynamicsCompressor();
+  comp.threshold.value = -14; comp.knee.value = 6; comp.ratio.value = 5; comp.attack.value = 0.002; comp.release.value = 0.09;
+  master.connect(comp).connect(ac.destination);
+  // sidechain-style duck bus for bass / pads
+  const duck = ac.createGain(); duck.connect(master);
+  const nb = ac.createBuffer(2, sr * 2, sr);
+  for (let ch = 0; ch < 2; ch++) { const d = nb.getChannelData(ch); let s = 7 + ch * 13; for (let i = 0; i < d.length; i++) { s = (s * 16807) % 2147483647; d[i] = (s / 2147483647) * 2 - 1; } }
+  const noise = (t, dur) => { const s = ac.createBufferSource(); s.buffer = nb; s.loop = true; s.start(t); s.stop(t + dur); return s; };
+  const env = (g, t, a, peak, d, end = 0.0001) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(end, t + a + d); };
+  const pan = (v) => { const p = ac.createStereoPanner(); p.pan.value = v; return p; };
+
+  function kick(t, g = 1) {
+    const o = ac.createOscillator(), a = ac.createGain();
+    o.frequency.setValueAtTime(170, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.09); o.frequency.exponentialRampToValueAtTime(38, t + 0.4);
+    env(a, t, 0.002, g, 0.42);
+    o.connect(a).connect(master); o.start(t); o.stop(t + 0.5);
+    const n = noise(t, 0.03), f = ac.createBiquadFilter(), ng = ac.createGain();
+    f.type = 'highpass'; f.frequency.value = 2500; env(ng, t, 0.001, 0.22 * g, 0.018);
+    n.connect(f).connect(ng).connect(master);
+    // duck the bed
+    duck.gain.setValueAtTime(0.25, t); duck.gain.linearRampToValueAtTime(1, t + 0.3);
+  }
+  function hat(t, g = 0.09, open = false) {
+    const n = noise(t, 0.2), f = ac.createBiquadFilter(), a = ac.createGain();
+    f.type = 'highpass'; f.frequency.value = 8000; env(a, t, 0.001, g, open ? 0.14 : 0.035);
+    n.connect(f).connect(a).connect(pan(open ? 0.25 : -0.2)).connect(master);
+  }
+  function clap(t, g = 0.35) {
+    for (let k = 0; k < 3; k++) {
+      const n = noise(t + k * 0.011, 0.25), f = ac.createBiquadFilter(), a = ac.createGain();
+      f.type = 'bandpass'; f.frequency.value = 1600; f.Q.value = 1.2; env(a, t + k * 0.011, 0.001, g * (k === 2 ? 1 : 0.6), k === 2 ? 0.16 : 0.012);
+      n.connect(f).connect(a).connect(master);
+    }
+  }
+  function hit(t, g = 1) {
+    const o = ac.createOscillator(), a = ac.createGain();
+    o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(34, t + 0.5);
+    env(a, t, 0.003, 0.9 * g, 1.1); o.connect(a).connect(master); o.start(t); o.stop(t + 1.3);
+    const n = noise(t, 0.9), f = ac.createBiquadFilter(), ng = ac.createGain();
+    f.type = 'lowpass'; f.frequency.setValueAtTime(9000, t); f.frequency.exponentialRampToValueAtTime(500, t + 0.6);
+    env(ng, t, 0.002, 0.45 * g, 0.7); n.connect(f).connect(ng).connect(master);
+    // metallic tick so the hit reads on small speakers
+    [523, 1307, 2093].forEach((fr, k) => {
+      const m = ac.createOscillator(), mg = ac.createGain(); m.type = 'square'; m.frequency.value = fr;
+      const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600; bp.Q.value = 3;
+      env(mg, t, 0.001, 0.05 * g, 0.22); m.connect(bp).connect(mg).connect(pan(k - 1)).connect(master); m.start(t); m.stop(t + 0.3);
+    });
+    // chord stab
+    [220, 261.63, 329.63, 392].forEach((fr, k) => {
+      const s = ac.createOscillator(), sg = ac.createGain(), lp = ac.createBiquadFilter();
+      s.type = 'sawtooth'; s.frequency.value = fr; s.detune.value = (k - 1.5) * 7;
+      lp.type = 'lowpass'; lp.frequency.setValueAtTime(5000, t); lp.frequency.exponentialRampToValueAtTime(400, t + 0.4);
+      env(sg, t, 0.003, 0.07 * g, 0.5); s.connect(lp).connect(sg).connect(pan((k - 1.5) / 2)).connect(master); s.start(t); s.stop(t + 0.6);
+    });
+  }
+  function whoosh(t, dur, g = 0.12, f0 = 600, f1 = 5000) {
+    const n = noise(t, dur + 0.05), f = ac.createBiquadFilter(), a = ac.createGain();
+    f.type = 'bandpass'; f.Q.value = 1.4; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    a.gain.setValueAtTime(0.0001, t); a.gain.exponentialRampToValueAtTime(g, t + dur * 0.35); a.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(f).connect(a).connect(master);
+  }
+  function tick(t, fr = 2400, g = 0.06) {
+    const o = ac.createOscillator(), a = ac.createGain(); o.type = 'sine'; o.frequency.value = fr;
+    env(a, t, 0.001, g, 0.03); o.connect(a).connect(pan(0.3)).connect(master); o.start(t); o.stop(t + 0.05);
+  }
+  function bass(t, fr, dur) {
+    const o = ac.createOscillator(), o2 = ac.createOscillator(), a = ac.createGain(), lp = ac.createBiquadFilter();
+    o.type = 'sawtooth'; o.frequency.value = fr; o2.type = 'sine'; o2.frequency.value = fr / 2;
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(900, t); lp.frequency.exponentialRampToValueAtTime(160, t + dur);
+    env(a, t, 0.004, 0.22, dur);
+    o.connect(lp); o2.connect(lp); lp.connect(a).connect(duck);
+    o.start(t); o2.start(t); o.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+  }
+  function riser(t0, t1) {
+    const d = t1 - t0;
+    const n = noise(t0, d), f = ac.createBiquadFilter(), a = ac.createGain();
+    f.type = 'bandpass'; f.Q.value = 2.5; f.frequency.setValueAtTime(300, t0); f.frequency.exponentialRampToValueAtTime(9000, t1);
+    a.gain.setValueAtTime(0.0001, t0); a.gain.exponentialRampToValueAtTime(0.32, t1 - 0.02); a.gain.linearRampToValueAtTime(0, t1);
+    n.connect(f).connect(a).connect(master);
+    const o = ac.createOscillator(), og = ac.createGain(), lp = ac.createBiquadFilter();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(110, t0); o.frequency.exponentialRampToValueAtTime(880, t1);
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(400, t0); lp.frequency.exponentialRampToValueAtTime(6000, t1);
+    og.gain.setValueAtTime(0.0001, t0); og.gain.exponentialRampToValueAtTime(0.1, t1 - 0.02); og.gain.linearRampToValueAtTime(0, t1);
+    o.connect(lp).connect(og).connect(master); o.start(t0); o.stop(t1);
+  }
+
+  const notes = [55, 55, 43.65, 49, 55, 55, 41.2, 49];
+  for (let b = 0; b < 30; b++) {
+    const t = b * SPB;
+    kick(t, b % 6 === 0 ? 1 : 0.85);
+    hat(t + 0.25, 0.08, b % 2 === 1);
+    if (b % 2 === 1) clap(t, 0.22);
+    bass(t + 0.25, notes[Math.floor(b / 4) % 8], 0.2);
+    if (b >= 18 && b < 24) [0.125, 0.375].forEach((o) => tick(t + o, b % 2 ? 1800 : 2400, 0.035));
+  }
+  [0, 3, 6, 9].forEach((t) => hit(t, 0.8));
+  hit(12, 1.25);
+  hit(14.0, 0.6);
+  riser(10.0, 12.0);
+  // motion foley: folds, pushes, slams
+  whoosh(0.5, 0.35, 0.1); whoosh(2.5, 0.42, 0.14, 300, 7000);
+  [12.5, 13.0, 13.5, 14.0].forEach((t) => whoosh(t, 0.32, 0.14, 500, 4000));
+  whoosh(14.5, 0.42, 0.12, 4000, 400);
+  whoosh(8.0, 0.45, 0.1, 400, 3000);
+
+  const buf2 = await ac.startRendering();
+  const L = buf2.getChannelData(0), R = buf2.getChannelData(1), n = L.length;
+  const dv = new DataView(new ArrayBuffer(44 + n * 4));
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true); dv.setUint32(24, sr, true);
+  dv.setUint32(28, sr * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); ws(36, 'data'); dv.setUint32(40, n * 4, true);
+  for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, clamp(L[i], -1, 1) * 32767, true); dv.setInt16(46 + i * 4, clamp(R[i], -1, 1) * 32767, true); }
+  const bytes = new Uint8Array(dv.buffer);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+
+window.ready = Promise.all([document.fonts.load('900 100px Geist'), document.fonts.load('500 20px Geist')]).then(() => { window.seek(0); return true; });
+</script>
+</body>
+</html>
