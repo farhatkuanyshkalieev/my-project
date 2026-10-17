@@ -7,7 +7,7 @@ mkdir -p "$OUT"
 node render.js events events.json
 python3 audio.py events.json "$OUT/sound.wav"
 for k in 0 1 2 3; do
-  node render.js segment "$OUT/seg$k.mp4" $((k * 300)) $((k * 300 + 300)) &
+  node render.js segment "$OUT/seg$k.mp4" $((k * 780)) $((k * 780 + 780)) &
 done
 wait
 printf "file 'seg%d.mp4'\n" 0 1 2 3 > "$OUT/list.txt"

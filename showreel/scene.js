@@ -3,7 +3,7 @@
 // Every frame is a pure function of time t (seconds), so frames can be
 // rendered in any order / in parallel workers.
 
-const W = 1920, H = 1080, CX = W / 2, CY = H / 2, FPS = 60, DUR = 20, BEAT = 0.5;
+const W = 1920, H = 1080, CX = W / 2, CY = H / 2, FPS = 60, DUR = 52, BEAT = 0.5;
 const TAU = Math.PI * 2;
 
 // ---------------------------------------------------------------- palette
@@ -29,7 +29,7 @@ const T = {
   words: [[12.0, 'ТОЧКА'], [12.5, 'ЛИНИЯ'], [13.0, 'ФОРМА'], [13.5, 'ОБЪЁМ'], [14.0, 'РИТМ'], [14.5, 'ИМПУЛЬС']],
   glitch: [12.0, 13.0, 14.0, 14.5],
   riser: [13.5, 15.93], implode: [15.0, 15.95], impact: 16.0,
-  dotTo: [16.14, 16.52], dotWrite: [16.52, 17.36], sub: 17.4, sweep: [18.1, 19.0], fade: [19.5, 20.0],
+  dotTo: [16.14, 16.52], dotWrite: [16.52, 17.36], sub: 17.4, sweep: [18.1, 19.0], fade: [51.4, 52.0],
 };
 
 // ---------------------------------------------------------------- utils
@@ -255,7 +255,7 @@ function buildEvents() {
   TITLE.chars.forEach((c, i) => { if (c.ch !== ' ') ev.push({ t: c.rt, type: 'letter', i }); });
   SUB.forEach(s => { if (s.ch !== ' ') ev.push({ t: s.st, type: 'tick', g: 0.22 }); });
   ev.push({ t: T.sweep[0], type: 'shine', end: T.sweep[1] });
-  ev.push({ t: T.impact, type: 'pad', end: DUR });
+  ev.push({ t: T.impact, type: 'pad', end: 20.3 });
   ev.sort((a, b) => a.t - b.t);
 }
 
@@ -868,7 +868,7 @@ function drawHUD(c, t) {
   c.fillStyle = rgba(WHITE, 0.85 * a);
   c.fillText('TC ' + timecode(t), W - 66, 80);
   c.fillStyle = rgba(STEEL, 0.7 * a);
-  c.fillText(`FRAME ${String(Math.floor(t * FPS)).padStart(4, '0')} / 1200`, W - 66, 102);
+  c.fillText(`FRAME ${String(Math.floor(t * FPS)).padStart(4, '0')} / ${DUR * FPS}`, W - 66, 102);
   const keysPassed = KEYS.filter(k => k <= t).length;
   c.fillText(`◆ KEY ${String(keysPassed).padStart(2, '0')}`, W - 66, H - 70);
   c.textAlign = 'left';
@@ -1021,7 +1021,14 @@ function drawTitle(c, t) {
   if (t < T.impact) return;
   const TT = TITLE;
   const zoom = 1 + 0.035 * E.inOutSine(prog(t, 16.6, 20));
-  c.save(); c.translate(CX, CY); c.scale(zoom, zoom); c.translate(-CX, -CY);
+  c.save();
+  if (t > DIVE) { // dive into the dot: it swells until its warmth fills the frame
+    const d0 = titleDot(t), dz = [CX + (d0[0] - CX) * zoom, CY + (d0[1] - CY) * zoom];
+    const s = Math.exp(E.inExpo(prog(t, DIVE, P2S)) * Math.log(70));
+    const m = E.inOutCubic(prog(t, DIVE, P2S - 0.1));
+    c.translate(lerp(dz[0], CX, m), lerp(dz[1], CY, m)); c.scale(s, s); c.translate(-dz[0], -dz[1]);
+  }
+  c.translate(CX, CY); c.scale(zoom, zoom); c.translate(-CX, -CY);
   // ambient dust
   const dA = E.outCubic(prog(t, 16.2, 17.2));
   for (const d of DUST) {
@@ -1207,15 +1214,16 @@ function post(t) {
   let zb = 0.07 * Math.sin(Math.PI * prog(t, 3.0, 4.5)) ** 2;
   if (t < T.impact) zb += 0.16 * E.inExpo(prog(t, T.implode[0], T.implode[1]));
   if (t >= T.impact) zb += 0.10 * Math.exp(-(t - T.impact) * 7);
+  zb += FX2.zoom(t);
   if (zb > 0.003) zoomBlur(zb);
-  let g = 0;
+  let g = FX2.glitch(t);
   for (const gt of T.glitch) if (t >= gt && t < gt + 0.1) g = Math.max(g, 1 - (t - gt) / 0.1);
   if (g > 0) glitch(t, g);
   // bloom
   b1c.globalCompositeOperation = 'copy'; b1c.filter = 'contrast(2.2) blur(3px)'; b1c.drawImage(out, 0, 0, 480, 270); b1c.filter = 'none';
   b2c.globalCompositeOperation = 'copy'; b2c.filter = 'blur(4px)'; b2c.drawImage(b1, 0, 0, 240, 135); b2c.filter = 'none';
   ctx.globalCompositeOperation = 'lighter';
-  const bk = t >= T.impact ? lerp(1, 0.5, prog(t, T.impact + 0.2, T.impact + 1.2)) : 1;
+  const bk = t >= P2S ? FX2.bloom(t) : t >= T.impact ? lerp(1, 0.5, prog(t, T.impact + 0.2, T.impact + 1.2)) : 1;
   ctx.globalAlpha = 0.5 * bk; ctx.drawImage(b1, 0, 0, W, H);
   ctx.globalAlpha = 0.6 * bk; ctx.drawImage(b2, 0, 0, W, H);
   // impact flash
@@ -1223,6 +1231,8 @@ function post(t) {
     ctx.globalAlpha = 1; ctx.fillStyle = rgba([255, 214, 160], 0.95 * Math.exp(-(t - T.impact) * 16));
     ctx.fillRect(0, 0, W, H);
   }
+  const [fc, fa] = FX2.flash(t);
+  if (fa > 0.003) { ctx.globalAlpha = 1; ctx.fillStyle = rgba(fc, fa); ctx.fillRect(0, 0, W, H); }
   ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
   ctx.drawImage(vig, 0, 0);
   // grain
@@ -1243,7 +1253,9 @@ function post(t) {
 function renderFrame(t) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
-  if (t < T.push[1]) {
+  if (t >= P2S) {
+    renderPart2(t);
+  } else if (t < T.push[1]) {
     drawScreen(sctx, t);
     const e = E.inOutQuint(prog(t, T.push[0], T.push[1]));
     const s0 = 1 + 0.05 * E.inOutSine(prog(t, 0, T.push[0]));
@@ -1266,6 +1278,9 @@ async function boot() {
   const faces = [
     ['Inter Display', 'InterDisplay-Bold.otf', '700'],
     ['Inter Display', 'InterDisplay-Black.otf', '900'],
+    ['Inter Display', 'InterDisplay-Medium.otf', '500'],
+    ['Inter Display', 'InterDisplay-SemiBold.otf', '600'],
+    ['Inter Display', 'InterDisplay-ExtraBold.otf', '800'],
     ['Inter', 'Inter-Medium.otf', '500'],
   ];
   for (const [fam, file, wt] of faces) {
@@ -1275,6 +1290,7 @@ async function boot() {
   const m = new FontFace('DejaVu Sans Mono', 'url(file:///usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf)', { weight: '400' });
   await m.load(); document.fonts.add(m);
   initData();
+  initPart2();
   window.READY = true;
 }
 window.renderFrame = renderFrame;

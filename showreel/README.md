@@ -1,6 +1,8 @@
 # От идеи к движению: motion showreel
 
-A 20-second motion piece at 1920×1080, 60 fps, with synchronized sound design. The output file is `ot-idei-k-dvizheniyu.mp4`.
+A 52-second motion piece at 1920×1080, 60 fps, with a male voiceover and synchronized sound design. The output file is `ot-idei-k-dvizheniyu.mp4`.
+
+Part I (0–19 s) is the wordless opening. Parts II–V (19–52 s) are driven by the voiceover: every word on screen lands on the frame where it is spoken.
 
 ## Storyboard
 
@@ -17,7 +19,13 @@ A 20-second motion piece at 1920×1080, 60 fps, with synchronized sound design. 
 | 15.0–16.0 | Everything collapses into the dot: speed lines and zoom blur, then a moment of near-silence. |
 | 16.0 | Impact: a flash, a shockwave and a burst. The harmony turns from D minor to D major. |
 | 16.1–17.4 | The dot draws a warm line. The letters of the title rise out of the line where it passes. |
-| 17.4–20.0 | **«От идеи к движению»** at full size. The subtitle decodes, a light sweep crosses the title, and the shot fades to black. |
+| 17.4–19.0 | **«От идеи к движению»** at full size. The subtitle decodes and a light sweep crosses the title. |
+| 19.0–19.85 | Dive into the dot: it swells until its warmth fills the frame, then a hard cut to black. |
+| 20–33.6 | **Voiceover + kinetic type.** Each phrase has its own technique. The dot is the cursor and the period of «точки», sparks fly from «искра», «темноте» goes dark and the dot dies out, «хрупкая» cracks and falls apart, «потерять» dissolves into particles, «движение» rushes in with motion smear and speed lines as the groove starts, «линией» is drawn as an outline and extends into rules, «Формой» drops in inside a morphing frame, and «Ритмом» bounces over an equaliser. A live waveform of the voice runs at the bottom. |
+| 34–40.9 | **Obstacles.** Glass walls slam in on each word: СТЕНЫ, СОМНЕНИЯ, ДЕДЛАЙНЫ, ХАОС. On «Но движение не остановить» the dot charges. |
+| 40.9–42.6 | **Breakthrough.** The camera rushes forward and the dot smashes through all four walls in rhythm. Shards fly, and «СКВОЗЬ» is flown through into a whiteout. |
+| 42.6–45.6 | **Ascent.** A 3D wireframe mountain range under the moon. The dot climbs the ridge leaving a warm trail, with «ВЫШЕ», «БЫСТРЕЕ» and «К ВЕРШИНЕ». |
+| 45.6–52 | **Summit.** Impact and god rays. The camera cranes up and «ОТ ИДЕИ / К ДВИЖЕНИЮ» slams in word by word with the voice, the warm rule grows, and the subtitle decodes before the fade. |
 
 ## How it's made
 
@@ -25,7 +33,9 @@ Everything is procedural, with no stock footage, samples or templates.
 
 - `scene.js` is a deterministic Canvas 2D renderer. Each frame is a pure function of `t`, so frames render in parallel. Post-processing adds two-level bloom, zoom blur, glitch slices, a vignette and film grain.
 - `render.js` drives headless Chromium through Playwright, which pipes PNG frames into x264 (BT.709, CRF 15). It also exports the **audio cue sheet** (`events.json`) straight from the scene timeline.
-- `audio.py` synthesizes the sound in NumPy and SciPy and places every cue on the exact frame of its visual. The layers are room tone, the power-on, the warm ping of the dot, UI ticks, FM plucks, the pulse, a riser, the impact and a Dmaj9 pad. Effects are a ZDF filter, ping-pong delay and a convolution reverb.
+- `scene2.js` holds parts II–V: kinetic type keyed to word timestamps, walls with shatter shards, a perspective camera over a procedural heightmap, and the final title.
+- `vo/` holds the voiceover (ElevenLabs, voice «Maxim — Premium Baritone», eleven_v4) and `env.js`, its per-frame loudness envelope that drives the on-screen waveform. Word timings come from a forced-alignment transcript (scribe).
+- `audio.py` synthesizes the sound in NumPy and SciPy and places every cue on the exact frame of its visual. The layers are room tone, the power-on, the warm ping of the dot, UI ticks, FM plucks, the pulse, a riser, the impact and a Dmaj9 pad. Effects are a ZDF filter, ping-pong delay and a convolution reverb. The voice is high-passed, compressed and given presence, and the music bus is sidechain-ducked under it. Every transition has its own designed hit: dive, cut, wall slams, shatters, whiteout, accents, summit and the final chord.
 
 ## Build
 
