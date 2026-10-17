@@ -1,5 +1,27 @@
 # От идеи к движению: motion showreel
 
+## v2 (current): bright style, lively voice
+
+`ot-idei-k-dvizheniyu_v2.mp4`: 46 s, 1920×1080, 60 fps. It was rebuilt from scratch in the style of the reference. The design uses light, airy canvases, one hero orange, and night scenes in indigo and purple. Type pairs a heavy grotesk with italic serif accents (Playfair Display) and handwritten notes (Caveat). The star is a mascot ball, the idea itself, with squash & stretch, eyes, a blink and a wink. The story is told through UI cards. A lively, expressive male voice (ElevenLabs «Andrey Permikin», with sighs, irony and a whisper) drives every cut. Every word lands on its frame.
+
+| VO | Scene |
+|---|---|
+| «Знаешь, где умирают лучшие идеи? В заметках.» | Kinetic hook, then a Notes window springs up. A handwritten «(вздох)» appears. The idea hides between «купить хлеб» and «позвонить маме». |
+| «А ведь всё начиналось с точки. Маленькой. Тёплой. Живой.» | Zoom-through into the dot. The ball shrinks, glows, then opens its eyes and hops. |
+| «Дедлайн откусил половину. Правки — ещё кусок. Сомнения доели остальное.» | Monsters with teeth notches eat into the ball: a purple clock-blob, a blue drop with a red pen and a pink vortex. The counter goes 100% → 50% → 30% → 0%. |
+| «И вот — полночь. Четырнадцать вкладок… и ноль движения.» | The vortex swallows the screen into night. A clock spins to midnight, 14 tabs orbit in 3D, then everything freezes and falls, and an ECG goes flat. |
+| «А теперь — смотри! …линией! …формой. …ритмом.» | An orange circle wipe with a burst. A slingshot launch draws a line, the line morphs into a circle, triangle and square, and they bounce to the beat over an equaliser. |
+| «Каждый кадр. Каждый изгиб. Каждая секунда…» | A 3D wall of frames, a bezier pen tool, then a timeline with keyframes. Everything returns to the ball, which winks. |
+| «…сделано кодом. Без After Effects.» | A code editor types the real API, and an Ae tile is circled and struck out. |
+| «Это — моушн-дизайн. От идеи… к движению.» | Letter cascade. The «…» dots merge into the ball, which jumps down to become the period. |
+| «Нужен такой же? Пиши — сделаем.» | CTA pill, a cursor click and a confetti burst. |
+
+Build: `./build_v2.sh`. The sources are `reel.html`/`reel.js` (scene), `reel_audio.py` (voice-forward mix, designed SFX, a music bed that drops on «смотри!» and sidechain ducking) and `vo2/` (the voice).
+
+---
+
+## v1: night version
+
 A 52-second motion piece at 1920×1080, 60 fps, with a male voiceover and synchronized sound design. The output file is `ot-idei-k-dvizheniyu.mp4`.
 
 Part I (0–19 s) is the wordless opening. Parts II–V (19–52 s) are driven by the voiceover: every word on screen lands on the frame where it is spoken.

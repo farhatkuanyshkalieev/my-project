@@ -16,7 +16,7 @@ async function open() {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.on('console', m => console.error('[page]', m.text()));
   page.on('pageerror', e => console.error('[pageerror]', e.message));
-  await page.goto('file://' + path.resolve(__dirname, 'scene.html'));
+  await page.goto('file://' + path.resolve(__dirname, process.env.SCENE || 'scene.html'));
   await page.waitForFunction(() => window.READY === true || window.BOOT_ERROR, null, { timeout: 30000 });
   const err = await page.evaluate(() => window.BOOT_ERROR);
   if (err) throw new Error(err);
