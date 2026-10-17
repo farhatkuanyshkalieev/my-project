@@ -1,6 +1,18 @@
 # От идеи к движению: motion showreel
 
-## v2 (current): bright style, lively voice
+## v3 (current): 3D, a live voice, a film score
+
+`ot-idei-k-dvizheniyu_v3.mp4`: 49 s, 1920×1080, 60 fps.
+
+- **3D (three.js / WebGL, rendered frame by frame):** all type is volumetric. Letters are extruded from the real Inter Display and Playfair outlines with bevels and lit sides, cast soft shadows, and enter as kinetic letters (flip, pop, drop, spin). Wilting letters on «умирают». The mascot is a glossy 3D ball with eyes. Its bites show a cut face like an orange slice. The monsters are jelly 3D creatures: a purple one with a clock, a blue drop with a pen, and a 3D vortex funnel. Also in 3D: a Notes window the camera dives into, a clock and tabs orbiting in space, the slingshot and a trail tube that becomes a ring, cone and cube, a curved wall of frames, a bezier tube with handles, a timeline with keyframe crystals, a tilted code editor, an Ae tile struck through, the finale and a capsule button with confetti.
+- **Voice:** re-recorded with emotional direction (ElevenLabs «Andrey Permikin», eleven_v4). It has sadness, a chuckle, irritation, a long sigh, an exhale, a sudden «Стоп.», a whisper, a laugh and pride.
+- **Music as a film score (`score3.py`):** an «idea» leitmotif of four notes goes through the whole story. It starts as a tentative minor on felt piano, becomes a celesta at the dot's birth, then turns to villain pizzicato, reed, «wah» and theremin for the monsters. At midnight a detuned piano breaks off into silence and the flatline. «Стоп» brings a record scratch, then a rewind and a snare roll. The drop on «смотри!» states the theme confidently in F major. The code section whispers on a music box, and the finale resolves on brass, choir and drums. Every transition has its own sound.
+
+Build: `./build_v3.sh`, which installs three and opentype.js via npm.
+
+---
+
+## v2: bright style, lively voice
 
 `ot-idei-k-dvizheniyu_v2.mp4`: 46 s, 1920×1080, 60 fps. It was rebuilt from scratch in the style of the reference. The design uses light, airy canvases, one hero orange, and night scenes in indigo and purple. Type pairs a heavy grotesk with italic serif accents (Playfair Display) and handwritten notes (Caveat). The star is a mascot ball, the idea itself, with squash & stretch, eyes, a blink and a wink. The story is told through UI cards. A lively, expressive male voice (ElevenLabs «Andrey Permikin», with sighs, irony and a whisper) drives every cut. Every word lands on its frame.
 

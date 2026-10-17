@@ -9,15 +9,30 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 
 const FPS = 60;
 
+const http = require('http');
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.ttf': 'font/ttf', '.otf': 'font/otf', '.wav': 'audio/wav', '.png': 'image/png' };
+function serve() { // static server so ES modules / importmaps work
+  return new Promise(res => {
+    const srv = http.createServer((req, rsp) => {
+      const u = decodeURIComponent(req.url.split('?')[0]);
+      const f = u.startsWith('/@fonts/') ? path.join('/usr/share/fonts', u.slice(8)) : path.join(__dirname, u);
+      fs.readFile(f, (e, d) => { if (e) { rsp.writeHead(404); rsp.end(); return; } rsp.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream' }); rsp.end(d); });
+    });
+    srv.listen(0, '127.0.0.1', () => res(srv));
+  });
+}
+
 async function open() {
   const browser = await chromium.launch({
-    args: ['--allow-file-access-from-files', '--force-color-profile=srgb', '--disable-gpu-vsync', '--hide-scrollbars'],
+    args: ['--allow-file-access-from-files', '--force-color-profile=srgb', '--disable-gpu-vsync', '--hide-scrollbars', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
   });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.on('console', m => console.error('[page]', m.text()));
   page.on('pageerror', e => console.error('[pageerror]', e.message));
-  await page.goto('file://' + path.resolve(__dirname, process.env.SCENE || 'scene.html'));
-  await page.waitForFunction(() => window.READY === true || window.BOOT_ERROR, null, { timeout: 30000 });
+  const scene = process.env.SCENE || 'scene.html';
+  if (scene.endsWith('3.html')) { const srv = await serve(); browser.on('disconnected', () => srv.close()); await page.goto(`http://127.0.0.1:${srv.address().port}/${scene}`); }
+  else await page.goto('file://' + path.resolve(__dirname, scene));
+  await page.waitForFunction(() => window.READY === true || window.BOOT_ERROR, null, { timeout: 120000 });
   const err = await page.evaluate(() => window.BOOT_ERROR);
   if (err) throw new Error(err);
   return { browser, page };
@@ -60,4 +75,5 @@ async function grab(page, t) {
     await new Promise((res, rej) => ff.on('close', c => (c === 0 ? res() : rej(new Error('ffmpeg exit ' + c)))));
   }
   await browser.close();
+  process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });
