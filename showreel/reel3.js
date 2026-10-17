@@ -194,7 +194,8 @@ class Line3D {
         p.visible = true;
         const a = t - ta;
         const sp = spring(t, ta, 2.6, 0.38);
-        const ex = prog(t, out + i * 0.02, out + i * 0.02 + 0.32);
+        const ed = o.exitDur || 0.32, es = o.exitStag ?? 0.02;
+        const ex = prog(t, out + i * es, out + i * es + ed);
         p.position.y = 0; p.position.z = 0; p.rotation.set(0, 0, 0); p.scale.setScalar(1);
         if (wd.anim === 'flip') { p.rotation.x = (1 - sp) * -1.7; p.position.y = (1 - sp) * -0.4; p.scale.setScalar(clamp(a * 8)); }
         else if (wd.anim === 'drop') { p.position.y = (1 - sp) * 2.2; p.rotation.z = (1 - sp) * 0.5; p.scale.y = 1 + 0.25 * (sp - 1) * -1 * Math.exp(-a * 6); }
@@ -401,8 +402,8 @@ function initScenes() {
   L.hook2 = new Line3D([Wd('лучшие', v(1.12)), Wd('идеи?', v(1.6), 'i', 'or', 'pop')], CX, 640, 160);
   L.notes = new Line3D([Wd('В', v(2.88)), Wd('заметках.', v(3.08), 'i')], CX, 170, 84, { z: 0.2 });
   L.dot1 = new Line3D([Wd('А', v(8.227)), Wd('ведь', v(8.28)), Wd('всё', v(8.4)), Wd('начиналось', v(8.64)), Wd('с', v(9.08)), Wd('точки.', v(9.2), 'i')], CX, 170, 72, { z: 0.2 });
-  L.small = new Line3D([Wd('маленькой…', v(10.16), 'i')], CX, 930, 96, { z: 0.2 });
-  L.warm = new Line3D([Wd('тёплой…', v(11.28), 'i')], CX, 930, 96, { z: 0.2 });
+  L.small = new Line3D([Wd('маленькой…', v(10.16), 'i')], CX, 930, 96, { z: 0.2, exitDur: 0.16, exitStag: 0.01 });
+  L.warm = new Line3D([Wd('тёплой…', v(11.28), 'i')], CX, 930, 96, { z: 0.2, exitDur: 0.16, exitStag: 0.01 });
   L.alive = new Line3D([Wd('живой!', v(12.08), 'i', 'or', 'pop')], CX, 930, 120, { z: 0.2 });
   L.b1 = new Line3D([Wd('А', v(12.709)), Wd('потом', v(12.8)), Wd('пришёл', v(13.04)), Wd('дедлайн', v(13.36), 'i', 'purple')], CX, 170, 76, { z: 0.2 });
   L.b2 = new Line3D([Wd('Правки', v(15.634), 'i', 'blue'), Wd('—', v(16.08)), Wd('ещё', v(16.16)), Wd('кусок.', v(16.48))], CX, 170, 76, { z: 0.2 });
@@ -624,7 +625,7 @@ function sceneDot(t) {
   HERO.setWedge(0, TAU);
   HERO.pose({ x: CX, y, r, sx, sy, eyes: eyesK, look: [0.2 * Math.sin(t * 2), 0.2], ry: 0.15 * Math.sin(t * 0.7), blink: t > v(12.9) && t < v(12.98) ? 1 : 0 });
   L.dot1.update(t, S.dot[1] - 0.2);
-  L.small.update(t, v(11.15)); L.warm.update(t, v(12.0)); L.alive.update(t, S.dot[1] + 0.3);
+  L.small.update(t, v(10.95)); L.warm.update(t, v(11.82)); L.alive.update(t, S.dot[1] + 0.3);
   // warm sparkles (2D)
   const warm = prog(t, v(11.28), v(11.5)) * (1 - prog(t, v(12.0), v(12.4)));
   return () => {
