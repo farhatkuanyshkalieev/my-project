@@ -9,8 +9,9 @@ import {Bill, MoneyFan} from '../../../components/Props';
 import cues from '../cues.json';
 
 const B = cues.beats;
+const S = cues.scenes;
 
-/** 0.0 – 8.0: motel room, slow push, then snap to the four bags. */
+/** Motel room, slow push, then snap to the four bags. */
 export const MotelScene: React.FC<{t: number}> = ({t}) => {
   const zoomP = prog(t, B.bags - 0.05, 0.45, ease.inOutQuint);
   const s = lerp(lerp(1.0, 1.1, prog(t, 0, B.bags, ease.outCubic)), 1.9, zoomP) + prog(t, B.bags + 0.4, 4, ease.outCubic) * 0.08;
@@ -138,13 +139,13 @@ const RainBill: React.FC<{i: number; t: number}> = ({i, t}) => {
   );
 };
 
-/** 7.9 – 13.55: "Жизнь удалась" fantasy, then the freeze-frame. */
+/** "Жизнь удалась" fantasy, then the freeze-frame. */
 export const RichScene: React.FC<{t: number}> = ({t}) => {
   const frozen = t >= B.freeze;
   const tf = Math.min(t, B.freeze);
   const fz = prog(t, B.freeze, 0.12, ease.outCubic);
-  const shadesP = springAt(tf, B.lifeIsGood - 0.95, 16, 0.3);
-  const push = lerp(1, 1.08, prog(tf, 7.9, 4, ease.outCubic)) * lerp(1, 1.12, prog(t, B.freeze, 1.8, ease.outCubic));
+  const shadesP = springAt(tf, B.shades, 16, 0.3);
+  const push = lerp(1, 1.08, prog(tf, S.rich[0], 4, ease.outCubic)) * lerp(1, 1.12, prog(t, B.freeze, 1.8, ease.outCubic));
   const goldP = prog(tf, B.lifeIsGood, 0.5);
   const shimmer = ((tf - B.lifeIsGood) / 1.2) % 1;
   const jitter = frozen ? (rand(Math.floor(t * 60)) - 0.5) * 16 * prog(t, B.worse - 0.5, 0.5, ease.inCubic) : 0;
@@ -170,7 +171,7 @@ export const RichScene: React.FC<{t: number}> = ({t}) => {
               t={tf}
               mood="smug"
               arms="hold"
-              holdItem={<MoneyFan spread={0.6 + 0.4 * prog(tf, 8.0, 0.5, ease.outBack)} />}
+              holdItem={<MoneyFan spread={0.6 + 0.4 * prog(tf, S.rich[0] + 0.1, 0.5, ease.outBack)} />}
               shades={clamp(shadesP)}
               blinkSeed={3}
             />
@@ -233,7 +234,7 @@ export const RichScene: React.FC<{t: number}> = ({t}) => {
         {/* sparkles */}
         <svg width={1080} height={1920} style={{position: 'absolute'}}>
           {Array.from({length: 12}).map((_, i) => {
-            const at = 8.0 + rand(i) * 3.6;
+            const at = S.rich[0] + 0.1 + rand(i) * (B.freeze - S.rich[0] - 0.4);
             const p = clamp((tf - at) / 0.5);
             if (p <= 0 || p >= 1) return null;
             const x = 140 + rand(i + 1) * 800;

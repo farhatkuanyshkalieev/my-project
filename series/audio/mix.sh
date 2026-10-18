@@ -9,7 +9,7 @@ ffmpeg -v error -y \
   -i "$DIR/vo.mp3" -i "$DIR/music.wav" -i "$DIR/sfx.wav" \
   -filter_complex "
     [0:a]aresample=48000,pan=stereo|c0=c0|c1=c0,adelay=${OFFSET_MS}|${OFFSET_MS},
-         highpass=f=70,equalizer=f=220:t=q:w=1.2:g=-2,equalizer=f=3200:t=q:w=1.5:g=3,
+         highpass=f=80,afftdn=nr=18:nf=-50:tn=1,agate=threshold=0.012:ratio=4:attack=3:release=180:range=0.05,equalizer=f=220:t=q:w=1.2:g=-2,equalizer=f=3200:t=q:w=1.5:g=3,
          acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=4,
          apad=whole_dur=60,asplit=2[vo][vokey];
     [1:a]volume=0.42[mus];

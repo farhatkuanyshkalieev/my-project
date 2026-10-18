@@ -1,28 +1,14 @@
 import React from 'react';
-import {AbsoluteFill, staticFile} from 'remotion';
+import {AbsoluteFill} from 'remotion';
 import {C, F} from '../lib/theme';
 import {clamp, ease, rand, springAt} from '../lib/anim';
 
-/** Animated film grain + vignette, always on top. */
-export const Grain: React.FC<{t: number; amount?: number}> = ({t, amount = 0.09}) => {
-  const f = Math.floor(t * 30);
-  const x = Math.floor(rand(f) * 512);
-  const y = Math.floor(rand(f + 99) * 512);
-  return (
-    <AbsoluteFill style={{pointerEvents: 'none'}}>
-      <AbsoluteFill
-        style={{
-          backgroundImage: `url(${staticFile('fx/grain.png')})`,
-          backgroundPosition: `${x}px ${y}px`,
-          backgroundSize: '512px 512px',
-          mixBlendMode: 'overlay',
-          opacity: amount * 2.2,
-        }}
-      />
-      <AbsoluteFill style={{background: 'radial-gradient(ellipse 75% 60% at 50% 48%, transparent 55%, rgba(0,0,0,0.55) 100%)'}} />
-    </AbsoluteFill>
-  );
-};
+/** Soft vignette, always on top. */
+export const Vignette: React.FC = () => (
+  <AbsoluteFill
+    style={{pointerEvents: 'none', background: 'radial-gradient(ellipse 75% 60% at 50% 48%, transparent 55%, rgba(0,0,0,0.5) 100%)'}}
+  />
+);
 
 /** Full-frame flash (white or coloured) that decays. */
 export const Flash: React.FC<{t: number; at: number; color?: string; dur?: number; max?: number}> = ({

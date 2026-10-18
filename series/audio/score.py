@@ -223,8 +223,10 @@ def pop(freq=900):
 
 
 def tick():
-    n = int(0.03 * SR)
-    return hp(noise(n), 2500) * env_ad(n, 0.0003, 0.01, 5) * 0.5
+    """Clean tonal click (woodblock-like) - no noise component."""
+    n = int(0.05 * SR)
+    t = np.arange(n) / SR
+    return (np.sin(2 * np.pi * 1850 * t) + 0.5 * np.sin(2 * np.pi * 2900 * t)) * np.exp(-t * 160) * 0.45
 
 
 def type_burst(dur, rate=22):
@@ -385,30 +387,7 @@ def ding():
     return sum(np.sin(2 * np.pi * f * t) * np.exp(-t * d) * g for f, d, g in ((1760, 2.5, 0.3), (2640, 3.5, 0.15), (5280, 6, 0.06)))
 
 
-def room_tone(dur):
-    n = int(dur * SR)
-    t = np.arange(n) / SR
-    hum = sum(np.sin(2 * np.pi * 60 * k * t) / k for k in (1, 2, 3, 5)) * 0.012
-    air = lp(noise(n), 400) * 0.02
-    return hum + air
 
-
-def crackle(dur, density=6):
-    n = int(dur * SR)
-    out = lp(noise(n), 3000) * 0.004
-    for _ in range(int(dur * density)):
-        i = rng.integers(0, n - 200)
-        out[i:i + 60] += hp(noise(60), 2000) * rng.uniform(0.02, 0.08)
-    return out
-
-
-def neon_buzz(dur):
-    n = int(dur * SR)
-    t = np.arange(n) / SR
-    x = signal.sawtooth(2 * np.pi * 120 * t) * 0.02
-    x = bp(x, 200, 3000)
-    flick = 1 + 0.5 * (rng.random(n // 2400 + 1).repeat(2400)[:n] > 0.93)
-    return x * flick
 
 
 # ---------------------------------------------------------------- build
@@ -435,7 +414,7 @@ def build(cues):
     intro.add(bass808(midi(26), 2.5), 0.0, 0.7)
     intro.add(bass808(midi(26), 1.8), B["cash"] - 0.02, 0.5)
     # "rich" section: warm keys + light groove from 8.0
-    rich0 = 7.95
+    rich0 = cues["scenes"]["rich"][0] + 0.05
     for k, ch in enumerate([(53, 57, 60, 64), (46, 50, 53, 57)]):
         intro.add(keys([midi(m) for m in ch], bar), rich0 + k * bar * 0.75, 0.32)
     for i in range(6):
@@ -455,7 +434,7 @@ def build(cues):
     music.add(riser(1.6), B["p1Label"] - 1.6, 0.35)
 
     # --- main beat: 16.1 -> 46.75
-    beat_start, beat_end = 16.15, cues["scenes"]["door"][0]
+    beat_start, beat_end = cues["scenes"]["weight"][0] + 0.1, cues["scenes"]["door"][0]
     tense_from = cues["scenes"]["nerves"][0]
     nbars = int(np.ceil((beat_end - beat_start) / bar))
     for b in range(nbars):
@@ -513,9 +492,6 @@ def build(cues):
 
     # ================= SFX =================
     S = sfx.add
-    S(room_tone(D), 0, 0.8)
-    S(crackle(D), 0, 1.0)
-    S(neon_buzz(cues["scenes"]["rich"][0]), 0, 1.0, pan=0.4)
     S(impact(0.8), 0.02, 0.55)
     S(cash_riffle(1.2), B["tenMillion"], 0.45)
     S(stamp(), B["cash"], 0.7)

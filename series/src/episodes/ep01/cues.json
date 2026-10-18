@@ -3,54 +3,120 @@
   "duration": 60,
   "voOffset": 0.15,
   "scenes": {
-    "motel": [0, 8.0],
-    "rich": [7.9, 13.55],
-    "title": [13.55, 16.2],
-    "weight": [16.05, 23.65],
-    "stairs": [23.5, 27.35],
-    "serial": [27.3, 36.05],
-    "register": [35.95, 39.35],
-    "nerves": [39.3, 46.75],
-    "door": [46.75, 51.0],
-    "end": [51.0, 60]
+    "motel": [
+      0,
+      9.22
+    ],
+    "rich": [
+      9.12,
+      14.55
+    ],
+    "title": [
+      14.55,
+      17.56
+    ],
+    "weight": [
+      17.41,
+      25.17
+    ],
+    "stairs": [
+      25.02,
+      28.95
+    ],
+    "serial": [
+      28.9,
+      37.33
+    ],
+    "register": [
+      37.23,
+      40.63
+    ],
+    "nerves": [
+      40.58,
+      46.59
+    ],
+    "door": [
+      46.59,
+      49.76
+    ],
+    "end": [
+      49.76,
+      60
+    ]
   },
   "beats": {
-    "tenMillion": 1.35,
-    "cash": 3.35,
-    "bags": 4.3,
-    "fourBags": 6.45,
-    "lifeIsGood": 10.3,
-    "freeze": 11.83,
-    "worse": 13.58,
-    "p1Label": 16.2,
-    "p1Word": 17.67,
-    "gridStart": 18.7,
-    "countStart": 20.45,
-    "countEnd": 21.75,
-    "kg": 21.98,
-    "kgLand": 22.3,
-    "stairsFail": 25.85,
-    "p2Label": 27.6,
-    "p2Word": 29.02,
-    "scanStart": 30.15,
-    "serialLock": 31.75,
-    "dbStart": 32.5,
-    "marked": 34.63,
-    "registerScan": 36.6,
-    "registerAlert": 37.4,
-    "hunted": 37.88,
-    "p3Label": 39.42,
-    "youself": 41.58,
-    "noSleep": 42.9,
-    "siren": 44.4,
-    "flinch": 45.1,
-    "andThen": 46.85,
-    "knockWord": 48.05,
-    "knocks": [50.1, 50.45, 50.8],
-    "cut": 51.0,
-    "ep2": 53.25,
-    "follow": 55.3,
+    "tenMillion": 1.91,
+    "cash": 3.75,
+    "bags": 4.95,
+    "fourBags": 7.67,
+    "lifeIsGood": 11.51,
+    "shades": 10.71,
+    "freeze": 12.71,
+    "worse": 14.55,
+    "p1Label": 17.59,
+    "p1Word": 18.95,
+    "gridStart": 19.83,
+    "countStart": 21.65,
+    "countEnd": 22.91,
+    "kg": 23.11,
+    "kgLand": 23.43,
+    "stairsFail": 27.43,
+    "p2Label": 29.27,
+    "p2Word": 30.39,
+    "scanStart": 31.19,
+    "serialLock": 32.55,
+    "dbStart": 33.53,
+    "marked": 35.75,
+    "registerScan": 37.88,
+    "registerAlert": 38.71,
+    "hunted": 39.19,
+    "p3Label": 40.71,
+    "youself": 42.09,
+    "closeUp": 42.84,
+    "noSleep": 43.13,
+    "siren": 44.63,
+    "flinch": 45.33,
+    "andThen": 46.75,
+    "knockWord": 47.59,
+    "knocks": [
+      48.81,
+      49.16,
+      49.51
+    ],
+    "cut": 49.76,
+    "who": 51.07,
+    "ep2": 53.35,
+    "follow": 55.4,
     "out": 59.55
   },
-  "suspicion": [[0, 0], [37.4, 0], [37.95, 41], [44.6, 41], [45.2, 73], [50.1, 73], [50.9, 97]]
+  "suspicion": [
+    [
+      0,
+      0
+    ],
+    [
+      38.71,
+      0
+    ],
+    [
+      39.26,
+      41
+    ],
+    [
+      44.83,
+      41
+    ],
+    [
+      45.43,
+      73
+    ],
+    [
+      48.81,
+      73
+    ],
+    [
+      49.61,
+      97
+    ]
+  ]
 }

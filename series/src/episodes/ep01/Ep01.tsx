@@ -4,7 +4,7 @@ import {C} from '../../lib/theme';
 import {Scene} from '../../components/Scene';
 import {Captions, Word} from '../../components/Captions';
 import {HUD} from '../../components/HUD';
-import {Flash, GlitchBars, Grain} from '../../components/FX';
+import {Flash, GlitchBars, Vignette} from '../../components/FX';
 import {MotelScene, RichScene} from './scenes/Opening';
 import {TitleScene, WeightScene, StairsScene} from './scenes/ProblemOne';
 import {SerialScene, RegisterScene} from './scenes/ProblemTwo';
@@ -80,7 +80,7 @@ export const Ep01: React.FC = () => {
       <Flash t={t} at={S.nerves[0]} color={C.red} max={0.6} dur={0.35} />
       <Flash t={t} at={B.cut} max={0.5} dur={0.2} />
       <GlitchBars t={t} at={B.out} dur={0.45} />
-      <Grain t={t} />
+      <Vignette />
       </AbsoluteFill>
     </AbsoluteFill>
   );

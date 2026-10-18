@@ -48,7 +48,7 @@ const ECG: React.FC<{t: number; y: number}> = ({t, y}) => {
 
 /** 39.3 – 46.75: problem three — you. */
 export const NervesScene: React.FC<{t: number}> = ({t}) => {
-  const close = 42.35;
+  const close = B.closeUp;
   if (t < close) {
     const sil = prog(t, S.nerves[0], 2.8, ease.outCubic);
     const eyes = t >= B.youself;
@@ -354,7 +354,7 @@ export const EndScene: React.FC<{t: number}> = ({t}) => {
           ГРЯЗНЫЕ <span style={{color: C.magenta}}>МИЛЛИОНЫ</span>
         </div>
         <div style={{position: 'absolute', top: lerp(880, 1060, up), left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
-          <TypeLabel t={t} at={a + 0.35} text="КТО ЗА ДВЕРЬЮ?" color={up > 0.5 ? C.magentaHot : '#fff'} size={lerp(58, 46, up)} cps={16} />
+          <TypeLabel t={t} at={B.who} text="КТО ЗА ДВЕРЬЮ?" color={up > 0.5 ? C.magentaHot : '#fff'} size={lerp(58, 46, up)} cps={16} />
         </div>
         <div style={{position: 'absolute', top: 560, left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
           <TypeLabel t={t} at={B.ep2 - 1.0} text="ПРОДОЛЖЕНИЕ" color="rgba(255,255,255,0.7)" size={30} />
