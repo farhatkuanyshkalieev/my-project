@@ -8,6 +8,10 @@ type Props = {
   visible: [number, number];
   suspicion: number[][];
   day: string;
+  /** clock reading (minutes past midnight) when the HUD appears */
+  clockStart?: number;
+  /** [start, end] windows where the HUD is hidden (e.g. title cards) */
+  hideRanges?: number[][];
 };
 
 const Cell: React.FC<{label: string; value: string; color?: string; children?: React.ReactNode; flex?: number}> = ({
@@ -35,16 +39,17 @@ const Cell: React.FC<{label: string; value: string; color?: string; children?: R
   </div>
 );
 
-export const HUD: React.FC<Props> = ({t, visible, suspicion, day}) => {
+export const HUD: React.FC<Props> = ({t, visible, suspicion, day, clockStart = 3 * 60 + 14, hideRanges = []}) => {
   const [a, b] = visible;
   if (t < a - 0.01 || t > b + 0.3) return null;
+  if (hideRanges.some(([h0, h1]) => t >= h0 && t < h1)) return null;
   const pin = ease.outExpo(clamp((t - a) / 0.5));
   const pout = ease.inCubic(clamp((t - b) / 0.25));
   const s = track(t, suspicion, ease.outExpo);
   const sCol = s > 60 ? C.red : s > 25 ? C.amber : '#fff';
   const blink = s > 90 ? (Math.floor(t * 6) % 2 ? 1 : 0.35) : 1;
   const jitter = s > 60 ? noise1(t * 30, 4) * 2 : 0;
-  const clock = 3 * 60 + 14 + Math.floor((t - a) * 1.6);
+  const clock = clockStart + Math.floor((t - a) * 1.6);
   const hh = String(Math.floor(clock / 60) % 24).padStart(2, '0');
   const mm = String(clock % 60).padStart(2, '0');
   return (

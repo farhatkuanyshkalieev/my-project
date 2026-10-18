@@ -1,6 +1,9 @@
 node_modules
 out
-takes
+public/ep01/mix.wav
 public/ep01/music.wav
 public/ep01/sfx.wav
-public/ep01/mix.wav
+public/ep02/mix.wav
+public/ep02/music.wav
+public/ep02/sfx.wav
+takes
