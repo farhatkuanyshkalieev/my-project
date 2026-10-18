@@ -79,6 +79,9 @@ audio/mix.sh public/ep02 1.6
 npm run render:ep2                                               # → out/ep02.mp4
 ```
 
+Обложка рилса: `npx remotion still src/index.ts Cover1 covers/ep01_cover.png` (компонент `src/covers/Cover.tsx`,
+всё важное держится в центральной зоне 3:4 — её показывает сетка профиля).
+
 Быстрые кадры для проверки: `node scripts/stills.mjs out/qa 5.2 22.6 49.0` (для серии 2 — с `COMP=Ep2`), затем
 `python3 scripts/sheet.py out/qa out/sheet.jpg`.
 

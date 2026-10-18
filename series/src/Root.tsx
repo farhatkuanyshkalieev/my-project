@@ -1,5 +1,5 @@
 import React from 'react';
-import {Composition, continueRender, delayRender} from 'remotion';
+import {Composition, Still, continueRender, delayRender} from 'remotion';
 import '@fontsource/unbounded/700.css';
 import '@fontsource/unbounded/800.css';
 import '@fontsource/unbounded/900.css';
@@ -11,6 +11,7 @@ import {Ep01} from './episodes/ep01/Ep01';
 import cues from './episodes/ep01/cues.json';
 import {Ep02} from './episodes/ep02/Ep02';
 import cues2 from './episodes/ep02/cues.json';
+import {Cover} from './covers/Cover';
 
 const fontHandle = typeof document !== 'undefined' ? delayRender('fonts') : null;
 if (typeof document !== 'undefined') {
@@ -31,5 +32,12 @@ export const RemotionRoot: React.FC = () => (
   <>
     <Composition id="Ep1" component={Ep01} durationInFrames={cues.duration * cues.fps} fps={cues.fps} width={1080} height={1920} />
     <Composition id="Ep2" component={Ep02} durationInFrames={cues2.duration * cues2.fps} fps={cues2.fps} width={1080} height={1920} />
+    <Still
+      id="Cover1"
+      component={Cover}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: 1, title: 'ПЕРВЫЙ\nДЕНЬ', tagline: 'КАЖДЫЙ ДОЛЛАР ОСТАВЛЯЕТ СЛЕД'}}
+    />
   </>
 );
