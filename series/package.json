@@ -5,7 +5,8 @@
   "scripts": {
     "studio": "remotion studio",
     "render:ep1": "remotion render src/index.ts Ep1 out/ep01.mp4 --codec h264 --crf 17 --pixel-format yuv420p --audio-codec aac --audio-bitrate 320k",
-    "render:ep2": "remotion render src/index.ts Ep2 out/ep02.mp4 --codec h264 --crf 17 --pixel-format yuv420p --audio-codec aac --audio-bitrate 320k"
+    "render:ep2": "remotion render src/index.ts Ep2 out/ep02.mp4 --codec h264 --crf 17 --pixel-format yuv420p --audio-codec aac --audio-bitrate 320k",
+    "render:ep3": "remotion render src/index.ts Ep3 out/ep03.mp4 --codec h264 --crf 17 --pixel-format yuv420p --audio-codec aac --audio-bitrate 320k"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

@@ -1,3 +1,4 @@
+__pycache__/
 node_modules
 out
 public/ep01/mix.wav
@@ -6,5 +7,7 @@ public/ep01/sfx.wav
 public/ep02/mix.wav
 public/ep02/music.wav
 public/ep02/sfx.wav
+public/ep03/mix.wav
+public/ep03/music.wav
+public/ep03/sfx.wav
 takes
-__pycache__/

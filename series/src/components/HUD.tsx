@@ -12,6 +12,8 @@ type Props = {
   clockStart?: number;
   /** [start, end] windows where the HUD is hidden (e.g. title cards) */
   hideRanges?: number[][];
+  /** [[t, dollars], ...] cash on hand over time */
+  cash?: number[][];
 };
 
 const Cell: React.FC<{label: string; value: string; color?: string; children?: React.ReactNode; flex?: number}> = ({
@@ -39,7 +41,7 @@ const Cell: React.FC<{label: string; value: string; color?: string; children?: R
   </div>
 );
 
-export const HUD: React.FC<Props> = ({t, visible, suspicion, day, clockStart = 3 * 60 + 14, hideRanges = []}) => {
+export const HUD: React.FC<Props> = ({t, visible, suspicion, day, clockStart = 3 * 60 + 14, hideRanges = [], cash = [[0, 10_000_000]]}) => {
   const [a, b] = visible;
   if (t < a - 0.01 || t > b + 0.3) return null;
   if (hideRanges.some(([h0, h1]) => t >= h0 && t < h1)) return null;
@@ -66,7 +68,7 @@ export const HUD: React.FC<Props> = ({t, visible, suspicion, day, clockStart = 3
           opacity: pin * (1 - pout),
         }}
       >
-        <Cell label="НАЛИЧНЫЕ" value={fmtMoney(10_000_000)} flex={1.5} />
+        <Cell label="НАЛИЧНЫЕ" value={fmtMoney(track(t, cash, ease.outExpo))} flex={1.5} />
         <Cell label="ЧИСТЫЕ" value="$0" flex={0.8} />
         <Cell label="РОЗЫСК" value={`${Math.round(s)}%`} color={sCol} flex={1}>
           <div style={{position: 'absolute', left: 0, bottom: 0, height: 6, width: `${s}%`, background: sCol, opacity: blink}} />

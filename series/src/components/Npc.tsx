@@ -15,6 +15,10 @@ type Props = {
   shout?: boolean;
   /** 0..1 glint sweeping across the analyst's glasses */
   glint?: number;
+  /** after the payout: red bomber jacket + gold chain */
+  flashy?: boolean;
+  legs?: boolean;
+  smirk?: boolean;
 };
 
 const blinkScale = (t: number, seed: number) => {
@@ -50,14 +54,14 @@ const Eye: React.FC<{x: number; y: number; kind: Eyes; look: {x: number; y: numb
 };
 
 /** Secondary cast: the motel night manager and the financial analyst. Same rig as Character (head at origin). */
-export const Npc: React.FC<Props> = ({kind, t, view = 'front', eyes = 'normal', look = {x: 0, y: 0}, shout = false, glint = -1}) => {
+export const Npc: React.FC<Props> = ({kind, t, view = 'front', eyes = 'normal', look = {x: 0, y: 0}, shout = false, glint = -1, flashy = false, legs = false, smirk = false}) => {
   const id = useId().replace(/:/g, '');
   const blink = blinkScale(t, kind === 'manager' ? 11 : 23);
   const manager = kind === 'manager';
   const skin = manager ? '#f2e2cc' : '#f4efe6';
   const shade = manager ? '#dcc6a8' : '#d8d1c2';
-  const shirt = manager ? '#3d7a7d' : '#e9e6df';
-  const shirtShade = manager ? '#2d5c5e' : '#c9c4ba';
+  const shirt = flashy ? '#c4232f' : manager ? '#3d7a7d' : '#e9e6df';
+  const shirtShade = flashy ? '#8e1620' : manager ? '#2d5c5e' : '#c9c4ba';
   const body = 'M -150 300 C -150 175 -95 120 0 120 C 95 120 150 175 150 300 L 166 560 L -166 560 Z';
 
   return (
@@ -71,12 +75,37 @@ export const Npc: React.FC<Props> = ({kind, t, view = 'front', eyes = 'normal', 
         </clipPath>
       </defs>
 
+      {legs && (
+        <g>
+          <path d="M -98 520 L -92 664 L -26 664 L -22 520 Z" fill="#23222c" stroke={O} strokeWidth={6} />
+          <path d="M 98 520 L 92 664 L 26 664 L 22 520 Z" fill="#23222c" stroke={O} strokeWidth={6} />
+          {[-62, 62].map((x) => (
+            <path
+              key={x}
+              d={`M ${x - 56} 690 Q ${x - 58} 650 ${x - 20} 652 L ${x + 30} 652 Q ${x + 62} 656 ${x + 60} 690 Z`}
+              fill={flashy ? '#f7f7f2' : '#3a2a20'}
+              stroke={O}
+              strokeWidth={6}
+            />
+          ))}
+        </g>
+      )}
       {/* torso */}
       <path d={body} fill={shirt} stroke={O} strokeWidth={7} />
       <g clipPath={`url(#nb${id})`}>
         <rect x={70} y={100} width={140} height={480} fill={shirtShade} opacity={0.55} />
       </g>
-      {view === 'front' ? (
+      {view === 'front' && flashy ? (
+        <>
+          <path d="M -62 124 L -40 560 L 40 560 L 62 124 Q 0 150 -62 124 Z" fill="#f4f1ea" stroke={O} strokeWidth={6} />
+          <path d="M -66 124 L -30 300 M 66 124 L 30 300" stroke="#8e1620" strokeWidth={14} />
+          <path d="M -56 140 Q 0 250 56 140" fill="none" stroke="#e8b730" strokeWidth={12} strokeDasharray="14 5" />
+          <circle cx={0} cy={232} r={20} fill="#f5c842" stroke={O} strokeWidth={5} />
+          <text x={0} y={242} textAnchor="middle" fontFamily={F.display} fontWeight={900} fontSize={24} fill="#8a6410">
+            $
+          </text>
+        </>
+      ) : view === 'front' ? (
         <>
           <path d="M -70 128 L 0 210 L 70 128" fill="none" stroke={O} strokeWidth={6} />
           <path d="M -70 128 L -20 200 L -64 210 Z M 70 128 L 20 200 L 64 210 Z" fill={manager ? '#f2efe6' : '#ffffff'} stroke={O} strokeWidth={5} />
@@ -159,7 +188,13 @@ export const Npc: React.FC<Props> = ({kind, t, view = 'front', eyes = 'normal', 
           {shout ? (
             <ellipse cx={0} cy={110} rx={20} ry={17} fill="#3a0f1a" stroke={O} strokeWidth={5} />
           ) : (
-            <path d={manager ? 'M -14 108 Q 0 112 14 108' : 'M -16 112 Q 0 104 16 112'} stroke={O} strokeWidth={6} fill="none" strokeLinecap="round" />
+            <path
+              d={smirk ? 'M -22 104 Q 6 120 30 98' : manager ? 'M -14 108 Q 0 112 14 108' : 'M -16 112 Q 0 104 16 112'}
+              stroke={O}
+              strokeWidth={6}
+              fill="none"
+              strokeLinecap="round"
+            />
           )}
         </>
       )}
