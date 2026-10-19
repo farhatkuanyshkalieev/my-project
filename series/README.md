@@ -104,6 +104,9 @@ npm run render:ep3                                               # → out/ep03.
 Обложка рилса: `npx remotion still src/index.ts Cover1 covers/ep01_cover.png` (компонент `src/covers/Cover.tsx`,
 всё важное держится в центральной зоне 3:4 — её показывает сетка профиля).
 
+Баннер YouTube: `npx remotion still src/index.ts YoutubeBanner covers/youtube_banner.png` (2560×1440, аватарка берётся
+из `public/brand/avatar.jpg` — в git её нет; безопасная зона 1546×423 по центру).
+
 Быстрые кадры для проверки: `node scripts/stills.mjs out/qa 5.2 22.6 49.0` (для серии 2 — с `COMP=Ep2`), затем
 `python3 scripts/sheet.py out/qa out/sheet.jpg`.
 

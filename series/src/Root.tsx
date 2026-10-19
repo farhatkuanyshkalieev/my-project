@@ -12,6 +12,7 @@ import cues from './episodes/ep01/cues.json';
 import {Ep02} from './episodes/ep02/Ep02';
 import cues2 from './episodes/ep02/cues.json';
 import {Cover} from './covers/Cover';
+import {YoutubeBanner} from './covers/YoutubeBanner';
 import {Ep03} from './episodes/ep03/Ep03';
 import cues3 from './episodes/ep03/cues.json';
 
@@ -42,5 +43,6 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: 1, title: 'ПЕРВЫЙ\nДЕНЬ', tagline: 'КАЖДЫЙ ДОЛЛАР ОСТАВЛЯЕТ СЛЕД'}}
     />
+    <Still id="YoutubeBanner" component={YoutubeBanner} width={2560} height={1440} />
   </>
 );

@@ -1,6 +1,8 @@
 __pycache__/
+covers/youtube_banner*
 node_modules
 out
+public/brand/
 public/ep01/mix.wav
 public/ep01/music.wav
 public/ep01/sfx.wav
