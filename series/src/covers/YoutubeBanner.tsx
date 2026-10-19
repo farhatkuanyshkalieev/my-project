@@ -2,8 +2,6 @@ import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {C, F} from '../lib/theme';
 import {rand} from '../lib/anim';
-import {Character} from '../components/Character';
-import {Npc} from '../components/Npc';
 import {Bill} from '../components/Props';
 
 const VIOLET = '#8a3cff';
@@ -82,16 +80,6 @@ export const YoutubeBanner: React.FC = () => (
     >
       $
     </div>
-
-    {/* desktop band sides: the series cast */}
-    <svg width={2560} height={1440} style={{position: 'absolute'}}>
-      <g transform="translate(260 600) scale(0.45)">
-        <Character t={0.4} view="front" mood="smug" arms="down" shades={1} />
-      </g>
-      <g transform="translate(2300 612) scale(0.5)">
-        <Npc kind="manager" t={0.2} flashy smirk look={{x: -0.7, y: 0}} />
-      </g>
-    </svg>
 
     {/* avatar */}
     <div
