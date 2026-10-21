@@ -29,8 +29,8 @@ def build(words):
     b["deadline"] = W.seq("до", "утра")
     b["pay"] = W.s("платить")
     b["run"] = W.s("бежать")
-    b["both"] = W.seq("ты", "выбрал")
-    b["bothStamp"] = W.s("другое")
+    b["vote"] = W.e("бежать") + 0.1  # viewers' poll: bars race to 51% / 49%
+    b["voteWin"] = b["vote"] + 1.3
     b["dawn"] = W.s("рассвет")
     b["backyard"] = W.s("задний")
     b["whoWrote"] = W.seq("и", "тот")

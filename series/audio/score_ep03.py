@@ -67,7 +67,7 @@ def build(cues):
         M(tick() * (1.0 if i % 2 == 0 else 0.55), i * beat, 0.35, pan=-0.3)
     M(kick(0.9), B["pay"], 0.6)
     M(kick(0.9), B["run"], 0.6)
-    M(braam(2.0) * 0.6, B["bothStamp"], 0.5)
+    M(braam(2.0) * 0.6, B["voteWin"], 0.5)
 
     # --- dawn: warm, uneasy keys; reveal sting
     dawn0 = S["dawn"][0]
@@ -136,8 +136,12 @@ def build(cues):
     X(impact(0.6), B["pay"], 0.45)
     X(whoosh(0.35, bright=1.3), B["run"] - 0.15, 0.4)
     X(impact(0.6), B["run"], 0.45)
-    X(pop(1100), B["both"], 0.5)
-    X(stamp(), B["bothStamp"], 0.85)
+    X(whoosh(0.4, bright=1.1), B["vote"] - 0.1, 0.35)
+    X(riser(1.3) * 0.5, B["vote"], 0.3)
+    for k in range(12):  # vote counter ticking
+        X(tick(), B["vote"] + 0.1 + k * 0.1, 0.35)
+    X(stamp(), B["voteWin"], 0.85)
+    X(chaching(), B["voteWin"] + 0.05, 0.35)
     X(whoosh(0.6, up=False, bright=0.6), S["dawn"][0], 0.35)
     X(type_burst(0.7), B["dawn"], 0.3)
     X(phone_buzz(0.5) * 0.5, B["whoWrote"] + 0.3, 0.4)

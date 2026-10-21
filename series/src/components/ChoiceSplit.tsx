@@ -6,12 +6,11 @@ import {clamp, prog, ease, shake, springAt, sumShake} from '../lib/anim';
 type Side = {label: string; sub: string; icon: string; at: number};
 
 /** Diagonal split choice card: left (paper) vs right (magenta), "ИЛИ" badge, comments bar. */
-export const ChoiceSplit: React.FC<{t: number; left: Side; right: Side; commentsAt?: number; both?: number}> = ({t, left, right, commentsAt, both}) => {
+export const ChoiceSplit: React.FC<{t: number; left: Side; right: Side; commentsAt?: number}> = ({t, left, right, commentsAt}) => {
   const lp = clamp(springAt(t, left.at, 16, 0.32), 0, 1.15);
   const rp = clamp(springAt(t, right.at, 16, 0.32), 0, 1.15);
   const commentsP = commentsAt === undefined ? 0 : prog(t, commentsAt, 0.4, ease.outExpo);
-  const sh = sumShake(shake(t, left.at, 18, 7), shake(t, right.at, 18, 7), both !== undefined ? shake(t, both, 26, 6) : {x: 0, y: 0, r: 0});
-  const bothOn = both !== undefined && t >= both;
+  const sh = sumShake(shake(t, left.at, 18, 7), shake(t, right.at, 18, 7));
   return (
     <AbsoluteFill style={{background: '#07060b'}}>
       <AbsoluteFill style={{transform: `translate(${sh.x}px, ${sh.y}px)`}}>
@@ -56,19 +55,19 @@ export const ChoiceSplit: React.FC<{t: number; left: Side; right: Side; comments
               width: 160,
               height: 160,
               borderRadius: '50%',
-              background: bothOn ? C.magenta : C.ink,
+              background: C.ink,
               border: '8px solid #fff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontFamily: F.display,
               fontWeight: 900,
-              fontSize: bothOn ? 40 : 46,
+              fontSize: 46,
               color: '#fff',
-              transform: `scale(${clamp(springAt(t, bothOn ? both! : right.at + 0.2, 20, 0.3), 0, 1.2)})`,
+              transform: `scale(${clamp(springAt(t, right.at + 0.2, 20, 0.3), 0, 1.2)})`,
             }}
           >
-            {bothOn ? '+' : 'ИЛИ'}
+            ИЛИ
           </div>
         )}
       </AbsoluteFill>

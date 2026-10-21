@@ -54,27 +54,104 @@ export const PhoneRecap: React.FC<{t: number}> = ({t}) => {
   );
 };
 
-/** "Платить или бежать? — Ты выбрал и то, и другое." */
-export const ChoiceRecap: React.FC<{t: number}> = ({t}) => (
-  <AbsoluteFill>
-    <ChoiceSplit
-      t={t}
-      left={{label: 'ПЛАТИТЬ', sub: '−$50 000', icon: '💵', at: B.pay}}
-      right={{label: 'БЕЖАТЬ', sub: 'ПЕРЕПРЯТАТЬ СУМКИ', icon: '🏃', at: B.run}}
-      both={B.both}
-    />
-    <div style={{position: 'absolute', top: 400, left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
-      <div style={{background: C.ink, padding: '10px 24px', borderRadius: 12}}>
-        <TypeLabel t={t} at={S.choice1[0] + 0.1} text="ТВОЙ ВЫБОР" color="#fff" size={30} />
+/** One poll row: icon, label, bar and percentage. */
+const PollRow: React.FC<{icon: string; label: string; pct: number; color: string; win: number}> = ({icon, label, pct, color, win}) => (
+  <div style={{marginTop: 34, opacity: 1 - 0.45 * Math.max(0, -win)}}>
+    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: F.display, fontWeight: 900, color: '#fff'}}>
+      <div style={{display: 'flex', alignItems: 'center', gap: 16, fontSize: 52, letterSpacing: -2}}>
+        <span style={{fontSize: 56}}>{icon}</span>
+        {label}
+        {win > 0 && <span style={{fontSize: 52, transform: `scale(${win})`, display: 'inline-block'}}>👑</span>}
       </div>
+      <div style={{fontSize: 64, letterSpacing: -2, color: win > 0 ? color : '#fff', fontVariantNumeric: 'tabular-nums'}}>{Math.round(pct)}%</div>
     </div>
-    {t >= B.bothStamp && (
-      <div style={{position: 'absolute', top: 1260, left: 0, right: 0, textAlign: 'center'}}>
-        <Stamp t={t} at={B.bothStamp} text="СРАЗУ ОБА" color={C.ink} size={92} rotate={-6} />
-      </div>
-    )}
-  </AbsoluteFill>
+    <div style={{marginTop: 14, height: 46, borderRadius: 999, background: 'rgba(255,255,255,0.1)', overflow: 'hidden'}}>
+      <div
+        style={{
+          width: `${pct}%`,
+          height: '100%',
+          borderRadius: 999,
+          background: color,
+          boxShadow: win > 0 ? `0 0 ${30 * win}px ${color}` : 'none',
+        }}
+      />
+    </div>
+  </div>
 );
+
+/** "Платить… или бежать?" — then the viewers' vote: ПЛАТИТЬ 51% beats БЕЖАТЬ 49%. */
+export const ChoiceRecap: React.FC<{t: number}> = ({t}) => {
+  const card = clamp(springAt(t, B.vote, 18, 0.34), 0, 1.1);
+  const p = prog(t, B.vote + 0.1, B.voteWin - B.vote - 0.12, ease.inOutCubic);
+  const swing = 7 * Math.sin(Math.PI * p); // "БЕЖАТЬ" leads mid-count, "ПЛАТИТЬ" overtakes at the end
+  const pay = 51 * p - swing;
+  const run = 49 * p + swing;
+  const won = t >= B.voteWin;
+  const winS = won ? clamp(springAt(t, B.voteWin, 22, 0.3), 0, 1.2) : 0;
+  const sh = shake(t, B.voteWin, 26, 6);
+  return (
+    <AbsoluteFill>
+      <ChoiceSplit
+        t={t}
+        left={{label: 'ПЛАТИТЬ', sub: '−$50 000', icon: '💵', at: B.pay}}
+        right={{label: 'БЕЖАТЬ', sub: 'ПЕРЕПРЯТАТЬ СУМКИ', icon: '🏃', at: B.run}}
+      />
+      <div style={{position: 'absolute', top: 400, left: 0, right: 0, display: 'flex', justifyContent: 'center', opacity: 1 - clamp(card)}}>
+        <div style={{background: C.ink, padding: '10px 24px', borderRadius: 12}}>
+          <TypeLabel t={t} at={S.choice1[0] + 0.1} text="ТВОЙ ВЫБОР" color="#fff" size={30} />
+        </div>
+      </div>
+      {t >= B.vote && (
+        <>
+          <AbsoluteFill style={{background: 'rgba(5,4,10,0.72)', opacity: clamp(card)}} />
+          <div
+            style={{
+              position: 'absolute',
+              left: 70,
+              right: 70,
+              top: 560,
+              transform: `translate(${sh.x}px, ${(1 - card) * 700 + sh.y}px) rotate(${-2 + sh.r}deg)`,
+              background: '#0e0b16',
+              border: `4px solid ${C.magenta}`,
+              borderRadius: 36,
+              padding: '40px 50px 52px',
+              boxShadow: `0 30px 80px rgba(0,0,0,0.6), 0 0 60px ${C.magenta}44`,
+            }}
+          >
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+              <TypeLabel t={t} at={B.vote + 0.05} text="ИТОГИ ГОЛОСОВАНИЯ" color="#fff" size={30} />
+              <div
+                style={{
+                  fontFamily: F.mono,
+                  fontWeight: 700,
+                  fontSize: 22,
+                  letterSpacing: 3,
+                  color: '#fff',
+                  background: C.red,
+                  padding: '6px 14px',
+                  borderRadius: 999,
+                  opacity: won ? 0.35 : Math.floor(t * 4) % 2 ? 1 : 0.6,
+                }}
+              >
+                ● LIVE
+              </div>
+            </div>
+            <div style={{fontFamily: F.mono, fontWeight: 700, fontSize: 24, letterSpacing: 3, color: 'rgba(255,255,255,0.55)', marginTop: 10}}>
+              ВЫ ВЫБРАЛИ В КОММЕНТАРИЯХ
+            </div>
+            <PollRow icon="💵" label="ПЛАТИТЬ" pct={pay} color={C.magenta} win={won ? winS : 0} />
+            <PollRow icon="🏃" label="БЕЖАТЬ" pct={run} color="#8f88a3" win={won ? -1 : 0} />
+          </div>
+          {won && (
+            <div style={{position: 'absolute', top: 1290, left: 0, right: 0, textAlign: 'center'}}>
+              <Stamp t={t} at={B.voteWin} text="ПЛАТИМ" sub="РЕШИЛИ ЗРИТЕЛИ" color={C.magenta} size={96} rotate={-6} />
+            </div>
+          )}
+        </>
+      )}
+    </AbsoluteFill>
+  );
+};
 
 const Envelope: React.FC = () => (
   <g>

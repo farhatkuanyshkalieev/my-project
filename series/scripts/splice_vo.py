@@ -3,7 +3,10 @@
 Each pause is placed at the quietest 10 ms inside +-80 ms of the requested time,
 with 6 ms fades on both sides so the cut never clicks.
 
-    python3 scripts/splice_vo.py take.mp3 words_raw.json out_dir 4.8:0.9 8.42:0.7 ...
+    python3 scripts/splice_vo.py take.mp3 words_raw.json out_dir 4.8:0.9 8.42:0.7 3.42-4.82:2.6 ...
+
+`t:gap` inserts `gap` seconds of silence at t; `a-b:gap` replaces the stretch a..b
+(e.g. a line that is no longer in the story) with `gap` seconds of silence.
 
 Writes out_dir/vo.mp3 and out_dir/words.json (words in the same format as the other episodes).
 """
@@ -34,19 +37,25 @@ def quietest(x, t, radius=0.08, win=0.01):
 
 def main():
     take, words_path, out_dir, *specs = sys.argv[1:]
-    pauses = sorted((float(a), float(b)) for a, b in (s.split(":") for s in specs))
+    ops = []  # (start, end, gap) in take seconds; start == end for a plain insert
+    for spec in specs:
+        where, gap = spec.split(":")
+        a, _, b = where.partition("-")
+        ops.append((float(a), float(b or a), float(gap)))
+    ops.sort()
     x = load(take)
     fade = int(0.006 * SR)
-    pieces, cursor, cuts = [], 0, []
-    for t, gap in pauses:
-        i = quietest(x, t)
+    pieces, cursor, edits = [], 0, []
+    for a, b, gap in ops:
+        i = quietest(x, a)
+        j = quietest(x, b) if b > a else i
         seg = x[cursor:i].copy()
         seg[-fade:] *= np.linspace(1, 0, fade)
         if cursor:
             seg[:fade] *= np.linspace(0, 1, fade)
         pieces += [seg, np.zeros(int(gap * SR), np.float32)]
-        cuts.append((i / SR, gap))
-        cursor = i
+        edits.append((i / SR, j / SR, gap))
+        cursor = j
     tail = x[cursor:].copy()
     tail[:fade] *= np.linspace(0, 1, fade)
     pieces.append(tail)
@@ -65,10 +74,12 @@ def main():
         text = w["text"]
         if w.get("type", "word") != "word" or text.startswith("[") or text.endswith("]") or text in ("—", "-"):
             continue
-        shift = sum(g for c, g in cuts if w["start"] >= c)
+        if any(a <= w["start"] < b for a, b, _ in edits):
+            continue  # this word was cut out
+        shift = sum(gap - (b - a) for a, b, gap in edits if w["start"] >= b)
         out.append({"w": text, "s": round(w["start"] + shift, 3), "e": round(w["end"] + shift, 3)})
     json.dump(out, open(f"{out_dir}/words.json", "w"), ensure_ascii=False, indent=0)
-    print(f"{len(out)} words, {len(y) / SR:.2f}s, cuts at", [round(c, 3) for c, _ in cuts])
+    print(f"{len(out)} words, {len(y) / SR:.2f}s, edits at", [(round(a, 3), round(b, 3)) for a, b, _ in edits])
 
 
 if __name__ == "__main__":

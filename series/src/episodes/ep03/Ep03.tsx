@@ -74,7 +74,7 @@ export const Ep03: React.FC = () => {
         <Captions t={t} words={words as Word[]} offset={cues.voOffset} highlight={HIGHLIGHT} />
 
         <Flash t={t} at={S.choice1[0]} max={0.5} dur={0.2} />
-        <Flash t={t} at={B.bothStamp} color={C.magenta} max={0.5} />
+        <Flash t={t} at={B.voteWin} color={C.magenta} max={0.5} />
         <Flash t={t} at={B.reveal} max={0.7} dur={0.3} />
         <Flash t={t} at={B.allCash} color={C.red} max={0.4} />
         <GlitchBars t={t} at={S.rule[0]} dur={0.25} />
