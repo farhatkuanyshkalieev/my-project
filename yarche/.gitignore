@@ -1,0 +1,5 @@
+node_modules
+out
+.cache
+audio_src/stems
+public/audio/mix.wav
