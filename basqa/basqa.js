@@ -699,7 +699,7 @@ function post(t, idx) {
   for (const tc of [T.qala, T.alem, T.zaman, T.build, 2.625, 2.75, 2.875]) if (t >= tc && t < tc + 1 / FPS) { c.globalCompositeOperation = 'difference'; c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over'; }
   // flashes / light leaks
   let fl = 0, leak = 0;
-  if (t >= T.drop && t < T.drop + 0.2) fl = 0.85 * (1 - prog(t, T.drop, T.drop + 0.2));
+  if (t >= T.drop && t < T.drop + 0.12) fl = 0.7 * Math.pow(1 - prog(t, T.drop, T.drop + 0.12), 2);
   if (t >= T.fin && t < T.fin + 0.18) fl = Math.max(fl, 0.6 * (1 - prog(t, T.fin, T.fin + 0.18)));
   for (const tl of [T.qala, T.alem, T.zaman, T.drop, T.land, T.fin]) if (t >= tl && t < tl + 0.35) leak = Math.max(leak, 1 - prog(t, tl, tl + 0.35));
   if (leak > 0) {
