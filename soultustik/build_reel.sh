@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 mkdir -p build
 node render.js events build/events.json
 python3 score_soul.py build/events.json build/sound.wav
-FR=480; Q=$((FR / 4))
+FR=600; Q=$((FR / 4))
 for i in 0 1 2 3; do
   node render.js segment build/seg$i.mp4 $((i * Q)) $(((i + 1) * Q)) 2> build/seg$i.log &
 done

@@ -9,9 +9,10 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 
-const W = 1080, H = 1920, CX = 540, CY = 960, FPS = 60, TAU = Math.PI * 2, DUR = 8.0;
-// film time (120 BPM: beat = 0.5 s, 16th = 0.125 s)
-const T = { settle: 0.5, N: 0.75, soul: 1.0, solt: 1.375, logo: 1.75, map: 2.0, gap: 2.94, drop: 3.0, cold: 4.25, minded: 4.375, garm: 4.5, land: 4.625, spin: 5.25, stamp: 5.75, fin: 6.5 };
+const W = 1080, H = 1920, CX = 540, CY = 960, FPS = 60, TAU = Math.PI * 2, DUR = 10.0;
+// film time (100 BPM: beat = 0.6 s, 16th = 0.15 s); every picture holds at least one beat
+const T = { settle: 0.6, N: 1.2, N2: 1.5, soul: 1.8, solt: 2.4, logo: 3.0, map: 3.6, gap: 4.74, drop: 4.8, s1: 5.4, s2: 5.7, s3: 6.0, garm: 6.6, land: 6.75, front: 6.9, spin: 7.5, back: 7.65, stamp: 7.8, zoom: 8.12, fin: 8.4, badge: 9.0 };
+const STUT = [4.5, 4.575, 4.65];
 const P = { g: '#024840', gD: '#012E29', gL: '#0A6A5D', cr: '#F6F6EA', crD: '#E3E1D3', ice: '#DDEFEF', iceB: '#BFE3E6', blk: '#070C0B' };
 const LOGO_AR = 3938 / 622;
 
@@ -395,14 +396,14 @@ function echoes(t, t0, txt, baseY, size, color, step) {
   c.restore();
 }
 
-// 0.00–0.75  the compass finds north, the camera dives into the «N»
+// 0.00–1.20  the compass finds north, the camera dives into the «N»
 function shotNorth(t) {
   const c = ctx;
   bgGreen(c); snow(c, t, 0.9);
-  const zk = E.inExpo(prog(t, 0.56, T.N));
+  const zk = E.inExpo(prog(t, 0.95, T.N));
   const s = 1 + 7 * zk, ny = 930 - 238;
   c.save(); c.translate(CX, lerp(ny, CY, zk)); c.scale(s, s); c.translate(-CX, -ny); c.translate(CX, 930);
-  const R = 330, ring = E.outExpo(prog(t, 0.0, 0.25)), rot = -0.3 * (1 - E.outCubic(prog(t, 0, 0.5)));
+  const R = 330, ring = E.outExpo(prog(t, 0.0, 0.35)), rot = -0.3 * (1 - E.outCubic(prog(t, 0, T.settle)));
   c.rotate(rot);
   for (let i = 0; i < 72; i++) {
     if (i / 72 > ring) break;
@@ -418,13 +419,13 @@ function shotNorth(t) {
     c.fillStyle = col(P.cr, ch === 'N' ? 0.6 + 0.4 * lit : 0.45);
     c.save(); c.translate(Math.cos(ang) * (R - 92), Math.sin(ang) * (R - 92)); c.rotate(-rot); c.fillText(ch, 0, 0); c.restore();
   }
-  const ang = t < T.settle ? 2.3 * Math.exp(-t * 3.4) * Math.cos(TAU * 2.1 * t) * (1 - E.inCubic(prog(t, 0.28, T.settle))) : 0.04 * Math.exp(-(t - T.settle) * 10) * Math.sin((t - T.settle) * 60);
+  const ang = t < T.settle ? 2.3 * Math.exp(-t * 2.8) * Math.cos(TAU * 1.75 * t) * (1 - E.inCubic(prog(t, 0.32, T.settle))) : 0.04 * Math.exp(-(t - T.settle) * 10) * Math.sin((t - T.settle) * 60);
   c.rotate(ang - rot);
   c.fillStyle = P.cr; c.beginPath(); c.moveTo(0, -R + 70); c.lineTo(26, 0); c.lineTo(-26, 0); c.closePath(); c.fill();
   c.strokeStyle = P.cr; c.lineWidth = 3; c.beginPath(); c.moveTo(0, R - 70); c.lineTo(26, 0); c.lineTo(-26, 0); c.closePath(); c.stroke();
   c.fillStyle = P.g; c.beginPath(); c.arc(0, 0, 11, 0, TAU); c.fill(); c.strokeStyle = P.cr; c.stroke();
   c.restore();
-  const kt = prog(t, 0.12, 0.42);
+  const kt = prog(t, 0.15, 0.55);
   if (kt > 0) {
     c.save(); c.textAlign = 'center'; c.font = IT(500, 46); c.letterSpacing = '1px'; c.globalAlpha = 1 - zk;
     const full = 'soltüstik (каз.) — север', n = Math.floor(kt * full.length), str = full.slice(0, n);
@@ -436,20 +437,20 @@ function shotNorth(t) {
   return null;
 }
 
-// 0.75–1.00  a giant N fills the frame, twice (cream, then inverted)
+// 1.20–1.80  a giant N fills the frame, twice (cream, then inverted)
 function shotN(t) {
-  const c = ctx, inv = t >= T.N + 0.125;
+  const c = ctx, inv = t >= T.N2;
   if (inv) bgGreen(c); else bgCream(c);
   const fg = inv ? P.cr : P.g;
   snow(c, t, 0.5, fg);
-  slam(t, inv ? T.N + 0.125 : T.N, 'N', CX + 20, 1430, inv ? 1650 : 1450, fg, { from: inv ? 1.25 : 1.6, grow: 0.08 });
+  slam(t, inv ? T.N2 : T.N, 'N', CX + 20, 1430, inv ? 1650 : 1450, fg, { from: inv ? 1.25 : 1.6, grow: 0.08 });
   c.save(); c.font = MONO(700, 30); c.letterSpacing = '10px'; c.fillStyle = inv ? P.cr : P.g; c.textAlign = 'left';
   c.fillText('NORTH', 70, 250); c.fillText('СЕВЕР', 70, 296); c.fillText('SOLTÜSTIK', 70, 342);
   c.textAlign = 'right'; c.fillText('53°13′ N', W - 70, 1700); c.restore();
   return null;
 }
 
-// 1.00–2.00  soul (cream) → soltüstik (black) → the logo (green)
+// 1.80–3.60  soul (cream) → soltüstik (black) → the logo (green)
 function shotWords(t) {
   const c = ctx;
   if (t < T.solt) {
@@ -484,8 +485,8 @@ function shotWords(t) {
   return null;
 }
 
-// 2.00–2.94  the region in a tilted camera: towns pop with light beams, a route links them, −32° looms behind
-const PIN_T = [2.25, 2.375, 2.5, 2.625, 2.75];
+// 3.60–4.74  the region in a tilted camera: towns pop with light beams, a route links them, −32° looms behind
+const PIN_T = [3.9, 4.05, 4.2, 4.35, 4.5];
 function shotMap(t) {
   const c = ctx, t0 = T.map;
   if (t >= T.gap) { c.fillStyle = '#000'; c.fillRect(0, 0, W, H); return null; }
@@ -503,7 +504,7 @@ function shotMap(t) {
   c.save(); c.globalAlpha = 0.16 * dk; c.beginPath(); REGION.forEach(([lo, la], i) => { const [x, y] = pj(lo, la); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.fillStyle = P.cr; c.fill(); c.restore();
   drawRegion(c, pj, dk, P.cr, 5);
   // route through the towns
-  const rk = E.inOutCubic(prog(t, 2.3, 2.88));
+  const rk = E.inOutCubic(prog(t, 3.95, 4.65));
   if (rk > 0) { c.save(); c.setLineDash([14, 12]); c.lineDashOffset = -t * 120; const pts = TOWNS.map(([, lo, la]) => pj(lo, la)); let tot = 0; const sg = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); sg.push(d); tot += d; }
     let left = tot * rk; c.strokeStyle = col(P.iceB, 0.95); c.lineWidth = 3; c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
     for (let i = 1; i < pts.length && left > 0; i++) { const f = Math.min(1, left / sg[i - 1]); c.lineTo(lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)); left -= sg[i - 1]; }
@@ -525,13 +526,13 @@ function shotMap(t) {
   c.font = MONO(700, 24); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.6); c.fillText('SOLTÜSTIK QAZAQSTAN', CX, 432);
   c.restore();
   snow(c, t, 0.5 + 0.5 * prog(t, t0, T.gap), P.cr, 1 + 2.5 * prog(t, t0, T.gap));
-  const fr = E.inCubic(prog(t, 2.6, T.gap));
+  const fr = E.inCubic(prog(t, 4.35, T.gap));
   if (fr > 0) { const vg = c.createRadialGradient(CX, CY, 900 * (1 - fr) + 120, CX, CY, 1300); vg.addColorStop(0, 'rgba(230,245,245,0)'); vg.addColorStop(1, `rgba(230,245,245,${0.85 * fr})`); c.fillStyle = vg; c.fillRect(0, 0, W, H); }
   hud(t, P.cr, 1, `−${Math.abs(temp)} °C`);
   return null;
 }
 
-// 3.00–4.25  DROP on cream: green 3D wordmark, a burst of ice crystals, stickers on the beats
+// 4.80–6.60  DROP on cream: green 3D wordmark, a burst of ice crystals, stickers on the beats
 function marquee(t, color, t0) {
   const c = ctx; c.save();
   c.font = ITI(900, 170); c.letterSpacing = '-2px'; c.strokeStyle = color; c.lineWidth = 3; c.textBaseline = 'middle';
@@ -553,38 +554,22 @@ function shotDrop(t) {
   snow(c, t, 0.35, P.g, 1.4);
   const L = on(LOGO); L.userData.mesh.material = MAT_LOGO_DROP;
   const kin = prog(t, t0, t0 + 0.11);
-  const pulse = [3.5, 3.75, 4.0].reduce((s, b) => s + (t >= b ? 0.05 * Math.exp(-(t - b) * 14) : 0), 0);
+  const pulse = [T.s1, T.s2, T.s3].reduce((s, b) => s + (t >= b ? 0.05 * Math.exp(-(t - b) * 14) : 0), 0);
   L.position.set(0, 0, 9 * (1 - E.outExpo(kin)));
   L.rotation.x = 0.9 * (1 - spring(t, t0, 2.4, 0.32)) + 0.12 * Math.sin((t - t0) * TAU * 0.4);
   L.rotation.y = -0.4 * Math.sin((t - t0) * TAU * 0.45);
   L.rotation.z = 0.04 * Math.sin((t - t0) * TAU * 0.3);
   L.scale.setScalar(1 + pulse);
   shards(t, 'burst', t0, 0, 0, 1);
-  slapSticker(t, STK.cold, 3.5, 540, 600, -0.08);
-  slapSticker(t, STK.badge, 3.75, 255, 1350, 0.22);
-  slapSticker(t, STK.tag, 4.0, 745, 1515, 0.07);
+  slapSticker(t, STK.cold, T.s1, 540, 600, -0.08);
+  slapSticker(t, STK.badge, T.s2, 255, 1350, 0.22);
+  slapSticker(t, STK.tag, T.s3, 745, 1515, 0.07);
   wall.position.z = -0.7; wall.material.opacity = 0.28;
   key.position.set(-5 + 4 * Math.sin((t - t0) * 1.6), 8, 16);
   return () => hud(t, P.g, 1, '−32 °C');
 }
 
-// 4.25–4.50  two hard frames: «cold» (black) / «minded.» (cream)
-function shotFlash(t) {
-  const c = ctx;
-  if (t < T.minded) {
-    c.fillStyle = P.blk; c.fillRect(0, 0, W, H); snow(c, t, 1, P.cr, 3);
-    const size = fitFont('cold', 1000, 560, s => ITI(900, s));
-    echoes(t, T.cold, 'cold', 1150, size, col(P.iceB, 1), 330);
-    slam(t, T.cold, 'cold', CX, 1150, size, P.cr, { from: 1.5, grow: 0.1 });
-    return null;
-  }
-  bgCream(c); snow(c, t, 0.6, P.g, 3);
-  const size = fitFont('minded.', 1020, 420, s => ITI(900, s));
-  slam(t, T.minded, 'minded.', CX, 1110, size, P.g, { from: 1.5, grow: 0.1 });
-  return null;
-}
-
-// 4.50–6.50  spotlight: the cream sweatshirt drops in, turns front → back, ice crystals orbit
+// 6.60–8.40  spotlight: the cream sweatshirt drops in, turns front → back, ice crystals orbit
 function shotGarm(t) {
   const c = ctx, t0 = T.garm;
   c.fillStyle = P.blk; c.fillRect(0, 0, W, H);
@@ -596,7 +581,7 @@ function shotGarm(t) {
   const G = on(SW.g);
   const fall = E.inCubic(prog(t, t0, T.land));
   const land = t > T.land ? spring(t, T.land, 3.2, 0.28) : 0;
-  const zk = E.inExpo(prog(t, 6.22, T.fin));
+  const zk = E.inExpo(prog(t, T.zoom, T.fin));
   const zs = 1.12 + 4.2 * zk;
   const backPrintY = 3.2 - 52 / 50;
   const bob = t > T.land ? 0.1 * Math.sin((t - T.land) * 3.2) : 0;
@@ -606,8 +591,8 @@ function shotGarm(t) {
   const sq = t > T.land ? 0.1 * (1 - land) : 0;
   G.scale.set(zs * (1 + sq * 0.5), zs * (1 - sq), zs);
   shards(t, 'orbit', 0, 0, 0.6, clamp(prog(t, t0 + 0.1, t0 + 0.4)) * (1 - zk));
-  slapSticker(t, STK.front, 4.75, 290, 1585, -0.07);
-  slapSticker(t, STK.back, 5.5, 790, 1600, 0.06);
+  slapSticker(t, STK.front, T.front, 290, 1585, -0.07);
+  slapSticker(t, STK.back, T.back, 790, 1600, 0.06);
   slapSticker(t, STK.tag2, T.stamp, 815, 330, -0.16, -0.3, 0.68);
   wall.position.z = -2.4; wall.material.opacity = 0.0;
   key.position.set(-3, 12, 14);
@@ -617,7 +602,7 @@ function shotGarm(t) {
   return () => hud(t, P.cr, 1 - zk);
 }
 
-// 6.50–8.00  FINALE
+// 8.40–10.00  FINALE
 function shotFin(t) {
   const c = ctx, t0 = T.fin;
   bgGreen(c); marquee(t, col(P.cr, 0.06), t0); snow(c, t, 0.55, P.cr, 0.7);
@@ -627,7 +612,7 @@ function shotFin(t) {
   L.position.set(0, Y(880), 0);
   L.rotation.set(0.1 * Math.sin((t - t0) * 2.2) - 0.25 * (1 - k), -0.25 * Math.sin((t - t0) * 1.6 + 0.3) * (0.4 + 0.6 * k), 0);
   shards(t, 'orbit', 0, 0, Y(880) + 0.4, E.outCubic(prog(t, t0 + 0.1, t0 + 0.6)) * 0.85);
-  slapSticker(t, STK.badge2, 7.0, 860, 1400, 0.2, -0.3, 0.55);
+  slapSticker(t, STK.badge2, T.badge, 860, 1400, 0.2, -0.3, 0.55);
   wall.position.z = -0.8; wall.material.opacity = 0.0;
   key.position.set(lerp(-9, 7, prog(t, t0, DUR)), 6, 16);
   return () => {
@@ -657,10 +642,10 @@ function shotFin(t) {
   };
 }
 
-const SHOTS = [[0, shotNorth], [T.N, shotN], [T.soul, shotWords], [T.map, shotMap], [T.drop, shotDrop], [T.cold, shotFlash], [T.garm, shotGarm], [T.fin, shotFin]];
+const SHOTS = [[0, shotNorth], [T.N, shotN], [T.soul, shotWords], [T.map, shotMap], [T.drop, shotDrop], [T.garm, shotGarm], [T.fin, shotFin]];
 
 // ---------------------------------------------------------------- frame
-const HITS = [[0.5, 6, 0.12], [0.75, 14, 0.12], [0.875, 10, 0.1], [1.0, 12, 0.12], [1.375, 12, 0.12], [1.75, 14, 0.15], [3.0, 34, 0.42], [3.5, 9, 0.16], [3.75, 9, 0.16], [4.0, 9, 0.16], [4.25, 16, 0.12], [4.375, 16, 0.12], [4.625, 18, 0.22], [4.75, 7, 0.14], [5.25, 8, 0.2], [5.5, 7, 0.14], [5.75, 7, 0.14], [6.5, 18, 0.3], [7.0, 6, 0.15]];
+const HITS = [[T.settle, 6, 0.12], [T.N, 14, 0.12], [T.N2, 10, 0.1], [T.soul, 12, 0.12], [T.solt, 12, 0.12], [T.logo, 14, 0.15], [T.drop, 34, 0.42], [T.s1, 9, 0.16], [T.s2, 9, 0.16], [T.s3, 9, 0.16], [T.land, 18, 0.22], [T.front, 7, 0.14], [T.spin, 8, 0.2], [T.back, 7, 0.14], [T.stamp, 7, 0.14], [T.fin, 18, 0.3], [T.badge, 6, 0.15]];
 function shakeAt(t) {
   let x = 0, y = 0;
   for (const [t0, a, d] of HITS) if (t >= t0 && t < t0 + d) { const k = 1 - (t - t0) / d; const f = Math.floor(t * FPS); x += (hash(f * 1.7 + t0) - 0.5) * 2 * a * k * k; y += (hash(f * 2.3 + t0 + 9) - 0.5) * 2 * a * k * k; }
@@ -711,12 +696,12 @@ function post(t, idx) {
   }
   // horizontal whip on the spin
   if (t > T.spin && t < T.spin + 0.2) dirBlur(160 * Math.sin(Math.PI * prog(t, T.spin, T.spin + 0.2)), 0);
-  if (t > 0.6 && t < T.N) zoomBlur(0.3 * E.inExpo(prog(t, 0.6, T.N)), 700);
-  if (t > 6.3 && t < T.fin) zoomBlur(0.3 * E.inExpo(prog(t, 6.3, T.fin)));
+  if (t > 0.98 && t < T.N) zoomBlur(0.3 * E.inExpo(prog(t, 0.98, T.N)), 700);
+  if (t > T.zoom + 0.08 && t < T.fin) zoomBlur(0.3 * E.inExpo(prog(t, T.zoom + 0.08, T.fin)));
   if (t >= T.fin && t < T.fin + 0.25) zoomBlur(0.25 * (1 - E.outCubic(prog(t, T.fin, T.fin + 0.25))));
-  if (t > 2.75 && t < T.gap) zoomBlur(0.1 * prog(t, 2.75, T.gap));
+  if (t > STUT[0] && t < T.gap) zoomBlur(0.1 * prog(t, STUT[0], T.gap));
   // one inverted frame on every hard cut (and a stutter before the drop)
-  for (const tc of [T.N, T.N + 0.125, T.soul, T.solt, T.logo, T.map, 2.75, 2.8125, 2.875, T.cold, T.minded]) if (t >= tc && t < tc + 1 / FPS) { c.globalCompositeOperation = 'difference'; c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over'; }
+  for (const tc of [T.N, T.N2, T.soul, T.solt, T.logo, T.map, ...STUT]) if (t >= tc && t < tc + 1 / FPS) { c.globalCompositeOperation = 'difference'; c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over'; }
   let fl = 0;
   if (t >= T.drop && t < T.drop + 0.12) fl = 0.7 * Math.pow(1 - prog(t, T.drop, T.drop + 0.12), 2);
   if (t >= T.logo && t < T.logo + 0.1) fl = 0.4 * (1 - prog(t, T.logo, T.logo + 0.1));
@@ -726,7 +711,7 @@ function post(t, idx) {
   const f = Math.floor(t * FPS);
   const fk = (hash(f * 0.913) - 0.5) * 0.04;
   if (fk > 0) { c.fillStyle = `rgba(255,255,255,${fk * 0.6})`; c.fillRect(0, 0, W, H); } else { c.fillStyle = `rgba(0,0,0,${-fk})`; c.fillRect(0, 0, W, H); }
-  const light = SHOTS[idx][1] === shotDrop || (SHOTS[idx][1] === shotWords && t < T.solt) || (SHOTS[idx][1] === shotN && t < T.N + 0.125) || (SHOTS[idx][1] === shotFlash && t >= T.minded);
+  const light = SHOTS[idx][1] === shotDrop || (SHOTS[idx][1] === shotWords && t < T.solt) || (SHOTS[idx][1] === shotN && t < T.N2);
   const vg = c.createRadialGradient(CX, CY, 520, CX, CY, 1250); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, light ? 'rgba(20,40,36,0.16)' : 'rgba(0,12,10,0.42)'); c.fillStyle = vg; c.fillRect(0, 0, W, H);
   c.globalCompositeOperation = 'overlay'; c.globalAlpha = 0.09;
   const ox = -Math.floor(hash(f) * 512), oy = -Math.floor(hash(f + 0.5) * 512);
@@ -740,29 +725,28 @@ function post(t, idx) {
 function buildEvents() {
   ev(0, 'wind', { end: DUR });
   ev(0.02, 'ringIn');
-  for (let i = 0; i < 4; i++) ev(i * 0.125, 'bell', { i });
+  for (let i = 0; i < 4; i++) ev(i * 0.15, 'bell', { i });
   ev(0.02, 'needle', { end: T.settle }); ev(T.settle, 'north');
-  ev(0.56, 'dive', { end: T.N });
-  ev(T.N, 'Nhit', { i: 0 }); ev(T.N + 0.125, 'Nhit', { i: 1 });
-  ev(T.soul, 'soul'); ev(T.solt, 'solt'); ev(T.logo - 0.2, 'merge', { end: T.logo }); ev(T.logo, 'logo2d');
+  ev(0.95, 'dive', { end: T.N });
+  ev(T.N, 'Nhit', { i: 0 }); ev(T.N2, 'Nhit', { i: 1 });
+  ev(T.soul, 'soul'); ev(T.solt, 'solt'); ev(T.logo - 0.25, 'merge', { end: T.logo }); ev(T.logo, 'logo2d');
   ev(T.map, 'draw', { end: T.map + 0.35 });
   PIN_T.forEach((tp, i) => ev(tp, 'pin', { i }));
-  for (let tt = T.map; tt < T.gap - 0.02; tt += 1 / 24) ev(tt, 'tempTick');
-  ev(T.map, 'riser', { end: T.gap }); ev(2.6, 'frost', { end: T.gap });
-  for (const ts of [2.75, 2.8125, 2.875]) ev(ts, 'stut');
+  for (let tt = T.map; tt < T.gap - 0.02; tt += 1 / 20) ev(tt, 'tempTick');
+  ev(T.map, 'riser', { end: T.gap }); ev(4.35, 'frost', { end: T.gap });
+  STUT.forEach((ts, i) => ev(ts, 'stut', { i }));
   ev(T.gap, 'gap');
   ev(T.drop, 'drop');
-  for (const ts of [3.5, 3.75, 4.0]) ev(ts, 'slap', { pan: ts === 3.75 ? -0.35 : ts === 4.0 ? 0.35 : 0 });
-  ev(T.cold, 'word', { i: 0 }); ev(T.minded, 'word', { i: 1 });
+  ev(T.s1, 'slap', { pan: 0 }); ev(T.s2, 'slap', { pan: -0.35 }); ev(T.s3, 'slap', { pan: 0.35 });
   ev(T.garm - 0.1, 'whip');
   ev(T.garm, 'garmFall', { end: T.land }); ev(T.land, 'land');
-  ev(4.75, 'slap', { pan: -0.3 });
+  ev(T.front, 'slap', { pan: -0.3 });
   ev(T.spin, 'spin');
-  ev(5.5, 'slap', { pan: 0.3 }); ev(T.stamp, 'slap', { pan: 0.4 });
-  ev(6.22, 'zoom', { end: T.fin });
+  ev(T.back, 'slap', { pan: 0.3 }); ev(T.stamp, 'slap', { pan: 0.4 });
+  ev(T.zoom, 'zoom', { end: T.fin });
   ev(T.fin, 'final');
   ev(T.fin + 0.45, 'compass');
-  ev(7.0, 'slap', { pan: 0.4, g: 0.6 });
+  ev(T.badge, 'slap', { pan: 0.4, g: 0.6 });
   EVENTS.sort((a, b) => a.t - b.t);
 }
 

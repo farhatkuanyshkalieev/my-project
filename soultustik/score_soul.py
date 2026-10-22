@@ -18,9 +18,9 @@ import numpy as np
 from scipy import signal
 
 SR = 48000
-DUR = 8.0
+DUR = 10.0
 N = int(SR * DUR)
-BPM = 120
+BPM = 100
 S16 = 60 / BPM / 4
 rng = np.random.default_rng(13)
 mus = np.zeros((2, N)); fx = np.zeros((2, N)); rev = np.zeros((2, N)); big = np.zeros((2, N))
@@ -267,10 +267,10 @@ MOTIF = [76, 83, 79, 88]   # E5 B5 G5 E6
 
 
 def needle_angle(t):   # same motion as the scene (radians of swing → ratchet ticks)
-    settle = 0.75
-    k = np.clip((t - 0.45) / (settle - 0.45), 0, 1)
-    swing = 2.4 * np.exp(-t * 2.6) * np.cos(2 * np.pi * 1.55 * t) * (1 - k ** 3)
-    rest = 0.035 * np.exp(-(t - settle) * 9) * np.sin((t - settle) * 60)
+    settle = 0.6
+    k = np.clip((t - 0.32) / (settle - 0.32), 0, 1)
+    swing = 2.3 * np.exp(-t * 2.8) * np.cos(2 * np.pi * 1.75 * t) * (1 - k ** 3)
+    rest = 0.04 * np.exp(-(t - settle) * 10) * np.sin((t - settle) * 60)
     return np.where(t >= settle, rest, swing)
 
 
@@ -279,7 +279,7 @@ def cue(e):
     if k == 'wind':
         w = wind(DUR)
         tt = np.arange(N) / SR
-        g = np.interp(tt, [0, 0.9, 1.0, 2.0, 2.94, 3.0, 4.5, 6.5, 8.0], [0.9, 0.9, 0.35, 0.5, 1.1, 0.25, 0.4, 0.55, 0.45])
+        g = np.interp(tt, [0, 1.15, 1.2, 3.6, 4.74, 4.8, 6.6, 8.4, 10.0], [0.9, 0.9, 0.35, 0.5, 1.1, 0.25, 0.4, 0.55, 0.45])
         F(w * g, 0, 0.5, width=1)
     elif k == 'ringIn':
         F(whoosh(0.35, 6000, 1800, 1.5), t, 0.12, r=0.3)
@@ -304,7 +304,7 @@ def cue(e):
         F(bell([88, 95][e['i']], 1.2, 1.4), t, 0.22, r=0.3, b=0.2)
     elif k == 'stut':
         F(kick(), t, 0.45)
-        F(bell(83 + 4 * [2.75, 2.8125, 2.875].index(round(t, 4)), 0.4, 1.2), t, 0.2)
+        F(bell(83 + 4 * e['i'], 0.4, 1.2), t, 0.2)
     elif k == 'slap':
         F(slap(), t - 0.05, 0.7 * e.get('g', 1), pan=e.get('pan', 0), r=0.12)
     elif k == 'garmFall':
@@ -387,13 +387,13 @@ def cue(e):
 
 
 # ------------------------------------------------------------------ the beat after the drop
-def beat(t0=3.0, t1=6.25):
+def beat(t0=4.8, t1=8.12):
     M(pad([40, 52, 59, 62, 66, 71], t1 - t0 + 0.3, 1300, 0.05, 0.4), t0, 0.7, b=0.2)
     arp = [76, 79, 83, 86, 83, 79, 88, 83]
     s = 0
     while t0 + s * S16 < t1:
         tt = t0 + s * S16
-        if s % 4 == 0 and tt != 3.0:
+        if s % 4 == 0 and s:
             M(kick(), tt, 0.85)
         if s % 8 == 4:
             M(clap(), tt, 0.45, r=0.25)
@@ -418,7 +418,7 @@ def main():
     mix = mus + fx + 0.5 * rv + 0.5 * rb
     tt = np.arange(N) / SR
     mix = signal.sosfilt(signal.butter(2, 28 / (SR / 2), 'high', output='sos'), mix, axis=1)
-    mix *= np.clip((np.abs(tt - 2.9705) - 0.0265) / 0.003, 0, 1)   # the gap before the drop
+    mix *= np.clip((np.abs(tt - 4.7705) - 0.0265) / 0.003, 0, 1)   # the gap before the drop
     pk = np.percentile(np.abs(mix), 99.9)
     mix = np.tanh(mix / pk * 1.15) / np.tanh(1.15)
     mix *= np.clip((DUR - tt) / 0.15, 0, 1) * np.clip(tt / 0.01, 0, 1)
