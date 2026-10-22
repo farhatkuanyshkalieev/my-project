@@ -11,8 +11,8 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 
 const W = 1080, H = 1920, CX = 540, CY = 960, FPS = 60, TAU = Math.PI * 2, DUR = 8.0;
 // film time (120 BPM: beat = 0.5 s, 16th = 0.125 s)
-const T = { soul: 1.0, solt: 1.5, merge: 1.75, map: 2.0, gap: 2.94, drop: 3.0, cold: 3.5, minded: 4.0, garm: 4.5, spin: 5.5, fin: 6.5 };
-const P = { g: '#024840', gD: '#012E29', gL: '#0A6A5D', cr: '#F6F6EA', crD: '#E3E1D3', ice: '#DDEFEF' };
+const T = { settle: 0.5, N: 0.75, soul: 1.0, solt: 1.375, logo: 1.75, map: 2.0, gap: 2.94, drop: 3.0, cold: 4.25, minded: 4.375, garm: 4.5, land: 4.625, spin: 5.25, stamp: 5.75, fin: 6.5 };
+const P = { g: '#024840', gD: '#012E29', gL: '#0A6A5D', cr: '#F6F6EA', crD: '#E3E1D3', ice: '#DDEFEF', iceB: '#BFE3E6', blk: '#070C0B' };
 const LOGO_AR = 3938 / 622;
 
 // ---------------------------------------------------------------- utils
@@ -85,15 +85,16 @@ const on = o => { o.visible = true; return o; };
 // ---------------------------------------------------------------- 3D wordmark
 let LOGO = null; const LOGO_W = 8.4;
 const MAT_LOGO = [phys(P.cr, 0.28, { emissive: '#ffffff', emissiveIntensity: 0.06 }), std('#0d5a50', 0.35, { metalness: 0.1 })];
+const MAT_LOGO_DROP = [phys('#03594D', 0.2, { clearcoat: 1 }), std('#012E29', 0.35)];
 function buildLogo(svgText) {
   const data = new SVGLoader().parse(svgText);
   const shapes = [];
   for (const p of data.paths) shapes.push(...SVGLoader.createShapes(p));
-  const geo = new THREE.ExtrudeGeometry(shapes, { depth: 150, bevelEnabled: true, bevelThickness: 14, bevelSize: 8, bevelSegments: 4, curveSegments: 8 });
+  const geo = new THREE.ExtrudeGeometry(shapes, { depth: 300, bevelEnabled: true, bevelThickness: 24, bevelSize: 10, bevelSegments: 5, curveSegments: 8 });
   geo.center();
   const s = LOGO_W / 3938; geo.scale(s, -s, -s);
   LOGO = new THREE.Group();
-  const m = new THREE.Mesh(geo, MAT_LOGO); m.castShadow = true; LOGO.add(m);
+  const m = new THREE.Mesh(geo, MAT_LOGO); m.castShadow = true; LOGO.add(m); LOGO.userData.mesh = m;
   reg(LOGO);
 }
 
@@ -129,17 +130,17 @@ function swOutline(c) {   // 280×320 template, 50 px = 1 unit
   c.closePath();
 }
 function swFabric(c, PW, PH) {
-  swOutline(c); c.fillStyle = '#035247'; c.fill();
+  swOutline(c); c.fillStyle = '#ECE9DA'; c.fill();
   c.save(); swOutline(c); c.clip();
   const r = rng(5);
   for (let i = 0; i < 2600; i++) { c.fillStyle = r() < 0.5 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.06)'; c.fillRect(r() * PW, r() * PH, 0.25 + r() * 0.6, 0.25 + r() * 0.6); }
   // ribbed collar, cuffs and hem
-  c.fillStyle = '#013f37';
+  c.fillStyle = '#DAD6C3';
   c.beginPath(); c.moveTo(108, 14); c.quadraticCurveTo(122, 40, 140, 40); c.quadraticCurveTo(158, 40, 172, 14); c.lineTo(166, 13); c.quadraticCurveTo(156, 32, 140, 32); c.quadraticCurveTo(124, 32, 114, 13); c.closePath(); c.fill();
   c.fillRect(40, 294, 200, 20);
   c.save(); c.beginPath(); c.moveTo(0, 186); c.lineTo(280, 186); c.lineTo(280, 215); c.lineTo(0, 215); c.clip();
   c.fillRect(0, 186, 60, 30); c.fillRect(220, 186, 60, 30); c.restore();
-  c.strokeStyle = 'rgba(0,0,0,0.22)'; c.lineWidth = 0.5;
+  c.strokeStyle = 'rgba(0,0,0,0.1)'; c.lineWidth = 0.5;
   for (let x = 40; x < 240; x += 2.2) { c.beginPath(); c.moveTo(x, 294); c.lineTo(x, 314); c.stroke(); }
   c.restore();
 }
@@ -174,23 +175,23 @@ function buildSweat() {
   const S = 4;
   // front: chest wordmark + the towns of the region
   const fc = mk(PW * S, PH * S), f = fc.getContext('2d'); f.scale(S, S); swFabric(f, PW, PH);
-  { const pw = 112, ph = pw / LOGO_AR; f.drawImage(IMG.logoC, 140 - pw / 2, 84 - ph / 2, pw, ph);
-    f.fillStyle = P.cr; f.font = MONO(700, 5.6); f.textAlign = 'center'; f.letterSpacing = '1px';
+  { const pw = 112, ph = pw / LOGO_AR; f.drawImage(IMG.logoG, 140 - pw / 2, 84 - ph / 2, pw, ph);
+    f.fillStyle = P.g; f.font = MONO(700, 5.6); f.textAlign = 'center'; f.letterSpacing = '1px';
     f.fillText('KOSTANAY · RUDNY · LISAKOVSK', 140, 106); f.fillText('ZHITIKARA · ARKALYK', 140, 114);
     f.globalAlpha = 0.6; f.font = MONO(500, 4.4); f.fillText('53.2141° N   63.6246° E', 140, 124); f.globalAlpha = 1; }
   // back: the region map (drawn mirrored, it is seen from behind)
   const bc = mk(PW * S, PH * S), b = bc.getContext('2d'); b.scale(S, S);
   b.save(); b.translate(PW, 0); b.scale(-1, 1); swFabric(b, PW, PH);
   { const pj = mapProj(140, 150, 150);
-    drawRegion(b, pj, 1, P.cr, 1.6);
-    for (const [, lo, la, big] of TOWNS) { const [x, y] = pj(lo, la); b.fillStyle = P.cr; b.beginPath(); b.arc(x, y, big ? 3 : 2, 0, TAU); b.fill(); if (big) { b.strokeStyle = P.cr; b.lineWidth = 0.8; b.beginPath(); b.arc(x, y, 6, 0, TAU); b.stroke(); } }
-    b.font = MONO(700, 5); b.fillStyle = P.cr; b.textAlign = 'left'; b.letterSpacing = '0.6px';
+    drawRegion(b, pj, 1, P.g, 1.6);
+    for (const [, lo, la, big] of TOWNS) { const [x, y] = pj(lo, la); b.fillStyle = P.g; b.beginPath(); b.arc(x, y, big ? 3 : 2, 0, TAU); b.fill(); if (big) { b.strokeStyle = P.g; b.lineWidth = 0.8; b.beginPath(); b.arc(x, y, 6, 0, TAU); b.stroke(); } }
+    b.font = MONO(700, 5); b.fillStyle = P.g; b.textAlign = 'left'; b.letterSpacing = '0.6px';
     for (const [n, lo, la] of TOWNS) { const [x, y] = pj(lo, la); const [lx, ly, al] = { KOSTANAY: [5, -4, 'left'], RUDNY: [-4, 7, 'right'], LISAKOVSK: [4, 7, 'left'], ZHITIKARA: [-4, -3, 'right'], ARKALYK: [5, -3, 'left'] }[n]; b.textAlign = al; b.fillText(n, x + lx, y + ly); }
-    const pw = 150, ph = pw / LOGO_AR; b.drawImage(IMG.logoC, 140 - pw / 2, 52 - ph / 2, pw, ph);
+    const pw = 150, ph = pw / LOGO_AR; b.drawImage(IMG.logoG, 140 - pw / 2, 52 - ph / 2, pw, ph);
     b.font = MONO(700, 6); b.textAlign = 'center'; b.letterSpacing = '2px'; b.fillText('KOSTANAY REGION', 140, 252); }
   b.restore();
   const mat = (cv) => { const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
-    const m = new THREE.MeshPhysicalMaterial({ map: tex, roughness: 0.92, sheen: 1, sheenColor: new THREE.Color('#7fb3a8'), sheenRoughness: 0.5, alphaTest: 0.5, side: THREE.DoubleSide });
+    const m = new THREE.MeshPhysicalMaterial({ map: tex, roughness: 0.92, sheen: 1, sheenColor: new THREE.Color('#ffffff'), sheenRoughness: 0.5, alphaTest: 0.5, side: THREE.DoubleSide });
     return [m, new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: tex, alphaTest: 0.5 })]; };
   const [fm, fd] = mat(fc), [bm, bd] = mat(bc);
   const front = new THREE.Mesh(mkGeo(1), fm); front.castShadow = true; front.customDepthMaterial = fd;
@@ -271,18 +272,137 @@ function gustWord(t, t0, txt, cx, baseY, size, color, o = {}) {
   return tw;
 }
 
+
+// ---------------------------------------------------------------- 3D vinyl stickers
+function rr(c, x, y, w, h, r) { c.beginPath(); c.roundRect(x, y, w, h, r); }
+function flake(c, x, y, s, color, lw) {   // six-armed snowflake glyph
+  c.save(); c.translate(x, y); c.strokeStyle = color; c.lineWidth = lw; c.lineCap = 'round';
+  for (let i = 0; i < 6; i++) { c.rotate(Math.PI / 3); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -s); c.moveTo(0, -s * 0.55); c.lineTo(s * 0.25, -s * 0.78); c.moveTo(0, -s * 0.55); c.lineTo(-s * 0.25, -s * 0.78); c.stroke(); }
+  c.restore();
+}
+function rose(c, x, y, s, color) {   // compass rose
+  c.save(); c.translate(x, y); c.fillStyle = color;
+  for (let i = 0; i < 4; i++) { c.rotate(Math.PI / 2); c.beginPath(); c.moveTo(0, -s); c.lineTo(s * 0.16, -s * 0.16); c.lineTo(-s * 0.16, -s * 0.16); c.closePath(); c.fill(); }
+  c.rotate(Math.PI / 4); for (let i = 0; i < 4; i++) { c.rotate(Math.PI / 2); c.beginPath(); c.moveTo(0, -s * 0.5); c.lineTo(s * 0.1, -s * 0.1); c.lineTo(-s * 0.1, -s * 0.1); c.closePath(); c.fill(); }
+  c.restore();
+}
+function stickerMesh(cv, wu, hu) {
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(wu, hu), new THREE.MeshPhysicalMaterial({ map: tex, roughness: 0.42, clearcoat: 0.6, clearcoatRoughness: 0.3, alphaTest: 0.5, toneMapped: false }));
+  m.castShadow = true;
+  m.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: tex, alphaTest: 0.5 });
+  return reg(m);
+}
+const STK = {};
+function buildStickers() {
+  { const cv = mk(940, 250), c = cv.getContext('2d');   // cold minded.
+    rr(c, 4, 4, 932, 242, 44); c.fillStyle = '#fff'; c.fill();
+    rr(c, 20, 20, 900, 210, 30); c.fillStyle = P.g; c.fill();
+    flake(c, 112, 125, 52, P.cr, 9);
+    c.fillStyle = P.cr; c.font = ITI(900, 104); c.letterSpacing = '-2px'; c.textBaseline = 'middle'; c.fillText('cold minded.', 196, 128);
+    STK.cold = { m: stickerMesh(cv, 6.0, 1.6), w: 6.0 }; }
+  const badge = () => { const cv = mk(560, 560), c = cv.getContext('2d');
+    c.beginPath(); c.arc(280, 280, 276, 0, TAU); c.fillStyle = '#fff'; c.fill();
+    c.beginPath(); c.arc(280, 280, 258, 0, TAU); c.fillStyle = P.g; c.fill();
+    c.beginPath(); c.arc(280, 280, 150, 0, TAU); c.fillStyle = P.cr; c.fill();
+    rose(c, 280, 280, 128, P.g);
+    c.fillStyle = P.cr; c.font = ITI(900, 40); c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.font = MONO(700, 32); const txt = 'SOULTUSTIK · KOSTANAY · SOLTÜSTIK · '; const n = txt.length;
+    for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + i / n * TAU; c.save(); c.translate(280 + Math.cos(a) * 205, 280 + Math.sin(a) * 205); c.rotate(a + Math.PI / 2); c.fillText(txt[i], 0, 0); c.restore(); }
+    return cv; };
+  STK.badge = { m: stickerMesh(badge(), 3.6, 3.6) };
+  STK.badge2 = { m: stickerMesh(badge(), 3.6, 3.6) };
+  const tag = () => { const cv = mk(900, 380), c = cv.getContext('2d');
+    rr(c, 4, 4, 892, 372, 34); c.fillStyle = '#fff'; c.fill();
+    rr(c, 20, 20, 860, 340, 20); c.fillStyle = P.iceB; c.fill();
+    c.drawImage(IMG.logoG, 54, 50, 230, 230 / LOGO_AR);
+    c.fillStyle = P.g; c.textBaseline = 'alphabetic';
+    c.font = ITI(900, 170); c.letterSpacing = '-4px'; c.fillText('−32 °C', 44, 252);
+    c.font = MONO(700, 28); c.letterSpacing = '2px'; c.fillText('NORTH SERIES · 53°13′ N', 56, 322);
+    const r = rng(9); let x = 700; while (x < 850) { const w = 3 + Math.floor(r() * 9); c.fillRect(x, 70, w, 170); x += w + 3 + Math.floor(r() * 7); }
+    flake(c, 775, 300, 26, P.g, 5);
+    return cv; };
+  STK.tag = { m: stickerMesh(tag(), 5.4, 2.28) };
+  STK.tag2 = { m: stickerMesh(tag(), 5.4, 2.28) };
+  const label = (word, sub) => { const cv = mk(640, 230), c = cv.getContext('2d');
+    rr(c, 4, 4, 632, 222, 36); c.fillStyle = '#fff'; c.fill();
+    rr(c, 18, 18, 604, 194, 24); c.fillStyle = P.cr; c.fill();
+    c.fillStyle = P.g; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    c.font = ITI(900, 112); c.letterSpacing = '-2px'; c.fillText(word, 320, 128);
+    c.font = MONO(700, 26); c.letterSpacing = '3px'; c.fillText(sub, 320, 182);
+    return cv; };
+  STK.front = { m: stickerMesh(label('front.', 'ВПЕРЕДИ — РАЙЦЕНТРЫ'), 4.2, 1.51) };
+  STK.back = { m: stickerMesh(label('back.', 'СЗАДИ — КАРТА ОБЛАСТИ'), 4.2, 1.51) };
+}
+function slapSticker(t, s, ts, x, y, rz, z = -0.3, sc = 1) {
+  if (t < ts) return;
+  const k = prog(t, ts, ts + 0.13), sp = spring(t, ts, 4.5, 0.38);
+  const m = on(s.m);
+  m.position.set(X(x), Y(y), lerp(5, z, E.outExpo(k)));
+  m.rotation.set(0.5 * (1 - sp), -0.4 * (1 - sp), rz + 0.5 * (1 - sp));
+  m.scale.setScalar(sc * (1 + 0.12 * (1 - sp)));
+}
+
+// ---------------------------------------------------------------- 3D ice crystals
+const SH = { n: 54, d: [] };
+function buildShards() {
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#d9f3f6', roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.05, flatShading: true, transparent: true, opacity: 0.92, envMapIntensity: 1.8, emissive: '#a9dde3', emissiveIntensity: 0.12 });
+  SH.mesh = reg(new THREE.InstancedMesh(new THREE.OctahedronGeometry(1, 0), mat, SH.n));
+  SH.mesh.castShadow = true;
+  const r = rng(404);
+  for (let i = 0; i < SH.n; i++) {
+    const a = r() * TAU, el = (r() - 0.5) * 1.2;
+    SH.d.push({ dir: new THREE.Vector3(Math.cos(a), Math.sin(a) * 1.5, (r() - 0.6) * 0.8), v: 11 + r() * 12, size: 0.07 + r() * 0.2, st: 1.6 + r() * 1.8,
+      axis: new THREE.Vector3(r() - 0.5, r() - 0.5, r() - 0.5).normalize(), spin: 2 + r() * 6, a0: r() * TAU, w: 0.35 + r() * 0.6, rad: 3.6 + r() * 3.0, yo: (r() - 0.5) * 9, zo: (r() - 0.5) * 3 });
+  }
+  SH.o = new THREE.Object3D(); SH.q = new THREE.Quaternion();
+}
+function shards(t, mode, t0, cx = 0, cy = 0, k = 1) {
+  const m = on(SH.mesh), o = SH.o;
+  for (let i = 0; i < SH.n; i++) {
+    const p = SH.d[i];
+    if (mode === 'burst') {
+      const d = Math.max(0, t - t0), dist = p.v * (1 - Math.exp(-2.4 * d)) / 2.4;
+      o.position.set(cx + p.dir.x * dist, cy + p.dir.y * dist - 0.3 * d * d, p.dir.z * dist * 0.5);
+      o.scale.set(p.size, p.size * p.st, p.size).multiplyScalar(clamp(d * 10) * k * 0.75);
+    } else {
+      const a = p.a0 + p.w * t;
+      o.position.set(cx + Math.cos(a) * p.rad, cy + p.yo * 0.8 + Math.sin(a * 1.3) * 0.3, Math.sin(a) * p.rad * 0.6 + p.zo * 0.3);
+      o.scale.set(p.size, p.size * p.st, p.size).multiplyScalar(k);
+    }
+    o.quaternion.setFromAxisAngle(p.axis, p.spin * t + i);
+    o.updateMatrix(); m.setMatrixAt(i, o.matrix);
+  }
+  m.instanceMatrix.needsUpdate = true;
+}
+
 // ---------------------------------------------------------------- shots
-// 0.00–1.00  the compass finds north
-const NEEDLE_SETTLE = 0.75;
+function bgGreen(c) { const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, P.gD); g.addColorStop(1, P.g); c.fillStyle = g; c.fillRect(0, 0, W, H); }
+function bgCream(c) { const g = c.createRadialGradient(CX, 820, 80, CX, 960, 1250); g.addColorStop(0, '#FBFAF3'); g.addColorStop(1, '#E4E1D2'); c.fillStyle = g; c.fillRect(0, 0, W, H); }
+// slam: a giant word that hits the frame and settles (scale + smear)
+function slam(t, t0, txt, cx, baseY, size, color, o = {}) {
+  const c = ctx, k = prog(t, t0, t0 + 0.09), e = E.outExpo(k);
+  const s = lerp(o.from ?? 1.35, 1, e) * (1 + (o.grow ?? 0.04) * prog(t, t0, t0 + 0.4));
+  c.save(); c.font = ITI(900, size); c.letterSpacing = '-4px'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  for (let j = 3; j >= 1; j--) if (k < 1) { c.save(); c.globalAlpha = 0.2 * (1 - k); c.translate(cx - j * 50 * (1 - e), baseY); c.scale(s, s); c.fillStyle = color; c.fillText(txt, 0, 0); c.restore(); }
+  c.translate(cx, baseY); c.scale(s, s); c.transform(1, 0, -0.12 * (1 - e), 1, 0, 0); c.fillStyle = color; c.fillText(txt, 0, 0);
+  c.restore();
+}
+// outline echoes of a word stacked above and below, drifting in opposite directions
+function echoes(t, t0, txt, baseY, size, color, step) {
+  const c = ctx; c.save(); c.font = ITI(900, size); c.letterSpacing = '-4px'; c.textAlign = 'center'; c.strokeStyle = color; c.lineWidth = 3;
+  for (let j = -4; j <= 4; j++) { if (!j) continue; const k = E.outExpo(prog(t, t0 + Math.abs(j) * 0.02, t0 + 0.2 + Math.abs(j) * 0.02)); c.globalAlpha = k * (0.5 - Math.abs(j) * 0.09); c.strokeText(txt, CX + (j % 2 ? 1 : -1) * (t - t0) * 260, baseY + j * step * k); }
+  c.restore();
+}
+
+// 0.00–0.75  the compass finds north, the camera dives into the «N»
 function shotNorth(t) {
   const c = ctx;
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, P.gD); g.addColorStop(1, P.g); c.fillStyle = g; c.fillRect(0, 0, W, H);
-  snow(c, t, 0.9);
-  const zk = E.inExpo(prog(t, 0.86, 1.0));
-  const ccx = CX, ccy = 930, R = 330;
-  c.save(); c.translate(ccx, ccy - 380 * zk * 0); c.scale(1 + 3.5 * zk, 1 + 3.5 * zk); c.translate(0, 330 * zk * 0.9);
-  const ring = E.outExpo(prog(t, 0.0, 0.35));
-  const rot = -0.25 * (1 - E.outCubic(prog(t, 0, 0.8)));
+  bgGreen(c); snow(c, t, 0.9);
+  const zk = E.inExpo(prog(t, 0.56, T.N));
+  const s = 1 + 7 * zk, ny = 930 - 238;
+  c.save(); c.translate(CX, lerp(ny, CY, zk)); c.scale(s, s); c.translate(-CX, -ny); c.translate(CX, 930);
+  const R = 330, ring = E.outExpo(prog(t, 0.0, 0.25)), rot = -0.3 * (1 - E.outCubic(prog(t, 0, 0.5)));
   c.rotate(rot);
   for (let i = 0; i < 72; i++) {
     if (i / 72 > ring) break;
@@ -292,30 +412,23 @@ function shotNorth(t) {
   }
   c.strokeStyle = col(P.cr, 0.35); c.lineWidth = 2; c.beginPath(); c.arc(0, 0, R + 22, -Math.PI / 2, -Math.PI / 2 + TAU * ring); c.stroke();
   c.font = ITI(900, 64); c.textAlign = 'center'; c.textBaseline = 'middle';
-  const lit = prog(t, NEEDLE_SETTLE, NEEDLE_SETTLE + 0.1);
+  const lit = prog(t, T.settle, T.settle + 0.08);
   for (const [ch, a] of [['N', 0], ['E', 1], ['S', 2], ['W', 3]]) {
     const ang = -Math.PI / 2 + a * Math.PI / 2;
-    c.fillStyle = col(P.cr, ch === 'N' ? 0.6 + 0.4 * lit : 0.45) ;
-    c.save(); c.translate(Math.cos(ang) * (R - 92), Math.sin(ang) * (R - 92)); c.rotate(-rot);
-    if (ch === 'N') c.scale(1 + 0.3 * lit * (1 - prog(t, NEEDLE_SETTLE + 0.1, 0.95)), 1 + 0.3 * lit * (1 - prog(t, NEEDLE_SETTLE + 0.1, 0.95)));
-    c.fillText(ch, 0, 0); c.restore();
+    c.fillStyle = col(P.cr, ch === 'N' ? 0.6 + 0.4 * lit : 0.45);
+    c.save(); c.translate(Math.cos(ang) * (R - 92), Math.sin(ang) * (R - 92)); c.rotate(-rot); c.fillText(ch, 0, 0); c.restore();
   }
-  // needle: swings, then settles on north exactly on the beat
-  const d = t;
-  const ang = t < NEEDLE_SETTLE ? 2.4 * Math.exp(-d * 2.6) * Math.cos(TAU * 1.55 * d) * (1 - E.inCubic(prog(t, 0.45, NEEDLE_SETTLE))) : 0.035 * Math.exp(-(t - NEEDLE_SETTLE) * 9) * Math.sin((t - NEEDLE_SETTLE) * 60);
+  const ang = t < T.settle ? 2.3 * Math.exp(-t * 3.4) * Math.cos(TAU * 2.1 * t) * (1 - E.inCubic(prog(t, 0.28, T.settle))) : 0.04 * Math.exp(-(t - T.settle) * 10) * Math.sin((t - T.settle) * 60);
   c.rotate(ang - rot);
   c.fillStyle = P.cr; c.beginPath(); c.moveTo(0, -R + 70); c.lineTo(26, 0); c.lineTo(-26, 0); c.closePath(); c.fill();
   c.strokeStyle = P.cr; c.lineWidth = 3; c.beginPath(); c.moveTo(0, R - 70); c.lineTo(26, 0); c.lineTo(-26, 0); c.closePath(); c.stroke();
   c.fillStyle = P.g; c.beginPath(); c.arc(0, 0, 11, 0, TAU); c.fill(); c.strokeStyle = P.cr; c.stroke();
   c.restore();
-  // definition
-  const kt = prog(t, 0.3, 0.62);
+  const kt = prog(t, 0.12, 0.42);
   if (kt > 0) {
-    c.save(); c.textAlign = 'center'; c.font = IT(500, 44); c.letterSpacing = '1px'; c.globalAlpha = 1 - zk;
+    c.save(); c.textAlign = 'center'; c.font = IT(500, 46); c.letterSpacing = '1px'; c.globalAlpha = 1 - zk;
     const full = 'soltüstik (каз.) — север', n = Math.floor(kt * full.length), str = full.slice(0, n);
-    c.fillStyle = col(P.cr, 0.9); c.fillText(str, CX, 1440);
-    const w = c.measureText(full).width;
-    if (Math.floor(t * 8) % 2 === 0 || kt < 1) { c.fillStyle = P.cr; c.fillRect(CX - w / 2 + c.measureText(str).width + 4, 1404, 4, 46); }
+    c.fillStyle = col(P.cr, 0.92); c.fillText(str, CX, 1450);
     c.font = MONO(700, 26); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.7 * clamp(kt * 3)); c.fillText('[ 53°13′ N ]', CX, 470);
     c.restore();
   }
@@ -323,187 +436,220 @@ function shotNorth(t) {
   return null;
 }
 
-// 1.00–2.00  soul + soltüstik = soultustik
+// 0.75–1.00  a giant N fills the frame, twice (cream, then inverted)
+function shotN(t) {
+  const c = ctx, inv = t >= T.N + 0.125;
+  if (inv) bgGreen(c); else bgCream(c);
+  const fg = inv ? P.cr : P.g;
+  snow(c, t, 0.5, fg);
+  slam(t, inv ? T.N + 0.125 : T.N, 'N', CX + 20, 1430, inv ? 1650 : 1450, fg, { from: inv ? 1.25 : 1.6, grow: 0.08 });
+  c.save(); c.font = MONO(700, 30); c.letterSpacing = '10px'; c.fillStyle = inv ? P.cr : P.g; c.textAlign = 'left';
+  c.fillText('NORTH', 70, 250); c.fillText('СЕВЕР', 70, 296); c.fillText('SOLTÜSTIK', 70, 342);
+  c.textAlign = 'right'; c.fillText('53°13′ N', W - 70, 1700); c.restore();
+  return null;
+}
+
+// 1.00–2.00  soul (cream) → soltüstik (black) → the logo (green)
 function shotWords(t) {
   const c = ctx;
   if (t < T.solt) {
-    c.fillStyle = P.cr; c.fillRect(0, 0, W, H);
-    const size = 360;
-    gustWord(t, T.soul, 'soul', CX, 1030, size, P.g);
-    c.save(); c.textAlign = 'center'; c.font = MONO(700, 30); c.letterSpacing = '8px'; c.fillStyle = col(P.g, 0.8);
-    c.fillText(scramble('(АНГЛ.) ДУША', prog(t, T.soul + 0.08, T.soul + 0.3), Math.floor(t * 40)), CX, 1160); c.restore();
+    bgCream(c);
+    const size = fitFont('soul', 960, 520, s => ITI(900, s));
+    echoes(t, T.soul, 'soul', 1060, size, col(P.g, 1), 300);
+    slam(t, T.soul, 'soul', CX, 1060, size, P.g);
+    c.save(); c.textAlign = 'center'; c.font = MONO(700, 32); c.letterSpacing = '10px'; c.fillStyle = P.g;
+    c.fillText(scramble('(АНГЛ.) ДУША', prog(t, T.soul + 0.04, T.soul + 0.22), Math.floor(t * 40)), CX, 1190); c.restore();
     hud(t, P.g, 1);
     return null;
   }
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, P.gD); g.addColorStop(1, P.g); c.fillStyle = g; c.fillRect(0, 0, W, H);
-  snow(c, t, 0.6);
-  const mk2 = E.inOutCubic(prog(t, T.merge, T.merge + 0.2));      // words collapse into the logo
-  const lk = E.outExpo(prog(t, T.merge + 0.12, T.map));
-  c.save(); c.globalAlpha = 1 - mk2;
-  // "soul" holds on top (smaller), "soltüstik" gusts in below
-  c.save(); c.translate(0, lerp(0, 230, mk2)); c.font = ITI(900, 200); c.letterSpacing = '-2px'; c.textAlign = 'center'; c.fillStyle = P.cr; c.fillText('soul', CX, 720); c.restore();
-  c.font = MONO(700, 60); c.textAlign = 'center'; c.fillStyle = col(P.cr, 0.8); c.fillText('+', CX, 850);
-  const size = fitFont('soltüstik', 940, 250, s => ITI(900, s));
-  c.save(); c.translate(0, lerp(0, -200, mk2)); gustWord(t, T.solt, 'soltüstik', CX, 1080, size, P.cr, { stag: 0.016 }); c.restore();
-  c.font = MONO(700, 30); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.75); c.textAlign = 'center';
-  c.fillText(scramble('(КАЗ.) СЕВЕР', prog(t, T.solt + 0.08, T.solt + 0.3), Math.floor(t * 40)), CX, 1190);
-  c.restore();
-  if (lk > 0) {
-    const lw = 900 * lerp(1.25, 1, lk), lh = lw / LOGO_AR;
-    c.globalAlpha = clamp(lk * 2); c.drawImage(IMG.logoC, CX - lw / 2, 900 - lh / 2, lw, lh);
-    c.font = MONO(700, 30); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.75); c.textAlign = 'center';
-    c.fillText('= ДУША СЕВЕРА', CX, 1100); c.globalAlpha = 1;
+  if (t < T.logo) {
+    c.fillStyle = P.blk; c.fillRect(0, 0, W, H);
+    snow(c, t, 0.9, P.cr, 2.2);
+    const size = fitFont('soltüstik', 1000, 300, s => ITI(900, s));
+    echoes(t, T.solt, 'soltüstik', 1040, size, col(P.iceB, 1), 190);
+    gustWord(t, T.solt, 'soltüstik', CX, 1040, size, P.cr, { stag: 0.014 });
+    c.save(); c.textAlign = 'center'; c.font = MONO(700, 32); c.letterSpacing = '10px'; c.fillStyle = P.iceB;
+    c.fillText(scramble('(КАЗ.) СЕВЕР', prog(t, T.solt + 0.04, T.solt + 0.22), Math.floor(t * 40)), CX, 1150); c.restore();
+    hud(t, P.cr, 1);
+    return null;
   }
+  bgGreen(c); snow(c, t, 0.7, P.cr, 1.2);
+  burst(c, t, T.logo);
+  const k = E.outExpo(prog(t, T.logo, T.logo + 0.12));
+  const lw = 960 * lerp(1.4, 1, k) * (1 + 0.04 * prog(t, T.logo, T.map)), lh = lw / LOGO_AR;
+  c.drawImage(IMG.logoC, CX - lw / 2, 920 - lh / 2, lw, lh);
+  c.save(); c.textAlign = 'center'; c.font = MONO(700, 30); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.75);
+  c.fillText('SOUL + SOLTÜSTIK', CX, 760); c.fillStyle = P.cr; c.font = ITI(900, 64); c.letterSpacing = '-1px'; c.fillText('= душа севера', CX, 1120); c.restore();
   hud(t, P.cr, 1);
   return null;
 }
 
-// 2.00–2.94  the region: outline draws, towns pop on 16ths, the temperature drops
+// 2.00–2.94  the region in a tilted camera: towns pop with light beams, a route links them, −32° looms behind
 const PIN_T = [2.25, 2.375, 2.5, 2.625, 2.75];
 function shotMap(t) {
   const c = ctx, t0 = T.map;
   if (t >= T.gap) { c.fillStyle = '#000'; c.fillRect(0, 0, W, H); return null; }
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, P.gD); g.addColorStop(1, P.g); c.fillStyle = g; c.fillRect(0, 0, W, H);
-  const zs = 1 + 0.12 * prog(t, t0, T.gap);
-  c.save(); c.translate(CX, CY); c.scale(zs, zs); c.translate(-CX, -CY);
-  const pj = mapProj(CX, 1000, 900);
-  // graticule
-  c.strokeStyle = col(P.cr, 0.12); c.lineWidth = 1.5; c.font = MONO(500, 18); c.fillStyle = col(P.cr, 0.35); c.textAlign = 'left';
-  for (let la = 49; la <= 54; la++) { const [x0, y] = pj(60.3, la), [x1] = pj(68, la); c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke(); c.fillText(`${la}°`, x0 - 46, y + 6); }
+  bgGreen(c);
+  const temp = Math.round(lerp(-12, -32, E.inCubic(prog(t, t0, T.gap))));
+  c.save(); c.textAlign = 'center'; c.font = ITI(900, 560); c.letterSpacing = '-20px'; c.strokeStyle = col(P.cr, 0.16); c.lineWidth = 4;
+  c.strokeText(`−${Math.abs(temp)}°`, CX, 1480); c.restore();
+  const e = E.outCubic(prog(t, t0, t0 + 0.6)), zs = 1 + 0.1 * prog(t, t0, T.gap);
+  c.save(); c.translate(CX, 1000); c.scale(zs, zs); c.rotate(lerp(-0.16, 0.03, e)); c.transform(1, 0, lerp(-0.3, -0.04, e), lerp(0.72, 0.96, e), 0, 0);
+  const pj = mapProj(0, 0, 860);
+  c.strokeStyle = col(P.cr, 0.1); c.lineWidth = 1.5;
+  for (let la = 49; la <= 54; la++) { const [x0, y] = pj(60.3, la), [x1] = pj(68, la); c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke(); }
   for (let lo = 61; lo <= 67; lo++) { const [x, y0] = pj(lo, 54.8), [, y1] = pj(lo, 48.4); c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1); c.stroke(); }
-  const dk = E.inOutCubic(prog(t, t0, t0 + 0.4));
-  c.save(); c.globalAlpha = 0.14 * dk; c.beginPath(); REGION.forEach(([lo, la], i) => { const [x, y] = pj(lo, la); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.fillStyle = P.cr; c.fill(); c.restore();
-  drawRegion(c, pj, dk, P.cr, 4);
+  const dk = E.inOutCubic(prog(t, t0, t0 + 0.35));
+  c.save(); c.globalAlpha = 0.16 * dk; c.beginPath(); REGION.forEach(([lo, la], i) => { const [x, y] = pj(lo, la); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.fillStyle = P.cr; c.fill(); c.restore();
+  drawRegion(c, pj, dk, P.cr, 5);
+  // route through the towns
+  const rk = E.inOutCubic(prog(t, 2.3, 2.88));
+  if (rk > 0) { c.save(); c.setLineDash([14, 12]); c.lineDashOffset = -t * 120; const pts = TOWNS.map(([, lo, la]) => pj(lo, la)); let tot = 0; const sg = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); sg.push(d); tot += d; }
+    let left = tot * rk; c.strokeStyle = col(P.iceB, 0.95); c.lineWidth = 3; c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length && left > 0; i++) { const f = Math.min(1, left / sg[i - 1]); c.lineTo(lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)); left -= sg[i - 1]; }
+    c.stroke(); c.restore(); }
   TOWNS.forEach(([n, lo, la, big], i) => {
     const tp = PIN_T[i]; if (t < tp) return;
-    const k = prog(t, tp, tp + 0.12), [x, y] = pj(lo, la);
-    const s = E.outBack(k);
-    c.fillStyle = P.cr; c.beginPath(); c.arc(x, y, (big ? 12 : 8) * s, 0, TAU); c.fill();
-    const pk = ((t - tp) * 2.2) % 1; c.strokeStyle = col(P.cr, 1 - pk); c.lineWidth = 3; c.beginPath(); c.arc(x, y, 12 + 40 * pk, 0, TAU); c.stroke();
+    const k = prog(t, tp, tp + 0.12), [x, y] = pj(lo, la), s = E.outBack(k);
+    const bh = 220 * E.outExpo(k);
+    const bg = c.createLinearGradient(x, y, x, y - bh); bg.addColorStop(0, col(P.cr, 0.9)); bg.addColorStop(1, col(P.cr, 0)); c.fillStyle = bg; c.fillRect(x - 3, y - bh, 6, bh);
+    c.fillStyle = P.cr; c.beginPath(); c.arc(x, y, (big ? 13 : 9) * s, 0, TAU); c.fill();
+    const pk = ((t - tp) * 2.2) % 1; c.strokeStyle = col(P.cr, 1 - pk); c.lineWidth = 3; c.beginPath(); c.arc(x, y, 12 + 46 * pk, 0, TAU); c.stroke();
     const [lx, ly, al] = { KOSTANAY: [22, -16, 'left'], RUDNY: [-20, 34, 'right'], LISAKOVSK: [20, 30, 'left'], ZHITIKARA: [-20, -14, 'right'], ARKALYK: [22, -14, 'left'] }[n];
-    c.font = MONO(700, big ? 30 : 24); c.letterSpacing = '3px'; c.fillStyle = P.cr; c.textAlign = al;
+    c.font = MONO(700, big ? 32 : 25); c.letterSpacing = '3px'; c.fillStyle = P.cr; c.textAlign = al;
     c.fillText(scramble(n, prog(t, tp, tp + 0.14), Math.floor(t * 40) + i), x + lx, y + ly);
   });
   c.restore();
-  // title + temperature
   c.save(); c.textAlign = 'center';
-  c.font = ITI(900, 74); c.letterSpacing = '-1px'; c.fillStyle = P.cr; c.fillText(scramble('kostanay region', prog(t, t0, t0 + 0.25), Math.floor(t * 40)).toLowerCase(), CX, 380);
-  c.font = MONO(700, 24); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.6); c.fillText('SOLTÜSTIK QAZAQSTAN', CX, 430);
-  const temp = Math.round(lerp(-12, -32, E.inCubic(prog(t, t0, T.gap))));
-  c.font = ITI(900, 190); c.letterSpacing = '-4px'; c.fillStyle = P.cr; c.fillText(`${temp < 0 ? '−' : ''}${Math.abs(temp)}°`, CX, 1740);
+  c.font = ITI(900, 80); c.letterSpacing = '-1px'; c.fillStyle = P.cr; c.fillText('kostanay region', CX, 380);
+  c.font = MONO(700, 24); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.6); c.fillText('SOLTÜSTIK QAZAQSTAN', CX, 432);
   c.restore();
-  snow(c, t, 0.5 + 0.5 * prog(t, t0, T.gap), P.cr, 1 + 2 * prog(t, t0, T.gap));
-  // frost creeping in from the edges before the cut
+  snow(c, t, 0.5 + 0.5 * prog(t, t0, T.gap), P.cr, 1 + 2.5 * prog(t, t0, T.gap));
   const fr = E.inCubic(prog(t, 2.6, T.gap));
   if (fr > 0) { const vg = c.createRadialGradient(CX, CY, 900 * (1 - fr) + 120, CX, CY, 1300); vg.addColorStop(0, 'rgba(230,245,245,0)'); vg.addColorStop(1, `rgba(230,245,245,${0.85 * fr})`); c.fillStyle = vg; c.fillRect(0, 0, W, H); }
   hud(t, P.cr, 1, `−${Math.abs(temp)} °C`);
   return null;
 }
 
-// 3.00–4.50  DROP — the wordmark in 3D, a snow burst, «cold» / «minded.»
-function marquee(t, color) {
+// 3.00–4.25  DROP on cream: green 3D wordmark, a burst of ice crystals, stickers on the beats
+function marquee(t, color, t0) {
   const c = ctx; c.save();
   c.font = ITI(900, 170); c.letterSpacing = '-2px'; c.strokeStyle = color; c.lineWidth = 3; c.textBaseline = 'middle';
   const unit = 'cold minded. soul of the north. ';
   const uw = c.measureText(unit).width;
   for (let r = 0; r < 11; r++) {
     const y = 90 + r * 185, dir = r % 2 ? 1 : -1;
-    let x = ((dir * (t - T.drop) * 300 + r * 411) % uw + uw) % uw - uw;
+    let x = ((dir * (t - t0) * 300 + r * 411) % uw + uw) % uw - uw;
     for (; x < W; x += uw) c.strokeText(unit, x, y);
   }
   c.restore();
 }
 function shotDrop(t) {
   const c = ctx, t0 = T.drop;
-  const g = c.createRadialGradient(CX, CY, 100, CX, CY, 1200); g.addColorStop(0, P.gL); g.addColorStop(1, P.gD); c.fillStyle = g; c.fillRect(0, 0, W, H);
-  marquee(t, col(P.cr, 0.1));
-  if (t < t0 + 0.5) { const k = prog(t, t0, t0 + 0.5); c.strokeStyle = col(P.ice, 0.9 * (1 - k)); c.lineWidth = 40 * (1 - k) + 2; c.beginPath(); c.arc(CX, CY, 60 + 1300 * E.outExpo(k), 0, TAU); c.stroke(); }
-  snow(c, t, 0.55, P.cr, 1.5);
-  const L = on(LOGO);
+  bgCream(c);
+  marquee(t, col(P.g, 0.12), t0);
+  c.save(); c.globalAlpha = 0.07; c.translate(CX, CY); c.rotate((t - t0) * 0.4); rose(c, 0, 0, 760 * (0.8 + 0.2 * E.outExpo(prog(t, t0, t0 + 0.4))), P.g); c.restore();
+  if (t < t0 + 0.5) { const k = prog(t, t0, t0 + 0.5); c.strokeStyle = col(P.g, 0.9 * (1 - k)); c.lineWidth = 46 * (1 - k) + 2; c.beginPath(); c.arc(CX, CY, 60 + 1300 * E.outExpo(k), 0, TAU); c.stroke(); }
+  snow(c, t, 0.35, P.g, 1.4);
+  const L = on(LOGO); L.userData.mesh.material = MAT_LOGO_DROP;
   const kin = prog(t, t0, t0 + 0.11);
-  const pulse = [3.5, 4.0].reduce((s, b) => s + (t >= b ? 0.06 * Math.exp(-(t - b) * 14) : 0), 0);
+  const pulse = [3.5, 3.75, 4.0].reduce((s, b) => s + (t >= b ? 0.05 * Math.exp(-(t - b) * 14) : 0), 0);
   L.position.set(0, 0, 9 * (1 - E.outExpo(kin)));
   L.rotation.x = 0.9 * (1 - spring(t, t0, 2.4, 0.32)) + 0.12 * Math.sin((t - t0) * TAU * 0.4);
-  L.rotation.y = -0.36 * Math.sin((t - t0) * TAU * 0.45);
+  L.rotation.y = -0.4 * Math.sin((t - t0) * TAU * 0.45);
   L.rotation.z = 0.04 * Math.sin((t - t0) * TAU * 0.3);
   L.scale.setScalar(1 + pulse);
-  wall.position.z = -0.9; wall.material.opacity = 0.3;
+  shards(t, 'burst', t0, 0, 0, 1);
+  slapSticker(t, STK.cold, 3.5, 540, 600, -0.08);
+  slapSticker(t, STK.badge, 3.75, 255, 1350, 0.22);
+  slapSticker(t, STK.tag, 4.0, 745, 1515, 0.07);
+  wall.position.z = -0.7; wall.material.opacity = 0.28;
   key.position.set(-5 + 4 * Math.sin((t - t0) * 1.6), 8, 16);
-  return () => {
-    burst(c, t, t0);
-    if (t >= T.cold) gustWord(t, T.cold, 'cold', CX, 700, 210, P.cr);
-    if (t >= T.minded) gustWord(t, T.minded, 'minded.', CX, 1400, 210, P.cr);
-    hud(t, P.cr, 1, '−32 °C');
-  };
+  return () => hud(t, P.g, 1, '−32 °C');
 }
 
-// 4.50–6.50  the sweatshirt: rises, turns front → back on the beat
+// 4.25–4.50  two hard frames: «cold» (black) / «minded.» (cream)
+function shotFlash(t) {
+  const c = ctx;
+  if (t < T.minded) {
+    c.fillStyle = P.blk; c.fillRect(0, 0, W, H); snow(c, t, 1, P.cr, 3);
+    const size = fitFont('cold', 1000, 560, s => ITI(900, s));
+    echoes(t, T.cold, 'cold', 1150, size, col(P.iceB, 1), 330);
+    slam(t, T.cold, 'cold', CX, 1150, size, P.cr, { from: 1.5, grow: 0.1 });
+    return null;
+  }
+  bgCream(c); snow(c, t, 0.6, P.g, 3);
+  const size = fitFont('minded.', 1020, 420, s => ITI(900, s));
+  slam(t, T.minded, 'minded.', CX, 1110, size, P.g, { from: 1.5, grow: 0.1 });
+  return null;
+}
+
+// 4.50–6.50  spotlight: the cream sweatshirt drops in, turns front → back, ice crystals orbit
 function shotGarm(t) {
   const c = ctx, t0 = T.garm;
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#F7F6EE'); g.addColorStop(0.7, '#ECEADF'); g.addColorStop(1, '#DCD9CA'); c.fillStyle = g; c.fillRect(0, 0, W, H);
-  // faint wordmark rows behind
-  c.save(); c.globalAlpha = 0.07;
-  for (let r = 0; r < 9; r++) { const lw = 700, lh = lw / LOGO_AR, dir = r % 2 ? 1 : -1; let x = ((dir * (t - t0) * 160 + r * 230) % (lw + 80) + lw + 80) % (lw + 80) - lw - 80; for (; x < W; x += lw + 80) c.drawImage(IMG.logoG, x, 130 + r * 205, lw, lh); }
-  c.restore();
+  c.fillStyle = P.blk; c.fillRect(0, 0, W, H);
+  const g = c.createRadialGradient(CX, 820, 60, CX, 900, 1100); g.addColorStop(0, '#0E7465'); g.addColorStop(0.55, P.gD); g.addColorStop(1, P.blk); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.save(); c.globalCompositeOperation = 'screen'; const cg = c.createLinearGradient(0, 0, 0, 1700); cg.addColorStop(0, col(P.cr, 0.22)); cg.addColorStop(1, col(P.cr, 0));
+  c.fillStyle = cg; c.beginPath(); c.moveTo(CX - 90, 0); c.lineTo(CX + 90, 0); c.lineTo(CX + 520, 1700); c.lineTo(CX - 520, 1700); c.closePath(); c.fill(); c.restore();
+  marquee(t, col(P.cr, 0.05), t0);
+  c.save(); c.globalAlpha = 0.3; c.fillStyle = P.cr; c.filter = 'blur(30px)'; c.beginPath(); c.ellipse(CX, 1690, 470, 60, 0, 0, TAU); c.fill(); c.restore();
   const G = on(SW.g);
-  const rise = spring(t, t0, 2.2, 0.34);
-  const spin = E.outBack(prog(t, T.spin, T.spin + 0.28));
+  const fall = E.inCubic(prog(t, t0, T.land));
+  const land = t > T.land ? spring(t, T.land, 3.2, 0.28) : 0;
   const zk = E.inExpo(prog(t, 6.22, T.fin));
   const zs = 1.12 + 4.2 * zk;
-  const backPrintY = 3.2 - 52 / 50;   // wordmark on the back, local y — match cut into the finale logo
-  G.position.set(0, lerp(lerp(-16, 0.4, rise), -backPrintY * zs, zk), 0);
-  G.rotation.set(0.05 * Math.sin((t - t0) * 2.1) * (1 - zk), (0.28 * Math.sin((t - t0) * TAU * 0.4) + Math.PI * spin) * (1 - zk) + Math.PI * zk, 0.04 * Math.sin((t - t0) * 2.7) * (1 - zk));
-  G.scale.setScalar(zs);
-  wall.position.z = -2.2; wall.material.opacity = 0.16 * (1 - zk);
-  key.position.set(-6, 10, 15);
-  c.save(); c.globalAlpha = 0.16 * rise * (1 - zk); c.fillStyle = '#000'; c.filter = 'blur(18px)'; c.beginPath(); c.ellipse(CX, 1690, 320, 30, 0, 0, TAU); c.fill(); c.restore();
-  return () => {
-    c.save(); c.textAlign = 'center';
-    const front = t < T.spin + 0.12;
-    const lk = front ? E.outCubic(prog(t, t0 + 0.2, t0 + 0.4)) : E.outCubic(prog(t, T.spin + 0.12, T.spin + 0.3));
-    c.globalAlpha = lk * (1 - zk);
-    c.font = ITI(900, 92); c.letterSpacing = '-1px'; c.fillStyle = P.g;
-    c.fillText(front ? 'front.' : 'back.', CX, 1560 + 30 * (1 - lk));
-    c.font = MONO(700, 26); c.letterSpacing = '6px'; c.fillStyle = col(P.g, 0.75);
-    c.fillText(front ? 'ВПЕРЕДИ — РАЙЦЕНТРЫ' : 'СЗАДИ — КАРТА ОБЛАСТИ', CX, 1616 + 30 * (1 - lk));
-    c.restore();
-    hud(t, P.g, 1 - zk);
-  };
+  const backPrintY = 3.2 - 52 / 50;
+  const bob = t > T.land ? 0.1 * Math.sin((t - T.land) * 3.2) : 0;
+  const spin = E.outBack(prog(t, T.spin, T.spin + 0.24));
+  G.position.set(0, lerp(lerp(14, 0.5, fall) + bob, -backPrintY * zs, zk), 0);
+  G.rotation.set(0.05 * Math.sin((t - t0) * 2.1) * (1 - zk), (0.3 * Math.sin((t - t0) * TAU * 0.4) + Math.PI * spin) * (1 - zk) + Math.PI * zk, 0.04 * Math.sin((t - t0) * 2.7) * (1 - zk));
+  const sq = t > T.land ? 0.1 * (1 - land) : 0;
+  G.scale.set(zs * (1 + sq * 0.5), zs * (1 - sq), zs);
+  shards(t, 'orbit', 0, 0, 0.6, clamp(prog(t, t0 + 0.1, t0 + 0.4)) * (1 - zk));
+  slapSticker(t, STK.front, 4.75, 290, 1585, -0.07);
+  slapSticker(t, STK.back, 5.5, 790, 1600, 0.06);
+  slapSticker(t, STK.tag2, T.stamp, 815, 330, -0.16, -0.3, 0.68);
+  wall.position.z = -2.4; wall.material.opacity = 0.0;
+  key.position.set(-3, 12, 14);
+  // snow puff on landing
+  if (t >= T.land && t < T.land + 0.6) { const k = prog(t, T.land, T.land + 0.6); for (let i = 0; i < 40; i++) { const a = hash(i) * Math.PI, v = 300 + 700 * hash(i + 9); c.fillStyle = col(P.cr, 0.7 * (1 - k)); c.beginPath(); c.arc(CX + Math.cos(a) * v * E.outCubic(k) * (i % 2 ? 1 : -1), 1690 - Math.sin(a) * v * 0.3 * E.outCubic(k), 3 + 3 * hash(i + 3), 0, TAU); c.fill(); } }
+  snow(c, t, 0.45, P.cr, 1);
+  return () => hud(t, P.cr, 1 - zk);
 }
 
 // 6.50–8.00  FINALE
 function shotFin(t) {
   const c = ctx, t0 = T.fin;
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, P.gD); g.addColorStop(1, P.g); c.fillStyle = g; c.fillRect(0, 0, W, H);
-  snow(c, t, 0.55, P.cr, 0.7);
-  const L = on(LOGO);
+  bgGreen(c); marquee(t, col(P.cr, 0.06), t0); snow(c, t, 0.55, P.cr, 0.7);
+  const L = on(LOGO); L.userData.mesh.material = MAT_LOGO;
   const k = E.outExpo(prog(t, t0, t0 + 0.45));
   L.scale.setScalar(lerp(1.7, 1.0, k));
   L.position.set(0, Y(880), 0);
-  L.rotation.set(0.1 * Math.sin((t - t0) * 2.2) - 0.25 * (1 - k), -0.2 * Math.sin((t - t0) * 1.6 + 0.3) * (0.4 + 0.6 * k), 0);
-  wall.position.z = -0.8; wall.material.opacity = 0;
+  L.rotation.set(0.1 * Math.sin((t - t0) * 2.2) - 0.25 * (1 - k), -0.25 * Math.sin((t - t0) * 1.6 + 0.3) * (0.4 + 0.6 * k), 0);
+  shards(t, 'orbit', 0, 0, Y(880) + 0.4, E.outCubic(prog(t, t0 + 0.1, t0 + 0.6)) * 0.85);
+  slapSticker(t, STK.badge2, 7.0, 860, 1400, 0.2, -0.3, 0.55);
+  wall.position.z = -0.8; wall.material.opacity = 0.0;
   key.position.set(lerp(-9, 7, prog(t, t0, DUR)), 6, 16);
   return () => {
     c.save(); c.textAlign = 'center'; c.textBaseline = 'alphabetic';
     const rk = E.outExpo(prog(t, t0 + 0.2, t0 + 0.5));
-    c.fillStyle = P.cr; c.fillRect(CX - 260 * rk, 1010, 520 * rk, 6);
-    // tagline, letters gust in
-    gustWord(t, t0 + 0.3, 'cold minded.', CX, 1160, 96, P.cr, { stag: 0.02 });
+    c.fillStyle = P.cr; c.fillRect(CX - 260 * rk, 1020, 520 * rk, 6);
+    gustWord(t, t0 + 0.3, 'cold minded.', CX, 1170, 100, P.cr, { stag: 0.02 });
     c.font = MONO(700, 26); c.letterSpacing = '8px'; c.fillStyle = col(P.cr, 0.6);
-    c.fillText(scramble('SOUL OF THE NORTH', prog(t, t0 + 0.25, t0 + 0.6), Math.floor(t * 40)), CX, 650);
+    c.fillText(scramble('SOUL OF THE NORTH', prog(t, t0 + 0.25, t0 + 0.6), Math.floor(t * 40)), CX, 640);
     const hk = E.outCubic(prog(t, t0 + 0.55, t0 + 0.85));
     c.globalAlpha = hk;
-    c.font = IT(800, 50); c.letterSpacing = '1px'; c.fillStyle = P.cr; c.fillText('@soultustik', CX, 1610 + 24 * (1 - hk));
-    c.font = IT(500, 34); c.letterSpacing = '1px'; c.fillStyle = col(P.cr, 0.7); c.fillText('северная душа · Костанай', CX, 1666 + 24 * (1 - hk));
-    // tiny compass pointing north again
+    c.font = IT(800, 52); c.letterSpacing = '1px'; c.fillStyle = P.cr; c.fillText('@soultustik', CX, 1640 + 24 * (1 - hk));
+    c.font = IT(500, 34); c.fillStyle = col(P.cr, 0.7); c.fillText('северная душа · Костанай', CX, 1696 + 24 * (1 - hk));
     c.globalAlpha = 1;
     const ck = E.outBack(prog(t, t0 + 0.45, t0 + 0.75));
     if (ck > 0) {
-      c.save(); c.translate(CX, 1400); c.scale(ck, ck);
-      c.strokeStyle = P.cr; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, 44, 0, TAU); c.stroke();
-      c.rotate(0.6 * Math.exp(-(t - t0 - 0.45) * 5) * Math.cos((t - t0) * 20));
-      c.fillStyle = P.cr; c.beginPath(); c.moveTo(0, -34); c.lineTo(9, 0); c.lineTo(-9, 0); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(0, 34); c.lineTo(9, 0); c.lineTo(-9, 0); c.closePath(); c.stroke();
+      c.save(); c.translate(CX - 0, 1400); c.translate(-250, 0); c.scale(ck, ck);
+      c.strokeStyle = P.cr; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, 50, 0, TAU); c.stroke();
+      c.rotate(0.7 * Math.exp(-(t - t0 - 0.45) * 5) * Math.cos((t - t0) * 20));
+      c.fillStyle = P.cr; c.beginPath(); c.moveTo(0, -38); c.lineTo(10, 0); c.lineTo(-10, 0); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(0, 38); c.lineTo(10, 0); c.lineTo(-10, 0); c.closePath(); c.stroke();
+      c.font = ITI(900, 26); c.textAlign = 'center'; c.fillText('N', 0, -60);
       c.restore();
     }
     c.restore();
@@ -511,10 +657,10 @@ function shotFin(t) {
   };
 }
 
-const SHOTS = [[0, shotNorth], [T.soul, shotWords], [T.map, shotMap], [T.drop, shotDrop], [T.garm, shotGarm], [T.fin, shotFin]];
+const SHOTS = [[0, shotNorth], [T.N, shotN], [T.soul, shotWords], [T.map, shotMap], [T.drop, shotDrop], [T.cold, shotFlash], [T.garm, shotGarm], [T.fin, shotFin]];
 
 // ---------------------------------------------------------------- frame
-const HITS = [[0.75, 6, 0.12], [1.0, 10, 0.12], [1.5, 10, 0.12], [3.0, 34, 0.42], [3.5, 9, 0.16], [4.0, 9, 0.16], [4.75, 6, 0.2], [5.5, 10, 0.2], [6.5, 18, 0.3]];
+const HITS = [[0.5, 6, 0.12], [0.75, 14, 0.12], [0.875, 10, 0.1], [1.0, 12, 0.12], [1.375, 12, 0.12], [1.75, 14, 0.15], [3.0, 34, 0.42], [3.5, 9, 0.16], [3.75, 9, 0.16], [4.0, 9, 0.16], [4.25, 16, 0.12], [4.375, 16, 0.12], [4.625, 18, 0.22], [4.75, 7, 0.14], [5.25, 8, 0.2], [5.5, 7, 0.14], [5.75, 7, 0.14], [6.5, 18, 0.3], [7.0, 6, 0.15]];
 function shakeAt(t) {
   let x = 0, y = 0;
   for (const [t0, a, d] of HITS) if (t >= t0 && t < t0 + d) { const k = 1 - (t - t0) / d; const f = Math.floor(t * FPS); x += (hash(f * 1.7 + t0) - 0.5) * 2 * a * k * k; y += (hash(f * 2.3 + t0 + 9) - 0.5) * 2 * a * k * k; }
@@ -528,7 +674,7 @@ function resetFrame() {
 }
 function renderFrame(t) {
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
-  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.letterSpacing = '0px';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.letterSpacing = '0px'; ctx.setLineDash([]);
   resetFrame();
   let idx = 0; for (let i = 0; i < SHOTS.length; i++) if (t >= SHOTS[i][0]) idx = i;
   const f = Math.floor(t * FPS);
@@ -555,35 +701,38 @@ function zoomBlur(amt, cy = CY) {
 }
 function post(t, idx) {
   const c = ctx; c.setTransform(1, 0, 0, 1, 0, 0);
-  // vertical whip DROP → sweatshirt
-  if (t > T.garm - 0.14 && t < T.garm + 0.16) {
-    const p = t < T.garm ? E.inExpo(prog(t, T.garm - 0.14, T.garm)) : 1 - E.outExpo(prog(t, T.garm, T.garm + 0.16));
+  // vertical whip into the spotlight
+  if (t > T.garm - 0.1 && t < T.garm + 0.14) {
+    const p = t < T.garm ? E.inExpo(prog(t, T.garm - 0.1, T.garm)) : 1 - E.outExpo(prog(t, T.garm, T.garm + 0.14));
     tctx.globalCompositeOperation = 'copy'; tctx.drawImage(out, 0, 0); tctx.globalCompositeOperation = 'source-over';
-    c.fillStyle = t < T.garm ? P.gD : '#F7F6EE'; c.fillRect(0, 0, W, H);
+    c.fillStyle = t < T.garm ? '#E4E1D2' : P.blk; c.fillRect(0, 0, W, H);
     c.drawImage(tmp, 0, (t < T.garm ? -1 : 1) * H * 0.6 * p);
-    dirBlur(0, 200 * p);
+    dirBlur(0, 220 * p);
   }
-  if (t > 0.86 && t < T.soul) zoomBlur(0.3 * E.inExpo(prog(t, 0.86, T.soul)), 930);
+  // horizontal whip on the spin
+  if (t > T.spin && t < T.spin + 0.2) dirBlur(160 * Math.sin(Math.PI * prog(t, T.spin, T.spin + 0.2)), 0);
+  if (t > 0.6 && t < T.N) zoomBlur(0.3 * E.inExpo(prog(t, 0.6, T.N)), 700);
   if (t > 6.3 && t < T.fin) zoomBlur(0.3 * E.inExpo(prog(t, 6.3, T.fin)));
   if (t >= T.fin && t < T.fin + 0.25) zoomBlur(0.25 * (1 - E.outCubic(prog(t, T.fin, T.fin + 0.25))));
-  // one inverted frame on the hard cuts
-  for (const tc of [T.soul, T.solt, T.map]) if (t >= tc && t < tc + 1 / FPS) { c.globalCompositeOperation = 'difference'; c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over'; }
-  // cold flashes
+  if (t > 2.75 && t < T.gap) zoomBlur(0.1 * prog(t, 2.75, T.gap));
+  // one inverted frame on every hard cut (and a stutter before the drop)
+  for (const tc of [T.N, T.N + 0.125, T.soul, T.solt, T.logo, T.map, 2.75, 2.8125, 2.875, T.cold, T.minded]) if (t >= tc && t < tc + 1 / FPS) { c.globalCompositeOperation = 'difference'; c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over'; }
   let fl = 0;
   if (t >= T.drop && t < T.drop + 0.12) fl = 0.7 * Math.pow(1 - prog(t, T.drop, T.drop + 0.12), 2);
+  if (t >= T.logo && t < T.logo + 0.1) fl = 0.4 * (1 - prog(t, T.logo, T.logo + 0.1));
+  if (t >= T.land && t < T.land + 0.1) fl = Math.max(fl, 0.25 * (1 - prog(t, T.land, T.land + 0.1)));
   if (t >= T.fin && t < T.fin + 0.16) fl = Math.max(fl, 0.5 * (1 - prog(t, T.fin, T.fin + 0.16)));
   if (fl > 0) { c.fillStyle = `rgba(235,248,248,${fl})`; c.fillRect(0, 0, W, H); }
-  // film grain, a cold vignette, slight flicker
   const f = Math.floor(t * FPS);
   const fk = (hash(f * 0.913) - 0.5) * 0.04;
   if (fk > 0) { c.fillStyle = `rgba(255,255,255,${fk * 0.6})`; c.fillRect(0, 0, W, H); } else { c.fillStyle = `rgba(0,0,0,${-fk})`; c.fillRect(0, 0, W, H); }
-  const light = idx === 4 || (idx === 1 && t < T.solt);
+  const light = SHOTS[idx][1] === shotDrop || (SHOTS[idx][1] === shotWords && t < T.solt) || (SHOTS[idx][1] === shotN && t < T.N + 0.125) || (SHOTS[idx][1] === shotFlash && t >= T.minded);
   const vg = c.createRadialGradient(CX, CY, 520, CX, CY, 1250); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, light ? 'rgba(20,40,36,0.16)' : 'rgba(0,12,10,0.42)'); c.fillStyle = vg; c.fillRect(0, 0, W, H);
   c.globalCompositeOperation = 'overlay'; c.globalAlpha = 0.09;
   const ox = -Math.floor(hash(f) * 512), oy = -Math.floor(hash(f + 0.5) * 512);
   for (let x = ox; x < W; x += 512) for (let y = oy; y < H; y += 512) c.drawImage(grains[f % 4], x, y);
   c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
-  const k = 1 - prog(t, 0, 0.08);
+  const k = 1 - prog(t, 0, 0.06);
   if (k > 0) { c.fillStyle = `rgba(0,0,0,${k})`; c.fillRect(0, 0, W, H); }
 }
 
@@ -591,22 +740,29 @@ function post(t, idx) {
 function buildEvents() {
   ev(0, 'wind', { end: DUR });
   ev(0.02, 'ringIn');
-  for (let i = 0; i < 4; i++) ev(i * 0.25, 'bell', { i });
-  ev(0.05, 'needle', { end: NEEDLE_SETTLE }); ev(NEEDLE_SETTLE, 'north');
-  ev(0.86, 'dive', { end: T.soul });
-  ev(T.soul, 'soul'); ev(T.solt, 'solt'); ev(T.merge, 'merge', { end: T.map }); ev(T.map, 'logo2d');
-  ev(T.map, 'draw', { end: T.map + 0.4 });
+  for (let i = 0; i < 4; i++) ev(i * 0.125, 'bell', { i });
+  ev(0.02, 'needle', { end: T.settle }); ev(T.settle, 'north');
+  ev(0.56, 'dive', { end: T.N });
+  ev(T.N, 'Nhit', { i: 0 }); ev(T.N + 0.125, 'Nhit', { i: 1 });
+  ev(T.soul, 'soul'); ev(T.solt, 'solt'); ev(T.logo - 0.2, 'merge', { end: T.logo }); ev(T.logo, 'logo2d');
+  ev(T.map, 'draw', { end: T.map + 0.35 });
   PIN_T.forEach((tp, i) => ev(tp, 'pin', { i }));
   for (let tt = T.map; tt < T.gap - 0.02; tt += 1 / 24) ev(tt, 'tempTick');
-  ev(T.map, 'riser', { end: T.gap }); ev(2.6, 'frost', { end: T.gap }); ev(T.gap, 'gap');
+  ev(T.map, 'riser', { end: T.gap }); ev(2.6, 'frost', { end: T.gap });
+  for (const ts of [2.75, 2.8125, 2.875]) ev(ts, 'stut');
+  ev(T.gap, 'gap');
   ev(T.drop, 'drop');
+  for (const ts of [3.5, 3.75, 4.0]) ev(ts, 'slap', { pan: ts === 3.75 ? -0.35 : ts === 4.0 ? 0.35 : 0 });
   ev(T.cold, 'word', { i: 0 }); ev(T.minded, 'word', { i: 1 });
-  ev(T.garm - 0.14, 'whip');
-  ev(T.garm, 'rise'); ev(T.garm + 0.25, 'settle');
+  ev(T.garm - 0.1, 'whip');
+  ev(T.garm, 'garmFall', { end: T.land }); ev(T.land, 'land');
+  ev(4.75, 'slap', { pan: -0.3 });
   ev(T.spin, 'spin');
+  ev(5.5, 'slap', { pan: 0.3 }); ev(T.stamp, 'slap', { pan: 0.4 });
   ev(6.22, 'zoom', { end: T.fin });
   ev(T.fin, 'final');
   ev(T.fin + 0.45, 'compass');
+  ev(7.0, 'slap', { pan: 0.4, g: 0.6 });
   EVENTS.sort((a, b) => a.t - b.t);
 }
 
@@ -629,6 +785,8 @@ async function boot() {
   IMG.logoG = await loadImg(tint(P.g));
   buildLogo(svg);
   buildSweat();
+  buildStickers();
+  buildShards();
   for (let k = 0; k < 4; k++) {
     const cv = mk(512, 512), gc = cv.getContext('2d'), id = gc.createImageData(512, 512), r = rng(50 + k);
     for (let i = 0; i < id.data.length; i += 4) { const vv = 128 + (r() + r() - 1) * 100; id.data[i] = id.data[i + 1] = id.data[i + 2] = vv; id.data[i + 3] = 255; }

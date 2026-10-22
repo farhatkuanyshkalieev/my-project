@@ -253,6 +253,15 @@ def ice(d, n=60, seed=0):
     return norm(out)
 
 
+def slap():
+    """Vinyl sticker slapped onto a surface: plastic snap + low thud + air."""
+    d = 0.22
+    s = filt(noise(d), 'bp', (700, 4200)) * np.exp(-T(d) / 0.018)
+    s += 0.8 * thump(120, 55, d, 0.05, 0.01)
+    pre = filt(noise(0.05), 'high', 3000) * np.linspace(0, 1, int(0.05 * SR)) ** 2 * 0.25
+    return norm(np.concatenate([pre, s]))
+
+
 # ------------------------------------------------------------------ cues
 MOTIF = [76, 83, 79, 88]   # E5 B5 G5 E6
 
@@ -289,6 +298,22 @@ def cue(e):
     elif k == 'dive':
         d = e['end'] - t
         F(whoosh(d + 0.02, 500, 7000, 0.7), t, 0.45, width=1)
+    elif k == 'Nhit':
+        F(kick(), t, 0.55 if e['i'] == 0 else 0.4)
+        F(norm(filt(noise(0.08), 'bp', (1500, 9000)) * np.exp(-T(0.08) / 0.015)), t, 0.3)
+        F(bell([88, 95][e['i']], 1.2, 1.4), t, 0.22, r=0.3, b=0.2)
+    elif k == 'stut':
+        F(kick(), t, 0.45)
+        F(bell(83 + 4 * [2.75, 2.8125, 2.875].index(round(t, 4)), 0.4, 1.2), t, 0.2)
+    elif k == 'slap':
+        F(slap(), t - 0.05, 0.7 * e.get('g', 1), pan=e.get('pan', 0), r=0.12)
+    elif k == 'garmFall':
+        d = e['end'] - t
+        F(filt(whoosh(d + 0.04, 2000, 300, 0.8), 'low', 4000), t, 0.4)
+    elif k == 'land':
+        F(kick(), t, 0.6)
+        F(norm(thump(140, 50, 0.4, 0.09, 0.012)), t, 0.6)
+        F(ice(0.4, 50, 9), t, 0.25, width=1)
     elif k == 'soul':
         F(kick(), t, 0.45)
         F(epiano([52, 59, 62, 66, 71]), t, 0.42, r=0.25, b=0.2, width=1)
