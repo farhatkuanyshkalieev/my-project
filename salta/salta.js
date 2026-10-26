@@ -230,6 +230,7 @@ function bigWord(c, txt, t, t0, baseY, color, o = {}) {
   c.save(); let size = o.size || 400; c.font = OS(700, size); c.letterSpacing = (o.ls ?? -6) + 'px';
   let tw = c.measureText(txt).width; const maxW = o.maxW || 1010; if (tw > maxW) { size *= maxW / tw; c.font = OS(700, size); tw = c.measureText(txt).width; }
   const ws = [...txt].map(ch => c.measureText(ch).width + (o.ls ?? -6));
+  tw = ws.reduce((a, b) => a + b, 0) - (o.ls ?? -6);
   let x = CX - tw / 2;
   c.beginPath(); c.rect(0, baseY - size * 1.2, W, size * 1.22 + (o.below || 6)); c.clip();
   const out = o.out ?? 1e9;
@@ -286,7 +287,7 @@ function shotPrologue(c, t) {
   c.save(); c.translate(0, -lift);
   // shadow vignette on the satin (only before the yank)
   if (yank === 0) { const g = c.createRadialGradient(CX, 900, 300, CX, 900, 1250); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(8,6,20,0.55)'); c.fillStyle = g; c.fillRect(0, 0, W, H); }
-  bigWord(c, 'АЛМАТЫ.', t, 0.22, 930, '#ffffff', { size: 250, ls: 4, stag: 0.05 });
+  bigWord(c, 'АЛМАТЫ', t, 0.22, 930, '#ffffff', { size: 250, ls: 4, stag: 0.05 });
   italic(c, 'четыре сезона за один день', t, 0.75, CX, 1040, 66, '#cfd4f4');
   // the S: eyes peek over the bottom edge, blink twice, jump up and grab the cloth
   const peek = E.outBack(prog(t, 0.95, 1.25)), jump = spring(t, 1.5, 2.4, 0.35);
@@ -487,12 +488,12 @@ function shot5(c, t) {
 // ---------------------------------------------------------------- finale: one day inside five letters → the logo, the S, haha
 const LETTER_LOOK = ['suit', 'mint', 'ornek', 'kiss', 'space'];
 const LETTER_BG = ['#E2D8CB', '#BFD8D2', '#7A1734', '#16121A', '#4FA7BB'];
-const ADD = { size: 52, ls: 14, w: 0 };
-function logoLayout(t) {     // big five-letter layout → lockup (logo smaller, ADDICT on the right, as on their avatar)
+const ADD = { size: 56 };
+const LOGO_W = 795;          // visible width of the letters in the SVG (0…795)
+function logoLayout(t) {     // big five-letter layout → centred lockup (the S above, SALTA, ADDICT under it)
   const k = E.inOutCubic(prog(t, T.f2 + 0.02, T.f2 + 0.42));
-  const s = lerp(1.3, 0.8, k), w = 800 * s, lw = 800 * 0.8 + 30 + ADD.w;
-  const x = lerp(CX - w / 2, CX - lw / 2, k), y = lerp(760, 1200, k);
-  return { s, x, y, k };
+  const s = lerp(1.3, 0.9, k);
+  return { s, x: CX - LOGO_W * s / 2, y: lerp(760, 1180, k), k };
 }
 function shotFinale(c, t) {
   const drop = E.outCubic(prog(t, T.f1 - 0.25, T.f1 + 0.25));
@@ -521,21 +522,21 @@ function shotFinale(c, t) {
   });
   // flash on the logo hit
   const fl = prog(t, T.f2, T.f2 + 0.18); if (fl > 0 && fl < 1) { c.fillStyle = `rgba(255,255,255,${0.35 * (1 - fl) ** 2})`; c.fillRect(0, 0, W, H); }
-  italic(c, 'один день.', t, T.f1 + 0.15, CX, 470, 100, '#ffffff', 'center', { out: T.f2 - 0.05 });
-  italic(c, 'все сезоны.', t, T.f1 + 0.55, CX, 580, 100, '#c8cdf2', 'center', { out: T.f2 - 0.05 });
   if (t < T.f2) return;
-  // ADDICT, spaced, on the baseline right of SALTA (as on their avatar)
+  // ADDICT, centred under SALTA and spread exactly to its width
   const ak = prog(t, T.f2 + 0.3, T.f2 + 0.6);
   c.save(); c.font = OS(500, ADD.size); c.letterSpacing = '0px'; c.fillStyle = '#ffffff';
-  const word = 'ADDICT'; let x = LY.x + 800 * LY.s + 30;
-  for (let i = 0; i < word.length; i++) { const kk = prog(ak, i / 8, i / 8 + 0.4); c.globalAlpha = kk; c.fillText(word[i], x, LY.y + 160 * LY.s - 4 + 20 * (1 - kk)); x += c.measureText(word[i]).width + ADD.ls; }
+  const word = 'ADDICT', cw = [...word].map(ch => c.measureText(ch).width), full = LOGO_W * LY.s;
+  const gap = (full - cw.reduce((a, b) => a + b, 0)) / (word.length - 1);
+  let x = LY.x, by = LY.y - 160 * LY.s + 360 * LY.s + 26 + ADD.size;
+  for (let i = 0; i < word.length; i++) { const kk = prog(ak, i / 8, i / 8 + 0.4); c.globalAlpha = kk; c.fillText(word[i], x, by + 20 * (1 - kk)); x += cw[i] + gap; }
   c.restore();
   // the S drops onto the lockup, lands with a squash, rock horns on 15.0
   const land = T.f2 + 0.72, fall = prog(t, T.f2 + 0.45, land);
   const sq = t > land ? Math.exp(-(t - land) * 6) * Math.sin((t - land) * 20) : 0;
-  const my = t < land ? lerp(-300, 1060, E.inCubic(fall)) : 1060;
+  const my = t < land ? lerp(-300, 1030, E.inCubic(fall)) : 1030;
   const horn = E.outBack(prog(t, 15.0, 15.14)), happy = t > 15.0 && t < 15.9;
-  if (t > T.f2 + 0.45) mascot(c, CX - 20, my, 540, { body: '#ffffff', eye: '#3a3f5e', sy: 1 - 0.18 * sq, sx: 1 + 0.12 * sq, horns: horn, happy, blink: (t > 15.95 && t < 16.03) ? 1 : 0, arm: -0.08 * horn });
+  if (t > T.f2 + 0.45) mascot(c, CX, my, 540, { body: '#ffffff', eye: '#3a3f5e', sy: 1 - 0.18 * sq, sx: 1 + 0.12 * sq, horns: horn, happy, blink: (t > 15.95 && t < 16.03) ? 1 : 0, arm: -0.08 * horn });
   // the haha patch, stamped
   const hk = prog(t, 15.08, 15.2);
   if (hk > 0) {
@@ -544,14 +545,13 @@ function shotFinale(c, t) {
     c.strokeStyle = 'rgba(255,255,255,0.75)'; c.setLineDash([9, 7]); c.lineWidth = 3; c.beginPath(); c.roundRect(-98, -40, 196, 80, 18); c.stroke(); c.setLineDash([]);
     c.fillStyle = '#ffffff'; c.font = OS(600, 66); c.textAlign = 'center'; c.textBaseline = 'middle'; c.letterSpacing = '2px'; c.fillText('haha', 0, 2); c.restore();
   }
-  // slogan + signature
+  // slogan
   const sk = prog(t, 15.3, 15.7);
   if (sk > 0) {
     c.save(); c.textAlign = 'center'; c.font = OS(400, 40); c.letterSpacing = '9px'; c.fillStyle = `rgba(255,255,255,${sk})`;
-    c.fillText('STYLE YOUR STRIDE.', CX + 5, 1560 + 20 * (1 - E.outCubic(sk)));
-    const sk2 = prog(t, 15.45, 15.85); c.fillStyle = `rgba(255,255,255,${sk2})`; c.fillText('WALK WITH PRIDE.', CX + 5, 1620 + 20 * (1 - E.outCubic(sk2)));
+    c.fillText('STYLE YOUR STRIDE.', CX + 4.5, 1620 + 20 * (1 - E.outCubic(sk)));
+    const sk2 = prog(t, 15.45, 15.85); c.fillStyle = `rgba(255,255,255,${sk2})`; c.fillText('WALK WITH PRIDE.', CX + 4.5, 1680 + 20 * (1 - E.outCubic(sk2)));
     c.restore();
-    italic(c, 'designed by Salta', t, 15.7, CX, 1730, 62, '#c8cdf2');
   }
 }
 
@@ -633,7 +633,6 @@ async function boot() {
   LOGO = parseLogo(await (await fetch('/assets/salta_logo.svg')).text());
   for (const k of Object.keys(LOOKS)) { const L = LOOKS[k]; L.im = await loadImg(L.file); L.b = bounds(L.im); L.tint = tinted(L.im, '#FF1E3C'); }
   buildGrain();
-  { const c = ctx; c.font = OS(500, ADD.size); c.letterSpacing = '0px'; ADD.w = [...'ADDICT'].reduce((a, ch) => a + c.measureText(ch).width + ADD.ls, -ADD.ls); }
   buildEvents();
   window.READY = true;
 }
