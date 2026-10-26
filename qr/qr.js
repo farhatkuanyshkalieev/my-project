@@ -374,7 +374,7 @@ function shotDrop(c, t) {
   // caption plate under the band
   const ck = E.outCubic(prog(t, T.jaqsy + 0.1, T.jaqsy + 0.3));
   if (ck > 0) {
-    const txt = t < T.badge ? 'ХОРОШИХ ДНЕЙ' : 'ВСЁ БУДЕТ ХОРОШО';
+    const txt = t < T.badge ? 'JAQSY KÚNDER' : 'BÁRI JAQSY BOLADY';
     c.save(); c.font = MONO(700, 30); c.letterSpacing = '10px'; const w = c.measureText(txt).width + 70;
     const y = t < T.badge ? CY + 230 : CY + 380;
     c.fillStyle = P.Ink; c.beginPath(); c.roundRect(CX - w / 2, y - 40, w * ck, 64, 10); c.fill();
