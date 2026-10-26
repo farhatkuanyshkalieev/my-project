@@ -1,14 +1,16 @@
-"""SALTA ADDICT «Стильная странность»: music + sound design, synthesized from scratch, plus one real laugh.
+"""SALTA ADDICT «Стильная странность»: a runway-house track + sound design, synthesized from scratch, plus one real laugh.
 
-An elegant groove at 120 BPM in D minor (Dm9 – B♭maj9 – Gm9 – A7sus – Dm9), one bar per scene of the day.
-The motif is played by a dombra (Karplus–Strong, the East) and answered by string pizzicato
-(the West): Salta's own «best of East and West». Each hour of the day has its weather in the mix:
-clock ticks at 08:00, rain at 13:00, wind at 18:00, neon hum at 21:00, cold air and chimes at
-21:30. Twice the elegance is sabotaged by a distorted rock power chord, when the little S shows
-the horns 🤘. The finale drops into five stabs for the five letters, a big logo hit, the S lands,
-the horns again, and a woman laughs «ha-ha» (ElevenLabs, voice Soldani): the brand's haha emblem.
+The track: 120 BPM, D minor (Dm7 – B♭maj7 – Gm – A7, one chord per hour of the day). A 909-style
+kick and a side-chained («pumping») bus with claps, swung hats and shakers, a rolling saw bass,
+detuned supersaw chord stabs and a vocal-chop hook. Intro: the loop through a closed low-pass that
+opens with the satin, a snare roll, a riser and one breath of silence; the drop lands on the cloth
+yank (2.0 s). The party hour adds percussion and a dombra doubling the hook (Salta's «East and
+West»); the mountains close the filter into cold air; the letters get a breakdown and a build; the
+second drop hits on the logo. Scene effects (clock, rain, wind, neon, snow, kisses, the rock power
+chord on the horns 🤘, the laugh «ha-ha» by ElevenLabs voice Soldani) sit under the music.
+Master: glue compression, tilt EQ, soft-clip limiter (~−9 dBFS RMS).
 
-usage: python3 score_salta.py build/events.json build/sound.wav
+usage: python3 score_salta.py build/events.json build/sound.wav [build/sfx_only.wav]
 """
 import json
 import sys
@@ -318,75 +320,215 @@ def ahh(notes, d=1.4):
     return norm(out * np.minimum(1, t / 0.03) * np.clip((d - t) / 0.5, 0, 1))
 
 
-# ------------------------------------------------------------------ harmony: one bar per hour of the day
-CHORDS = {   # bar start → (bass root, chord voicing, motif base)
-    2: (38, [57, 60, 64, 65, 69], 62),      # Dm9      08:00
-    4: (34, [57, 62, 65, 69, 72], 62),      # B♭maj9   13:00
-    6: (43, [58, 62, 65, 69, 70], 67),      # Gm9      18:00
-    8: (45, [55, 60, 62, 67, 69], 69),      # A7sus    21:00
-    10: (38, [57, 60, 64, 65, 69], 62),     # Dm9      21:30
-}
-SCALE = [0, 2, 3, 5, 7, 8, 10]   # natural minor
+# ------------------------------------------------------------------ the track: runway house, 120 BPM, D minor
+# Buses: kick and sub go straight; everything else musical is side-chained to the kick («pumping»).
+drums = np.zeros((2, N)); pump_bus = np.zeros((2, N)); KICKS = []
 
 
-def motif(base, t0, g=1.0, which='dombra'):
-    """Four-note dombra phrase with a pizzicato answer (East asks, West answers)."""
-    steps = [(0, 0), (3, 2), (6, 4), (8, 3)]     # (16th, scale degree)
-    for s16, deg in steps:
-        m = base + SCALE[deg % 7] + 12 * (deg // 7)
-        M(dombra(m, 0.6), t0 + s16 * S16, 0.32 * g, pan=-0.3, r=0.25)
-    for s16, deg in [(12, 2), (14, 0)]:
-        m = base + SCALE[deg]
-        M(pizz(m + 12, 0.4), t0 + s16 * S16, 0.28 * g, pan=0.35, r=0.3)
+def D(sig, t0, g=1.0, pan=0.0, r=0.0, b=0.0, width=0.0):
+    put(drums, sig, t0, g, pan, r, b, width)
 
 
-def groove(t0, t1, g=1.0, party=False, light=False):
-    s = 0
-    while t0 + s * S16 < t1 - 1e-6:
-        tt = t0 + s * S16; q = s % 16
-        bar = 2 * int(tt // 2)
-        root, chord, _ = CHORDS.get(bar, CHORDS[2])
-        if (q % 4 == 0 and not light) or (light and q in (0, 10)):
-            M(kick(), tt, 0.7 * g)
-        if q in (4, 12):
-            M(snap(), tt, 0.33 * g, r=0.25, pan=0.1)
-            if party:
-                M(rim(), tt, 0.15 * g, pan=-0.1)
-        if q in (6, 15) and not light:
-            M(rim(), tt, 0.12 * g, pan=-0.3)
-        if q % 2 == 1 or party:
-            M(hat(party and q % 4 == 2), tt, (0.05 if q % 2 else 0.035) * g * (1.6 if party else 1), pan=0.25)
-        if (q in (0, 3, 7, 10) and not light) or (light and q in (0, 10)):
-            M(bass(root + (12 if q == 7 else 0), 0.5 if light else 0.28), tt, 0.5 * g)
+def P(sig, t0, g=1.0, pan=0.0, r=0.0, b=0.0, width=0.0):
+    put(pump_bus, sig, t0, g, pan, r, b, width)
+
+
+def snare(d=0.12):
+    t = T(d)
+    return norm(filt(noise(d), 'bp', (1500, 9000)) * np.exp(-t / 0.04) + 0.6 * np.sin(2 * np.pi * 200 * t) * np.exp(-t / 0.03))
+
+
+def kick909():
+    t = T(0.5)
+    f = 54 + 150 * np.exp(-t / 0.028) + 40 * np.exp(-t / 0.004)
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.2)
+    click = filt(noise(0.5), 'bp', (2500, 9000)) * np.exp(-t / 0.0025) * 0.5
+    return norm(np.tanh(2.2 * (body + click)) * np.minimum(1, t / 0.0008))
+
+
+def clap2():
+    d = 0.45; t = T(d); out = np.zeros(len(t))
+    for i, dt in enumerate((0, 0.007, 0.015, 0.024)):
+        tail = 0.009 if i < 3 else 0.11
+        bl = filt(noise(d), 'bp', (900, 7000)) * np.exp(-t / tail)
+        j = int(dt * SR); out[j:] += bl[:len(out) - j]
+    return norm(out + 0.25 * filt(noise(d), 'bp', (180, 400)) * np.exp(-t / 0.03))
+
+
+def shaker():
+    t = T(0.07)
+    return norm(filt(noise(0.07), 'bp', (5000, 12000)) * np.sin(np.pi * np.clip(t / 0.06, 0, 1)) ** 2)
+
+
+def ohat():
+    t = T(0.3)
+    s = filt(noise(0.3), 'high', 7000) + 0.3 * sum(osc(f, 0.3, rng.uniform(0, 6)) for f in (5400, 7900, 10300))
+    return norm(filt(s, 'high', 6000) * np.exp(-t / 0.09))
+
+
+def chat():
+    t = T(0.05)
+    return norm(filt(noise(0.05), 'high', 8500) * np.exp(-t / 0.008))
+
+
+def saw_bass(m, d=0.22, cut0=2200, cut1=260):
+    """Rolling house bass: detuned saws through a plucked low-pass, plus a clean sub."""
+    f = midi(m); t = T(d)
+    saw = sum(2 * ((f * (1 + dt) * t + ph) % 1) - 1 for dt, ph in ((0, 0), (0.006, 0.3), (-0.005, 0.6))) / 3
+    out = np.zeros(len(t)); seg = int(0.004 * SR)
+    for i in range(0, len(t), seg):   # filter envelope, stepped
+        fc = cut1 + (cut0 - cut1) * np.exp(-(i / SR) / 0.045)
+        out[i:i + seg] = filt(saw[max(0, i - seg * 6):i + seg], 'low', fc)[-len(out[i:i + seg]):]
+    sub = np.sin(2 * np.pi * f * t)
+    env_ = np.minimum(1, t / 0.003) * np.clip((d - t) / 0.02, 0, 1)
+    return norm(filt(np.tanh(1.6 * (0.9 * out + 0.5 * sub)) * env_, 'high', 38))
+
+
+def stab(notes, d=0.32, cut=2600, voices=7, spread=18):
+    """Detuned supersaw chord stab (the hook's rhythm)."""
+    t = T(d); L = np.zeros(len(t)); R = np.zeros(len(t))
+    for m in notes:
+        for j in range(voices):
+            dt = (j - (voices - 1) / 2) / ((voices - 1) / 2) * spread
+            f = midi(m) * 2 ** (dt / 1200); ph = rng.uniform(0, 1)
+            saw = 2 * ((f * t + ph) % 1) - 1
+            (L if j % 2 else R)[:] += saw
+            if j == voices // 2:
+                L += saw * 0.6; R += saw * 0.6
+    env_ = np.minimum(1, t / 0.003) * np.exp(-t / (d * 0.45)) * np.clip((d - t) / 0.03, 0, 1)
+    st = np.vstack([filt(L, 'low', cut), filt(R, 'low', cut)]) * env_
+    return st / (np.max(np.abs(st)) + 1e-9)
+
+
+def chop(m, vowel='a', d=0.22):
+    """Vocal chop: a sung formant syllable, short, slightly pitched up at the start (like a sliced sample)."""
+    t = T(d); f = midi(m) * (1 + 0.03 * np.exp(-t / 0.02))
+    src = sum(np.sin(2 * np.pi * np.cumsum(f * h) / SR) / h for h in range(1, 30))
+    F_ = {'a': ((800, 1.0), (1200, 0.7), (2700, 0.3)), 'o': ((500, 1.0), (850, 0.6), (2600, 0.2)),
+          'e': ((450, 1.0), (1900, 0.6), (2700, 0.35)), 'u': ((330, 1.0), (750, 0.4), (2400, 0.15))}[vowel]
+    out = sum(g * filt(src, 'bp', (fc * 0.88, fc * 1.12)) for fc, g in F_)
+    out += 0.08 * filt(noise(d), 'bp', (4000, 9000)) * np.exp(-t / 0.02)   # breath on the attack
+    return norm(out * np.minimum(1, t / 0.005) * np.clip((d - t) / 0.05, 0, 1))
+
+
+def lead_pluck(m, d=0.3):
+    f = midi(m); t = T(d)
+    s = sum(np.sin(2 * np.pi * f * h * t + h) / h ** 0.9 for h in range(1, 10)) + 0.5 * np.sin(2 * np.pi * f * 2.004 * t)
+    e = np.exp(-t / 0.09) * np.minimum(1, t / 0.002)
+    return norm(filt(s * e, 'low', 5200))
+
+
+def riser(d, f0=300, f1=9000):
+    t = T(d); k = t / d
+    nz = whoosh(d, f0, f1, 0.3) * k ** 2.2
+    tone = sum(np.sin(2 * np.pi * np.cumsum(midi(62) * 2 ** (2.5 * k) * r) / SR) for r in (1, 1.5, 2)) * 0.12 * k ** 3
+    return norm(nz + tone)
+
+
+def impact():
+    t = T(2.2)
+    boom = np.sin(2 * np.pi * np.cumsum(32 + 70 * np.exp(-t / 0.07)) / SR) * np.exp(-t / 0.6)
+    air = filt(noise(2.2), 'bp', (200, 5000)) * np.exp(-t / 0.35) * 0.4
+    return norm(np.tanh(1.8 * (boom + air)))
+
+
+def reverse_cym(d=0.9):
+    c = crash(d)[::-1]
+    return norm(c * np.linspace(0, 1, len(c)) ** 2)
+
+
+def sweep_lowpass(x, t0, t1, f0, f1):
+    """Time-varying low-pass on a bus segment (the intro opening up / the mountains closing)."""
+    i0, i1 = int(t0 * SR), int(t1 * SR); seg = int(0.01 * SR)
+    for ch in range(2):
+        y = x[ch, i0:i1].copy(); o = np.zeros_like(y)
+        for i in range(0, len(y), seg):
+            fc = f0 * (f1 / f0) ** (i / max(1, len(y)))
+            o[i:i + seg] = filt(y[max(0, i - seg * 8):i + seg], 'low', fc)[-len(o[i:i + seg]):]
+        x[ch, i0:i1] = o
+
+
+PROG = [(38, [62, 65, 69, 72]), (34, [62, 65, 69, 70]), (31, [62, 65, 67, 70]), (33, [61, 64, 67, 69])]   # Dm7 B♭maj7 Gm A7 (one per bar = one per hour)
+HOOK = [(0, 74, 'a'), (3, 77, 'o'), (6, 76, 'a'), (8, 74, 'e'), (10, 72, 'o'), (12, 69, 'a'), (14, 72, 'u')]   # 16th, note, vowel
+
+
+def chord_at(tt):
+    return PROG[int(np.floor(tt / 2.0 + 1e-9)) % 4]
+
+
+def beat(t0, t1, g=1.0, kick=True, clap=True, hats=True, bassline=True, stabs=True, hook=False, perc=False, halftime=False):
+    s = int(round(t0 / S16))
+    while s * S16 < t1 - 1e-6:
+        tt = s * S16; q = s % 16; sw = 0.012 if q % 2 else 0.0      # a little swing on the off 16ths
+        root, ch = chord_at(tt)
+        if kick and (q % 4 == 0) and (not halftime or q in (0, 8)):
+            D(kick909(), tt, 0.8 * g); KICKS.append(tt)
+        if clap and q in (4, 12):
+            P(clap2(), tt, 0.55 * g, r=0.22, pan=0.05)
+        if hats:
+            if q % 4 == 2:
+                P(ohat(), tt + sw, 0.2 * g, pan=0.2)
+            P(chat(), tt + sw, (0.12 if q % 2 else 0.08) * g, pan=-0.25)
+            P(shaker(), tt + sw, (0.1 if q % 4 in (1, 3) else 0.05) * g, pan=0.4)
+        if perc and q in (3, 7, 11, 14):
+            P(rim(), tt + sw, 0.14 * g, pan=-0.45 if q % 2 else 0.45)
+        if bassline and q in (2, 3, 6, 7, 10, 11, 14, 15):
+            m = root + (12 if q in (7, 15) else 0)
+            P(saw_bass(m, 0.2), tt + sw, 0.5 * g)
+        if stabs and q in (0, 3, 6, 10, 12):
+            P(stab(ch, 0.28 if q != 12 else 0.4, 4200), tt, 0.34 * g, r=0.15, width=1)
+        if hook:
+            for h16, m, v in HOOK:
+                if q == h16:
+                    P(chop(m, v, 0.2), tt + sw, 0.34 * g, r=0.3, pan=0.15)
+                    P(lead_pluck(m - 12, 0.25), tt + sw, 0.12 * g, pan=-0.2, r=0.2)
         s += 1
 
 
+def snare_roll(t0, t1, g0, g1):
+    """Accelerating roll: 16ths for the first half, 32nds after."""
+    mid = (t0 + t1) / 2; tt = t0
+    while tt < t1 - 0.005:
+        k = (tt - t0) / (t1 - t0)
+        P(snare(0.1), tt, g0 + (g1 - g0) * k, r=0.22)
+        tt += S16 if tt < mid else S16 / 2
+
+
 def score():
-    # prologue: the satin breathes, a cello holds D, the title is a soft E-piano chord
-    M(cello(38, 2.1, 0.6, 0.4), 0.05, 0.4, r=0.4, b=0.3)
-    M(epiano([62, 65, 69, 72, 76], 2.0), 0.22, 0.22, r=0.4, b=0.3)
-    M(pad([50, 57, 62, 65], 1.9, 1100, 0.6, 0.3), 0.1, 0.35, b=0.2)
-    # the day: one bar per hour, groove + chord + dombra/pizzicato motif
-    for bar, (root, chord, base) in CHORDS.items():
-        M(epiano(chord, 1.9), bar, 0.18, r=0.3, pan=0.05)
-        M(pad([n - 12 for n in chord[:3]], 2.0, 1300, 0.08, 0.3), bar, 0.18)
-        motif(base, bar, 1.0)
-    groove(2.0, 8.0)
-    groove(8.0, 10.0, 1.15, party=True)
-    groove(10.0, 11.75, 1.0, light=True)
-    M(pad([62, 69, 74, 76, 81], 2.0, 3200, 0.3, 0.4), 10.0, 1.4, b=0.4)   # cold air: a high open pad
-    # finale: breakdown, letters, riser, logo
-    M(pad([50, 57, 62, 64, 65, 69], 2.1, 1800, 0.2, 0.4), 12.0, 0.4, b=0.3)
-    M(cello(38, 2.0, 0.2, 0.3), 12.0, 0.3, r=0.3)
-    rise = whoosh(1.0, 400, 7000, 0.5) * np.linspace(0, 1, int(1.0 * SR)) ** 2
-    M(rise, 13.0, 0.5, width=1)
-    for i in range(8):
-        M(snap(), 13.0 + i * BEAT / 4 + (i > 3) * 0.0, 0.08 + 0.03 * i, r=0.2)
-    M(pad([50, 57, 62, 65, 69, 74], 2.6, 2200, 0.02, 1.2), 14.0, 0.42, b=0.45)
-    M(ahh([62, 65, 69, 74], 1.6), 14.0, 0.18, r=0.3, b=0.4)
-    groove(14.5, 16.0, 0.6, light=True)
-    motif(62, 14.5, 0.8)
-    M(epiano([50, 62, 65, 69, 72, 76], 1.5), 16.0, 0.25, r=0.4, b=0.4)
+    # 0–2: intro — the loop through a closed low-pass that opens with the satin; snare roll, riser, one breath of silence
+    beat(0.0, 1.94, 0.85, kick=False, clap=False)
+    snare_roll(1.0, 1.94, 0.08, 0.4)
+    P(riser(1.4), 0.54, 0.4, width=1)
+    P(reverse_cym(0.8), 1.15, 0.25)
+    # 2–8: the drop — full beat; the vocal hook comes in on the second bar
+    beat(2.0, 4.0, 1.0)
+    beat(4.0, 8.0, 1.0, hook=True)
+    # 8–10: the party peak — extra percussion, the hook doubled by the dombra (the East in the club)
+    beat(8.0, 10.0, 1.08, hook=True, perc=True)
+    for rep in (0, 1):
+        for h16, m, v in HOOK:
+            P(dombra(m - 12, 0.5), 8.0 + rep * 1.0 + h16 * S16, 0.2, pan=-0.4, r=0.2)
+    # 10–12: the mountains — the beat keeps going, the music closes into cold air and opens again
+    beat(10.0, 11.94, 1.0, hook=True)
+    P(reverse_cym(0.9), 11.04, 0.28)
+    # 12–14: breakdown under the letters — no kick, held chords, a build with a snare roll and a riser
+    P(pad([50, 57, 62, 65, 69], 2.0, 2400, 0.05, 0.3), 12.0, 1.1, b=0.3)
+    P(stab([50, 62, 65, 69, 72], 1.0, 1600) * 0.6, 12.0, 0.5, r=0.4)
+    P(stab([46, 62, 65, 69, 70], 1.0, 1600) * 0.6, 13.0, 0.5, r=0.4)
+    beat(12.0, 13.0, 0.7, kick=False, clap=False, bassline=False, stabs=False)
+    snare_roll(13.0, 13.94, 0.1, 0.45)
+    P(riser(1.0, 400, 11000), 12.95, 0.5, width=1)
+    # 14–16: the second drop on the logo, then the final chord rings out
+    D(impact(), 14.0, 0.8)
+    P(crash(2.6), 14.0, 0.35, r=0.2, b=0.3)
+    beat(14.0, 16.0, 1.05, hook=True, perc=True)
+    P(stab([50, 62, 65, 69, 72], 0.9, 2200), 16.0, 0.4, r=0.4, b=0.4)
+    D(kick909(), 16.0, 0.9); KICKS.append(16.0)
+    P(pad([50, 57, 62, 65, 69, 74], 0.5, 2400, 0.01, 0.4), 16.0, 0.9, b=0.5)
+    # filter moves
+    sweep_lowpass(pump_bus, 0.0, 1.94, 320, 7000)
+    sweep_lowpass(pump_bus, 10.0, 11.0, 9000, 1100)
+    sweep_lowpass(pump_bus, 11.0, 11.94, 1100, 9000)
 
 
 def cue(e):
@@ -461,9 +603,18 @@ def cue(e):
         r = wave.open('vo/laugh.wav')
         x = np.frombuffer(r.readframes(r.getnframes()), np.int16) / 32768.0
         x = filt(x, 'high', 90)
-        F(norm(x), t0, 0.62, r=0.12)
+        F(norm(x), t0, 1.3, r=0.12)
     elif ty == 'slogan':
         F(bell(98, 1.4, 0.4), t0, 0.08, r=0.6, pan=-0.2)
+
+
+def compress(x, thr_db=-18, ratio=3.0, att=0.005, rel=0.12):
+    lv = np.sqrt(np.mean(x ** 2, axis=0))
+    a_, r_ = np.exp(-1 / (att * SR)), np.exp(-1 / (rel * SR))
+    env_ = signal.lfilter([1 - r_], [1, -r_], lv)          # smooth level (release-dominated)
+    env_ = np.maximum(env_, signal.lfilter([1 - a_], [1, -a_], lv))
+    db = 20 * np.log10(env_ + 1e-9); over = np.maximum(0, db - thr_db)
+    return x * 10 ** (-(over - over / ratio) / 20)
 
 
 def main():
@@ -471,21 +622,45 @@ def main():
     for e in events:
         cue(e)
     score()
+    tt = np.arange(N) / SR
+    # side-chain: every kick pushes the music bus down and lets it breathe back
+    sc = np.ones(N)
+    for tk in KICKS:
+        i0 = int(tk * SR); n = min(N - i0, int(0.45 * SR))
+        if n > 0:
+            sc[i0:i0 + n] = np.minimum(sc[i0:i0 + n], 1 - 0.62 * np.exp(-np.arange(n) / SR / 0.09))
+    # duck the music under the laugh
+    duck = 1 - 0.45 * np.clip(prog_arr(tt, 15.05, 15.15) - prog_arr(tt, 16.2, 16.5), 0, 1)
     irL, irR = reverb_ir(1.4, 0.26)
     rv = np.vstack([signal.fftconvolve(rev[0], irL)[:N], signal.fftconvolve(rev[1], irR)[:N]])
     bL, bR = reverb_ir(3.2, 0.7, 5)
     rb = np.vstack([signal.fftconvolve(big[0], bL)[:N], signal.fftconvolve(big[1], bR)[:N]])
-    mix = mus * 0.9 + fx * 0.85 + 0.4 * rv + 0.35 * rb
-    mix = signal.sosfilt(signal.butter(2, 28 / (SR / 2), 'high', output='sos'), mix, axis=1)
-    pk = np.percentile(np.abs(mix), 99.95)
-    mix = np.tanh(mix / pk * 1.1) / np.tanh(1.1)
-    k = np.arange(N) / SR
-    mix *= np.clip((DUR - k) / 0.6, 0, 1) ** 1.5 * np.clip(k / 0.02, 0, 1)
-    mix = mix / np.max(np.abs(mix)) * 10 ** (-0.8 / 20)
+    music = (pump_bus * sc + drums + 0.35 * rv * sc + 0.3 * rb) * duck
+    mix = music + fx * 0.42 + mus * 0.5
+    mix = signal.sosfilt(signal.butter(3, 34 / (SR / 2), 'high', output='sos'), mix, axis=1)
+    mix = mix - 0.42 * filt(mix, 'low', 65) + 0.6 * filt(mix, 'high', 2800) + 0.4 * filt(mix, 'high', 8000)   # tilt: less mud, more bite and air
+    # master: glue compression, gentle high shelf for air, soft-clip limiter
+    mix = mix / (np.max(np.abs(mix)) + 1e-9)
+    mix = compress(mix, -16, 2.5)
+    pk = np.percentile(np.abs(mix), 99.7)
+    mix = np.tanh(mix / pk * 1.15) / np.tanh(1.15)
+    mix *= np.clip((DUR - tt) / 0.5, 0, 1) ** 1.5 * np.clip(tt / 0.01, 0, 1)
+    mix = mix / np.max(np.abs(mix)) * 10 ** (-0.6 / 20)
     with wave.open(sys.argv[2], 'wb') as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes((mix.T * 32767).astype(np.int16).tobytes())
     print(f'wrote {sys.argv[2]}  rms {20 * np.log10(np.sqrt(np.mean(mix ** 2))):.1f} dBFS')
+    if len(sys.argv) > 3:   # an effects-only stem (no music) for posting with a licensed track
+        stem = fx * 0.42 + mus * 0.5
+        stem = stem / (np.max(np.abs(stem)) + 1e-9) * 10 ** (-3 / 20)
+        with wave.open(sys.argv[3], 'wb') as w:
+            w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
+            w.writeframes((stem.T * 32767).astype(np.int16).tobytes())
+        print(f'wrote {sys.argv[3]}')
+
+
+def prog_arr(t, a, b):
+    return np.clip((t - a) / (b - a), 0, 1)
 
 
 if __name__ == '__main__':
