@@ -84,6 +84,7 @@ function grid(c, color, a = 0.08) {
   c.restore();
 }
 function hud(c, color, left, right, k = 1) {
+  return;   // no corner captions: they read as a template
   c.save(); c.globalAlpha = k; c.font = MONO(700, 24); c.letterSpacing = '4px'; c.fillStyle = col(color, 0.8); c.textBaseline = 'alphabetic';
   c.textAlign = 'left'; c.fillText(left, 64, 110); c.textAlign = 'right'; c.fillText(right, W - 64, 110);
   c.strokeStyle = col(color, 0.5); c.lineWidth = 2;
