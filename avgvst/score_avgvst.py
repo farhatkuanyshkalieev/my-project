@@ -17,7 +17,7 @@ import numpy as np
 from scipy import signal
 
 SR = 48000
-DUR = 16.5
+DUR = 18.0
 N = int(SR * DUR)
 BPM = 120
 BEAT = 60 / BPM
@@ -598,6 +598,13 @@ def score():
     M(strum([50, 57, 62], 1.0), 15.75, 0.35, r=0.3, b=0.3)
     M(kobyz(74, 0.75, 0.05, 0.6), 15.75, 0.25, r=0.4, b=0.4)
     M(throat(38, 0.75, 0.05, 0.6, [8, 10]), 15.75, 0.25, b=0.4)
+    # the logo holds: the groove rides on, lighter, and resolves on the last bar
+    beat(16.0, 17.5, 0.8, clap=True, toms=False, octave=False)
+    D(impact(), 17.5, 0.6); P(crash(2.0), 17.5, 0.22, r=0.3, b=0.4)
+    M(strum([50, 57, 62, 69], 1.6), 17.5, 0.4, r=0.35, b=0.35)
+    for i, m in enumerate([62, 69, 74]):
+        M(dombra(m, 1.4), 17.5 + i * S16, 0.28, pan=-0.2 + 0.2 * i, r=0.3, b=0.2)
+    M(kobyz(74, 0.5, 0.05, 0.4), 17.5, 0.22, r=0.4, b=0.4)
 
 
 def cue(e):
@@ -638,6 +645,10 @@ def cue(e):
         F(whoosh(0.35, 500, 5000, 1.2), t0 - 0.1, 0.4, width=1)
     elif ty == 'pop':
         F(plop(600, 0.12), t0, 0.35, r=0.2); F(metal_plate(2) * 0.5, t0 + 0.02, 0.15)
+    elif ty == 'match':
+        F(whoosh(0.65, 400, 4500, 1.4), t0, 0.35, width=1); F(metal_plate(1), t0 + 0.6, 0.3, r=0.4)
+    elif ty == 'credit':
+        F(bell(93, 1.0, 0.4), t0, 0.06, r=0.5)
     elif ty == 'open':
         F(whoosh(0.5, 300, 6000, 1.2), t0, 0.4, width=1)
     elif ty == 'collapse':

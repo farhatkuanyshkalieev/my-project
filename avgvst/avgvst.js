@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const W = 1080, H = 1920, CX = 540, CY = 960, FPS = 60, TAU = Math.PI * 2;
-export const DUR = 16.5;
+export const DUR = 18.0;
 const T = { pro: 0, hist: 2, dec: 4, eki: 8, uni: 10, real: 12, fin: 14 };
 const C = { beige: '#F3E1D2', brown: '#5A2E1E', red: '#B3202A', red2: '#D8383F', indigo: '#16202E', denim: '#2B3F5C', bronze: '#B08A4E', rust: '#9E4A28', rock: '#7E4026', ochre: '#E7C9A0' };
 
@@ -254,14 +254,16 @@ function serif(c, txt, t, t0, x, y, size, color, o = {}) {
   const outT = o.out ?? 1e9, ko = 1 - prog(t, outT, outT + 0.25);
   for (let i = 0; i < txt.length; i++) {
     const k = prog(t, t0 + i * (o.stag ?? 0.03), t0 + i * (o.stag ?? 0.03) + 0.4), e = E.outCubic(k);
+    if (o.shadow) { c.shadowColor = o.shadow; c.shadowBlur = o.blur ?? 18; c.shadowOffsetY = 3; }
     c.globalAlpha = k * ko; c.fillStyle = color; c.fillText(txt[i], px, y + (o.dy ?? 30) * (1 - e)); px += ws[i];
   }
   c.restore();
 }
-function label(c, txt, t, t0, x, y, size, color, ls = 10) {
+function label(c, txt, t, t0, x, y, size, color, ls = 10, shadow = null, wt = 400) {
   if (t < t0) return;
   const k = E.outCubic(prog(t, t0, t0 + 0.4));
-  c.save(); c.font = UB(400, size); c.letterSpacing = ls + 'px'; c.fillStyle = color; c.globalAlpha = k; c.textAlign = 'center';
+  c.save(); c.font = UB(wt, size); c.letterSpacing = ls + 'px'; c.fillStyle = color; c.globalAlpha = k; c.textAlign = 'center';
+  if (shadow) { c.shadowColor = shadow; c.shadowBlur = 14; c.shadowOffsetY = 2; }
   c.fillText(txt, x + ls / 2, y + 16 * (1 - k)); c.restore();
 }
 function render3D(c) { R3.render(scene, cam); c.drawImage(R3.domElement, 0, 0); }
@@ -335,8 +337,8 @@ function shotHist(c, t) {
   const t0 = T.hist;
   c.drawImage(ROCK, 0, 0, W, H);
   const v = c.createRadialGradient(CX, 900, 300, CX, 900, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(20,6,2,0.55)'); c.fillStyle = v; c.fillRect(0, 0, W, H);
-  serif(c, 'tarih', t, t0 + 0.15, CX, 300, 130, C.ochre, { it: true });
-  label(c, 'TAMGALY · PETROGLYPHS', t, t0 + 0.4, CX, 380, 26, col(C.ochre, 0.7), 10);
+  serif(c, 'tarih', t, t0 + 0.15, CX, 300, 140, '#F4DDBA', { it: true, w: 600, shadow: 'rgba(20,6,2,0.7)' });
+  label(c, 'TAMGALY · PETROGLYPHS', t, t0 + 0.4, CX, 385, 32, '#F4DDBA', 10, 'rgba(20,6,2,0.85)', 500);
   const k1 = E.outCubic(prog(t, t0 + 0.05, t0 + 0.9)), k2 = E.outCubic(prog(t, t0 + 0.45, t0 + 1.3));
   const fade = 1 - prog(t, t0 + 1.55, t0 + 1.85);
   c.save(); c.globalAlpha = fade;
@@ -391,9 +393,10 @@ function shotDec(c, t) {
   A.hero.visible = true; A.hero.scale.setScalar(A.hero.userData.s);
   // the hero plate: hits the screen on the drop, recedes, and waits on the back
   const hk = prog(t, t0, t0 + 0.45);
+  HERO.traverse(m => { if (m.isMesh) { m.material.transparent = false; m.material.opacity = 1; } });
   show(HERO, hk < 1); HERO.position.set(0, lerp(0, 6, E.inCubic(hk)), lerp(8, 2, E.outCubic(prog(t, t0, t0 + 0.12)))); HERO.rotation.set(0.2, lt * 6, 0); HERO.scale.setScalar(lerp(1.6, 0.6, hk));
   render3D(c);
-  label(c, 'DECONSTRUCTION · ASYMMETRY', t, t0 + 0.6, CX, 1800, 26, 'rgba(220,230,250,0.75)', 10);
+  label(c, 'DECONSTRUCTION · ASYMMETRY', t, t0 + 0.6, CX, 1800, 32, '#EEF2FA', 10, 'rgba(0,0,0,0.85)', 500);
 }
 
 // ---------------------------------------------------------------- 8–10 · eki: the vest rises, the trousers assemble, a two-piece
@@ -411,7 +414,7 @@ function shotEki(c, t) {
   grow(TR.bandT, prog(t, t0 + 0.75, t0 + 1.25));
   const pk = E.outBack(prog(t, t0 + 1.25, t0 + 1.45)); TR.pl.visible = pk > 0; TR.pl.scale.setScalar(Math.max(0.001, pk) * 0.3);
   render3D(c);
-  serif(c, 'two-piece', t, t0 + 0.6, CX, 1800, 70, '#F3E1D2', { it: true });
+  serif(c, 'two-piece', t, t0 + 0.6, CX, 1800, 84, '#FFF1E4', { it: true, w: 600, shadow: 'rgba(40,10,0,0.6)' });
 }
 
 // ---------------------------------------------------------------- 10–12 · unisex: one vest, two silhouettes
@@ -434,30 +437,49 @@ function shotUni(c, t) {
     grow(A.laceT, 1); grow(A.stL, 1); grow(A.stR, 1);
   });
   render3D(c);
-  serif(c, 'unisex', t, t0 + 0.5, CX, 1790, 150, C.red, { it: true, w: 600 });
+  const splitPath = (fresh = true) => { if (fresh) c.beginPath(); c.moveTo(0, 0); c.lineTo(lerp(W, 640, split), 0); c.lineTo(lerp(W, 440, split), H); c.lineTo(0, H); c.closePath(); };
+  c.save(); splitPath(); c.clip(); serif(c, 'unisex', t, t0 + 0.5, CX, 1790, 160, '#F3E1D2', { it: true, w: 700 }); c.restore();
+  c.save(); c.beginPath(); c.rect(0, 0, W, H); splitPath(false); c.clip('evenodd'); serif(c, 'unisex', t, t0 + 0.5, CX, 1790, 160, C.red, { it: true, w: 700 }); c.restore();
+  // match cut, part 1: the bronze plate leaves the vest and flies to where the real plate sits in their shoot
+  const mk2 = E.inOutCubic(prog(t, T.real - 0.65, T.real));
+  if (t > T.real - 0.65) {
+    HERO.visible = true; const fade = 1 - prog(t, T.real + 0.05, T.real + 0.45);
+    HERO.position.set(lerp(2.6, (ANCHOR[0] - CX) / 100, mk2), lerp(1.75, (CY - ANCHOR[1]) / 100, mk2), lerp(0.8, 0.4, mk2));
+    HERO.rotation.set(0.25 * (1 - mk2), TAU * 1.5 * (1 - mk2), 0); HERO.scale.setScalar(lerp(0.25, 1.12, mk2));
+    HERO.traverse(m => { if (m.isMesh) { m.material.transparent = true; m.material.opacity = fade; } });
+    R3.clear(); scene.traverse(o => { if (o.userData.top && o !== HERO) o.visible = false; }); wall.visible = false;
+    if (fade > 0) render3D(c);
+    wall.visible = true;
+  }
 }
 
 // ---------------------------------------------------------------- 12–14 · the real thing: their shoot through the ornament window
 let PHOTO = null;
+const ANCHOR = [509, 1186];    // the bronze plate in their shoot, on screen at t = T.real
 function drawPhoto(c, t, t0) {
-  const lt = t - t0, s = 1920 / PHOTO.height * (1.06 + 0.03 * lt), w = PHOTO.width * s, h = PHOTO.height * s;
-  c.drawImage(PHOTO, CX - w / 2 - 60 + 40 * lt, CY - h / 2, w, h);
+  const lt = Math.max(0, t - t0), s = 1920 / PHOTO.height * (1.06 + 0.03 * lt), w = PHOTO.width * s, h = PHOTO.height * s;
+  const z = 1 + 0.18 * (1 - E.outCubic(prog(t, t0, t0 + 0.9)));
+  c.save(); c.translate(ANCHOR[0], ANCHOR[1]); c.scale(z, z); c.translate(-ANCHOR[0], -ANCHOR[1]);
+  c.drawImage(PHOTO, CX - w / 2 - 60 + 40 * lt, CY - h / 2, w, h); c.restore();
 }
 function shotReal(c, t) {
-  const t0 = T.real, k = E.inExpo(prog(t, t0 - 0.15, t0 + 0.4));
+  const t0 = T.real, k = E.inCubic(prog(t, t0 + 0.02, t0 + 0.55));
   if (k < 1) shotUni(c, t);
+  // match cut, part 2: the ornament window opens around the plate; a soft bloom hides the hand-over
   lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.clearRect(0, 0, W, H);
-  lctx.fillStyle = '#fff'; ornamentClip(lctx, CX, CY, lerp(60, 2600, k));
+  { const r = lerp(105, 2900, k); lctx.fillStyle = '#fff'; lctx.beginPath(); lctx.moveTo(ANCHOR[0], ANCHOR[1] - r * 1.08); lctx.lineTo(ANCHOR[0] + r, ANCHOR[1]); lctx.lineTo(ANCHOR[0], ANCHOR[1] + r * 1.08); lctx.lineTo(ANCHOR[0] - r, ANCHOR[1]); lctx.closePath(); lctx.fill(); }   // the plate's own diamond becomes the window
+  lctx.globalAlpha = 1;
   lctx.globalCompositeOperation = 'source-in'; drawPhoto(lctx, t, t0); lctx.globalCompositeOperation = 'source-over';
   c.drawImage(lay, 0, 0);
   if (k >= 1) drawPhoto(c, t, t0);
-  const g = c.createLinearGradient(0, 1350, 0, H); g.addColorStop(0, 'rgba(10,6,4,0)'); g.addColorStop(1, 'rgba(10,6,4,0.8)'); c.fillStyle = g; c.fillRect(0, 1350, W, H - 1350);
+  const bl = Math.sin(Math.PI * prog(t, t0 - 0.05, t0 + 0.35)); if (bl > 0) { const g2 = c.createRadialGradient(ANCHOR[0], ANCHOR[1], 0, ANCHOR[0], ANCHOR[1], 420); g2.addColorStop(0, `rgba(255,236,200,${0.55 * bl})`); g2.addColorStop(1, 'rgba(255,236,200,0)'); c.fillStyle = g2; c.fillRect(0, 0, W, H); }
+  const g = c.createLinearGradient(0, 1300, 0, H); g.addColorStop(0, 'rgba(10,6,4,0)'); g.addColorStop(1, 'rgba(10,6,4,0.88)'); c.fillStyle = g; c.fillRect(0, 1350, W, H - 1350);
   // a running stitch across the bottom of the frame
   const S = poly([[-20, 1560], [1100, 1530]]), sk = E.inOutCubic(prog(t, t0 + 0.5, t0 + 1.3));
   c.save(); c.setLineDash([26, 16]); const r = thread(c, S, S.len * sk, { w: 6, shadow: false }); c.restore();
   if (sk > 0 && sk < 1) needle(c, r.tip[0], r.tip[1], r.ang, 0.7);
-  serif(c, 'made by @sa1ita', t, t0 + 0.7, CX, 1700, 92, '#F8EDE2', { it: true });
-  label(c, 'ALMATY', t, t0 + 1.0, CX, 1780, 30, 'rgba(248,237,226,0.85)', 16);
+  serif(c, 'designed by @sa1ita', t, t0 + 0.7, CX, 1700, 88, '#FFF4EA', { it: true, w: 600, shadow: 'rgba(0,0,0,0.8)' });
+  label(c, 'ALMATY', t, t0 + 1.0, CX, 1785, 32, '#FFF4EA', 16, 'rgba(0,0,0,0.85)', 500);
 }
 
 // ---------------------------------------------------------------- 14–16.5 · from Almaty worldwide, then the needle sews «august»
@@ -485,24 +507,25 @@ function shotFin(c, t) {
   if (t < t0 + 1.25) { c.fillStyle = C.red; c.beginPath(); c.arc(DOT[0], DOT[1], 12, 0, TAU); c.fill(); label(c, 'ALMATY', t, t0 + 0.3, DOT[0], DOT[1] + 60, 26, C.brown, 12); }
   serif(c, 'order worldwide', t, t0 + 0.4, CX, 1180, 84, C.brown, { it: true, out: t0 + 1.1 });
   // the needle sews the logo from left to right
-  const lw = 880, s = lw / LOGO_W, lx = CX - lw / 2, ly = 900 - LOGO_H * s / 2;
+  const lw = 980, s = lw / LOGO_W, lx = CX - lw / 2, ly = 860 - LOGO_H * s / 2;
   const sew = E.inOutCubic(prog(t, t0 + 1.15, t0 + 1.75)), hit = prog(t, t0 + 1.75, t0 + 2.1);
   if (sew > 0) {
-    const pop = 1 + 0.05 * Math.sin(Math.PI * hit) * (1 - hit);
-    c.save(); c.translate(CX, 900); c.scale(pop, pop); c.translate(-CX, -900);
+    const pop = (1 + 0.06 * Math.sin(Math.PI * hit) * (1 - hit)) * (1 + 0.035 * E.outCubic(prog(t, t0 + 2.0, DUR)));
+    c.save(); c.translate(CX, 860); c.scale(pop, pop); c.translate(-CX, -860);
     c.beginPath(); c.rect(lx - 20, 0, (lw + 40) * sew, H); c.clip();
-    c.translate(lx, ly); c.scale(s, s); c.fillStyle = C.brown; c.fill(LOGO); c.restore();
+    c.translate(lx, ly); c.scale(s, s); c.shadowColor = 'rgba(90,46,30,0.28)'; c.shadowBlur = 26; c.shadowOffsetY = 10; c.fillStyle = '#4E2416'; c.fill(LOGO); c.restore();
     if (sew < 1) {   // the needle bobs through the letters, a short red tail behind it
-      const nx = lx + lw * sew, ny = 900 + 70 * Math.sin(sew * 46);
-      c.strokeStyle = C.red; c.lineWidth = 5; c.beginPath(); c.moveTo(nx - 160, 905 + 70 * Math.sin((sew - 0.16) * 46)); c.quadraticCurveTo(nx - 70, 900, nx, ny); c.stroke();
+      const nx = lx + lw * sew, ny = 860 + 80 * Math.sin(sew * 46);
+      c.strokeStyle = C.red; c.lineWidth = 5; c.beginPath(); c.moveTo(nx - 160, 865 + 80 * Math.sin((sew - 0.16) * 46)); c.quadraticCurveTo(nx - 70, 860, nx, ny); c.stroke();
       needle(c, nx, ny, -0.35 + 0.5 * Math.cos(sew * 46), 0.8);
     }
   }
   // a single red stitch under the logo, then the line
   const ul = E.inOutCubic(prog(t, t0 + 1.8, t0 + 2.2));
-  if (ul > 0) { c.save(); c.setLineDash([22, 14]); thread(c, poly([[lx + 40, 1060], [lx + lw - 40, 1060]]), (lw - 80) * ul, { w: 5, shadow: false }); c.restore(); }
-  label(c, 'QAZAQ WEAR', t, t0 + 2.0, CX, 1175, 40, C.brown, 22);
-  label(c, 'MADE IN ALMATY · ORDER WORLDWIDE', t, t0 + 2.2, CX, 1250, 24, col(C.brown, 0.65), 8);
+  if (ul > 0) { c.save(); c.setLineDash([22, 14]); thread(c, poly([[lx + 60, 1050], [lx + lw - 60, 1050]]), (lw - 120) * ul, { w: 6, shadow: false }); c.restore(); }
+  label(c, 'QAZAQ WEAR', t, t0 + 2.0, CX, 1170, 44, '#4E2416', 22, null, 500);
+  label(c, 'MADE IN ALMATY · ORDER WORLDWIDE', t, t0 + 2.2, CX, 1245, 26, col(C.brown, 0.8), 8);
+  label(c, 'made by @f4rh4t._', t, t0 + 2.5, CX, 1810, 28, col(C.brown, 0.85), 6);
 }
 
 // ---------------------------------------------------------------- transitions + frame
@@ -526,7 +549,7 @@ function renderFrame(t) {
   else if (t < T.dec) shotHist(ctx, t);
   else if (t < T.eki) shotDec(ctx, t);
   else if (t < T.uni) shotEki(ctx, t);
-  else if (t < T.real - 0.15) shotUni(ctx, t);
+  else if (t < T.real) shotUni(ctx, t);
   else if (t < T.fin) shotReal(ctx, t);
   else shotFin(ctx, t);
   ctx.restore();
@@ -559,8 +582,8 @@ function buildEvents() {
   ev(T.dec + 3.2, 'spin');
   ev(T.eki, 'hit'); ev(T.eki + 0.25, 'piece'); ev(T.eki + 0.5, 'piece'); ev(T.eki + 0.75, 'stitch', { end: T.eki + 1.25 }); ev(T.eki + 1.25, 'plate', { i: 2 });
   ev(T.uni, 'swipe'); ev(T.uni + 0.1, 'thread', { end: T.uni + 1.05 }); ev(T.uni + 0.55, 'pop'); ev(T.uni + 0.75, 'pop');
-  ev(T.real - 0.15, 'open'); ev(T.real + 0.5, 'stitch', { end: T.real + 1.3 });
-  ev(T.fin, 'collapse'); ev(T.fin + 0.3, 'fly'); ev(T.fin + 0.95, 'back'); ev(T.fin + 1.15, 'sew', { end: T.fin + 1.75 }); ev(T.fin + 1.75, 'logo');
+  ev(T.real - 0.65, 'match'); ev(T.real, 'open'); ev(T.real + 0.5, 'stitch', { end: T.real + 1.3 });
+  ev(T.fin, 'collapse'); ev(T.fin + 0.3, 'fly'); ev(T.fin + 0.95, 'back'); ev(T.fin + 1.15, 'sew', { end: T.fin + 1.75 }); ev(T.fin + 1.75, 'logo'); ev(T.fin + 2.5, 'credit');
   EVENTS.sort((a, b) => a.t - b.t);
 }
 
