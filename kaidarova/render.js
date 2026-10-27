@@ -38,7 +38,7 @@ async function open() {
 }
 
 async function grab(page, t) {
-  await page.evaluate(tt => window.renderFrame(tt), t);
+  await page.evaluate(async tt => { if (window.prep) await window.prep(tt); window.renderFrame(tt); }, t);
   return page.screenshot({ type: 'png', clip: { x: 0, y: 0, width: W, height: H } });
 }
 
