@@ -630,6 +630,8 @@ def cue(e):
         F(thump(140, 60, 0.3, 0.08, 0.02), t0 + 0.25, 0.4)
     elif ty == 'tick':
         F(bell(93, 1.0, 0.5), t0, 0.1, r=0.4)
+    elif ty == 'unravel':
+        F(zip_(e['end'] - t0, 1800, 5200) * 0.5, t0, 0.14, pan=-0.3); F(silk(e['end'] - t0), t0, 0.14, width=1)
     elif ty == 'knitup':
         F(whoosh(0.4, 300, 3000, 1.3), t0, 0.35, width=1)
     elif ty == 'knit':
@@ -647,6 +649,8 @@ def cue(e):
         F(whoosh(0.5, 4000, 400, 1.2), t0, 0.35, width=1)
     elif ty == 'gold':
         F(bell(81, 1.6, 0.6), t0, 0.16, r=0.5); F(bell(88, 1.6, 0.6), t0 + 0.4, 0.12, r=0.5); F(metal_plate(4) * 0.6, t0 + 0.8, 0.2, r=0.4)
+    elif ty == 'detach':
+        F(bell(93, 1.2, 0.5), t0, 0.12, r=0.5); F(whoosh(0.5, 800, 6000, 1.3), t0 + 0.05, 0.25, width=1)
     elif ty == 'open':
         F(whoosh(0.4, 400, 5000, 1.2), t0, 0.35, width=1)
     elif ty == 'fall':
