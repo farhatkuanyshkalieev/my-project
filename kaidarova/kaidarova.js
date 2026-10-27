@@ -347,7 +347,7 @@ function shotTumar(c, t) {
   if (sh > 0 && sh < 1) { c.save(); tumarPath(c, TC[0], TC[1], TS); c.lineWidth = 14; c.strokeStyle = 'rgba(255,250,230,0.0)'; c.clip(); const gx = lerp(-300, W + 300, sh); const g = c.createLinearGradient(gx - 160, 0, gx + 160, 0); g.addColorStop(0, 'rgba(255,240,200,0)'); g.addColorStop(0.5, 'rgba(255,240,200,0.28)'); g.addColorStop(1, 'rgba(255,240,200,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H); c.restore(); }
   // the loop on top and three swinging pendants; the middle one is a little úki feather
   if (close >= 1) {
-    const dk = E.outBack(prog(t, t0 + 0.45, t0 + 0.8));
+    const dk = Math.max(0, E.outBack(prog(t, t0 + 0.45, t0 + 0.8)));
     const top = [TC[0], TC[1] - 0.62 * TS];
     c.save(); c.strokeStyle = C.gold; c.lineWidth = 7; c.beginPath(); c.arc(top[0], top[1] - 30, 26 * dk, 0, TAU); c.stroke(); c.restore();
     const leave = E.inCubic(prog(t, T.fin - 0.5, T.fin - 0.05));
