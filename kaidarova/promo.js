@@ -314,9 +314,10 @@ function shotPay(c, t) {
   drawClip(c, cl, t, 1.0 + 0.05 * lt);
   c.fillStyle = `rgba(20,6,9,${0.35 * E.inOutSine(prog(t, T.pay, T.pay + 0.6))})`; c.fillRect(0, 0, W, H);
   shade(c, 1150, H, 0.85);
-  line(c, 'завёрнутые', t, T.pay + 0.05, CX, 1470, CG(700, 150), C.cream, { stag: 0.02 });
-  line(c, 'в любовь', t, T.pay + 0.3, CX, 1610, CG(700, 150), '#FFB9A6', { stag: 0.025 });
-  line(c, 'НАГИМА КАЙДАРОВА · С 2014 · АСТАНА', t, T.pay + 0.6, CX, 1745, JO(500, 38), col(C.cream, 0.95), { ls: 6, stag: 0.006 });
+  line(c, 'завёрнутые', t, T.pay + 0.05, CX, 1440, CG(700, 150), C.cream, { stag: 0.02 });
+  line(c, 'в любовь', t, T.pay + 0.3, CX, 1580, CG(700, 150), '#FFB9A6', { stag: 0.025 });
+  line(c, 'НАГИМА КАЙДАРОВА', t, T.pay + 0.6, CX, 1745, JO(500, 46), C.cream, { ls: 8, stag: 0.01 });
+  line(c, 'С 2014 · АСТАНА', t, T.pay + 0.75, CX, 1810, JO(500, 40), col(C.cream, 0.9), { ls: 8, stag: 0.01 });
 }
 
 // ---------------------------------------------------------------- 15.5–18 · logo
