@@ -226,9 +226,9 @@ function shotPrint(c, t) {
     c.save(); c.beginPath(); c.rect(front, 0, W, H); c.clip();
     c.translate(CX, 930); c.scale(g, g); c.font = OS(700, 200); c.textAlign = 'center'; c.letterSpacing = '4px'; c.fillStyle = C.terra; c.shadowColor = 'rgba(80,30,10,0.25)'; c.shadowBlur = 30; c.shadowOffsetY = 12; c.fillText('MAHABBAT', 0, 90); c.restore();
     if (un > 0 && un < 1) yarn(c, front, 930 + 60 * Math.sin(un * 40), t);   // … into one terracotta yarn pulled up and away
-    line(c, 'махаббат · любовь · love', t, t0 + 2.15, CX, 1150, CG(700, 94), C.ink);
-    line(c, 'КАЗАХСКИЕ СЛОВА ЛАТИНИЦЕЙ', t, t0 + 2.3, CX, 1250, JO(500, 40), col(C.ink, 0.85), { ls: 6 });
-    line(c, 'С 2014 ГОДА', t, t0 + 2.4, CX, 1310, JO(500, 40), col(C.ink, 0.85), { ls: 6 });
+    line(c, 'махаббат · любовь · love', t, t0 + 1.9, CX, 1150, CG(700, 94), C.ink, { stag: 0.01 });
+    line(c, 'КАЗАХСКИЕ СЛОВА ЛАТИНИЦЕЙ', t, t0 + 2.0, CX, 1250, JO(500, 40), col(C.ink, 0.85), { ls: 6, stag: 0.008 });
+    line(c, 'С 2014 ГОДА', t, t0 + 2.05, CX, 1310, JO(500, 40), col(C.ink, 0.85), { ls: 6, stag: 0.01 });
   }
 }
 
@@ -437,7 +437,7 @@ function buildGrain() {
 function buildEvents() {
   ev(0.12, 'draw', { end: 0.8 }); ev(0.45, 'barbs', { end: 1.3 }); ev(1.2, 'loose');
   ev(T.wrap - 0.1, 'ribbon', { end: T.wrap + 1.2 }); ev(T.print - 0.4, 'dive');
-  ev(T.oyu - 0.65, 'unravel', { end: T.oyu - 0.1 }); ev(T.print, 'drop'); ev(T.print + 0.15, 'rise'); ev(T.print + 1.75, 'word'); ev(T.print + 2.15, 'tick');
+  ev(T.oyu - 0.65, 'unravel', { end: T.oyu - 0.1 }); ev(T.print, 'drop'); ev(T.print + 0.15, 'rise'); ev(T.print + 1.75, 'word'); ev(T.print + 1.9, 'tick');
   ev(T.oyu - 0.35, 'knitup'); ev(T.oyu, 'knit', { end: T.oyu + 2.3 }); ev(T.oyu + 2.55, 'match');
   ev(T.card - 0.3, 'title');
   ev(T.tumar - 0.2, 'close'); ev(T.tumar + 0.1, 'gold', { end: T.tumar + 0.9 });
