@@ -402,6 +402,24 @@ export const Cta: React.FC = () => {
         </AbsoluteFill>
       </Punch>
       <AbsoluteFill style={{background: '#000', opacity: interpolate(frame, [S.cta[1] - base - 0.4 * fps, S.cta[1] - base], [0, 0.6], clamp)}} />
+      {/* Author credit, kept above the closing fade so it stays readable to the last frame. */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 1660,
+          width: '100%',
+          textAlign: 'center',
+          fontFamily: body,
+          fontWeight: 600,
+          fontSize: 36,
+          letterSpacing: 3,
+          color: C.ice,
+          opacity: 0.8 * interpolate(frame, [press + 18, press + 30], [0, 1], clamp),
+          transform: `translateY(${interpolate(frame, [press + 18, press + 30], [16, 0], clamp)}px)`,
+        }}
+      >
+        made by f4rh4t._
+      </div>
     </AbsoluteFill>
   );
 };
