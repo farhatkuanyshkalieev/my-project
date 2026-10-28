@@ -424,7 +424,7 @@ export const Cta: React.FC = () => {
           transform: `translateY(${interpolate(frame, [press + 18, press + 30], [16, 0], clamp)}px)`,
         }}
       >
-        made by f4rh4t._
+        made by @frht.work
       </div>
     </AbsoluteFill>
   );
