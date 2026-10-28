@@ -11,6 +11,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
+import {LOGO_SPARKLE, LOGO_TEXT, LOGO_TOOTH_LEFT, LOGO_TOOTH_RIGHT} from './logo.generated';
 import {body, C, display, FOOTAGE} from './theme';
 import timeline from './timeline.json';
 
@@ -142,8 +143,12 @@ export const Tooth: React.FC<{size: number; shine?: number; glow?: number}> = ({
 
 /* ---------- Logo ---------- */
 
-const LOGO_TOOTH =
-  'M150 40 C 110 15, 40 20, 35 85 C 30 140, 60 175, 70 230 C 78 275, 95 285, 110 270 C 122 255, 125 215, 150 205 C 175 215, 178 255, 190 270 C 205 285, 222 275, 230 230 C 240 175, 270 140, 265 85 C 260 20, 190 15, 150 40 Z';
+// Centre lines of the two tooth strokes (same 330x330 box as the traced logo);
+// a thick stroke along each one is the mask that draws the stroke on.
+const TOOTH_SPINES = [
+  ['M177 47 C 150 36, 110 32, 80 45 C 50 58, 32 85, 29 123 C 27 160, 40 210, 61 245 C 75 270, 95 300, 119 307 C 135 312, 145 285, 160 264 C 172 250, 190 247, 206 247', LOGO_TOOTH_LEFT],
+  ['M105 68 C 125 74, 150 76, 172 72 C 205 64, 235 46, 262 48 C 290 50, 302 80, 300 118 C 298 160, 285 205, 262 245 C 250 270, 235 300, 215 309 C 200 314, 185 290, 178 274', LOGO_TOOTH_RIGHT],
+];
 
 export const Sparkle: React.FC<{size: number; color?: string; style?: React.CSSProperties}> = ({size, color = C.white, style}) => (
   <svg width={size} height={size} viewBox="-10 -10 20 20" style={style}>
@@ -151,47 +156,52 @@ export const Sparkle: React.FC<{size: number; color?: string; style?: React.CSSP
   </svg>
 );
 
-// Thick tooth outline with the wordmark inside and a sparkle, after the Atlantis Dent logo;
-// `draw` animates the outline, then the text and sparkle come in.
+// The clinic's logo, traced from their avatar (scripts/trace_logo.py): two brush strokes
+// forming a tooth, the wordmark and a sparkle. `draw` paints the strokes on, then the
+// wordmark and sparkle come in.
 export const Logo: React.FC<{scale?: number; draw?: number; light?: boolean}> = ({scale = 1, draw = 1, light = true}) => {
-  const len = 1000;
+  const id = React.useId().replace(/:/g, '');
   const color = light ? C.white : '#111';
+  const stroke = interpolate(draw, [0, 0.85], [0, 1], clamp);
   const text = interpolate(draw, [0.55, 1], [0, 1], clamp);
   return (
     <div style={{transform: `scale(${scale})`, width: 300, height: 300, position: 'relative'}}>
-      <svg width={300} height={300} viewBox="0 0 300 300" style={{overflow: 'visible', filter: light ? `drop-shadow(0 0 22px ${C.accent}66)` : 'none'}}>
+      <svg
+        width={300}
+        height={300}
+        viewBox="14 24 302 302"
+        style={{overflow: 'visible', filter: light ? `drop-shadow(0 0 22px ${C.accent}66)` : 'none'}}
+      >
+        <defs>
+          {TOOTH_SPINES.map(([spine], i) => (
+            <mask key={i} id={`${id}-m${i}`} maskUnits="userSpaceOnUse" x={-50} y={-50} width={430} height={430}>
+              <path
+                d={spine}
+                pathLength={1}
+                fill="none"
+                stroke="#fff"
+                strokeWidth={46}
+                strokeLinecap="round"
+                strokeDasharray={`${stroke} 2`}
+                opacity={stroke > 0 ? 1 : 0}
+              />
+            </mask>
+          ))}
+        </defs>
+        {TOOTH_SPINES.map(([, shape], i) => (
+          <path key={i} d={shape} fill={color} mask={`url(#${id}-m${i})`} />
+        ))}
+        <path d={LOGO_TEXT} fill={color} fillRule="evenodd" opacity={text} transform={`translate(0 ${(1 - text) * 12})`} />
         <path
-          d={LOGO_TOOTH}
-          fill="none"
-          stroke={color}
-          strokeWidth={22}
-          strokeLinejoin="round"
-          strokeDasharray={len}
-          strokeDashoffset={len * (1 - draw)}
+          d={LOGO_SPARKLE}
+          fill={color}
+          style={{
+            transformBox: 'fill-box',
+            transformOrigin: 'center',
+            transform: `scale(${text}) rotate(${(1 - text) * 90}deg)`,
+          }}
         />
       </svg>
-      <div
-        style={{
-          position: 'absolute',
-          top: 100,
-          width: '100%',
-          textAlign: 'center',
-          fontFamily: body,
-          fontWeight: 800,
-          color,
-          lineHeight: 1.05,
-          opacity: text,
-          transform: `translateY(${(1 - text) * 12}px)`,
-        }}
-      >
-        <div style={{fontSize: 31, letterSpacing: 0.5}}>ATLANTIS</div>
-        <div style={{fontSize: 34, letterSpacing: 1}}>DENT</div>
-      </div>
-      <Sparkle
-        size={28}
-        color={color}
-        style={{position: 'absolute', left: 74, top: 74, transform: `scale(${text}) rotate(${(1 - text) * 90}deg)`}}
-      />
     </div>
   );
 };

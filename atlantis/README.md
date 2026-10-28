@@ -7,6 +7,7 @@
 - `public/audio/vo.mp3` — озвучка, `vo.words.json` — тайминги слов (faster-whisper, написание приведено к тексту сценария).
 - `scripts/build_timeline.py` — привязывает сцены, субтитры и SFX к словам озвучки → `src/timeline.json`.
 - `scripts/mix_audio.py` — синтезирует звуковые эффекты и музыку и сводит их с голосом → `public/audio/soundtrack.wav`.
+- `src/logo.generated.ts` — логотип клиники, векторизованный из аватарки Instagram (`scripts/trace_logo.py`).
 - `src/` — Remotion-композиция (сцены в `scenes.tsx`).
 
 ## Озвучка
