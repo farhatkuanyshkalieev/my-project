@@ -621,6 +621,7 @@ function shotFin(c, t) {
   const hk = E.outCubic(prog(t, T.handles, T.handles + 0.3));
   c.globalAlpha = hk; c.textAlign = 'center'; c.font = MONO(700, 36); c.letterSpacing = '2px'; c.fillStyle = P.W; c.fillText('@qazaq.republic', CX, 1690 + 20 * (1 - hk));
   c.font = MONO(500, 28); c.fillStyle = col(P.W, 0.7); c.fillText('qazaqrepublic.com', CX, 1740 + 20 * (1 - hk));
+  c.font = MONO(500, 28); c.letterSpacing = '4px'; c.fillStyle = col(P.W, 0.75); c.fillText('made by @frht.work', CX, 1840 + 20 * (1 - hk));
   c.restore();
   hud(c, P.W, 'QAZAQ REPUBLIC', 'JAQSY KÚNDER', prog(t, T.handles, T.handles + 0.3));
 }

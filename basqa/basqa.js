@@ -632,6 +632,7 @@ function shotFin(t) {
     c.globalAlpha = hk;
     c.font = IT(800, 50); c.letterSpacing = '1px'; c.fillStyle = '#ffffff'; c.fillText('@basqawear', CX, 1600 + 24 * (1 - hk));
     c.font = MONO(500, 30); c.letterSpacing = '4px'; c.fillStyle = P.or; c.fillText('basqa.kz', CX, 1658 + 24 * (1 - hk));
+    c.font = MONO(500, 28); c.letterSpacing = '4px'; c.fillStyle = col('#ffffff', 0.75); c.fillText('made by @frht.work', CX, 1770 + 24 * (1 - hk));
     c.globalAlpha = 1;
     rosette(c, CX, 1420, 120 * E.outBack(prog(t, t0 + 0.45, t0 + 0.75)), (t - t0) * 0.8, P.or, 7);
     c.restore();

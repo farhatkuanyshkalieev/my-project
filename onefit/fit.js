@@ -522,6 +522,8 @@ function shotEnd(c, t) {
   const bk = E.outBack(prog(t, td + 0.6, td + 0.9));
   pillText(c, ' App Store', 330, 1770, 40, '#0b0b2a', '#fff', bk);
   pillText(c, ' Google Play', 760, 1770, 40, '#0b0b2a', '#fff', E.outBack(prog(t, td + 0.7, td + 1.0)));
+  const ck = E.outCubic(prog(t, td + 0.9, td + 1.2));
+  if (ck > 0) { c.save(); c.globalAlpha = ck; c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.font = MONO(700, 28); c.letterSpacing = '4px'; c.fillStyle = col('#ffffff', 0.8); c.fillText('made by @frht.work', CX, 1866 + 16 * (1 - ck)); c.restore(); }
 }
 
 // ---------------------------------------------------------------- frame
