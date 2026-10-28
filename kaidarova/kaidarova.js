@@ -389,7 +389,7 @@ function shotFin(c, t) {
   }
   const tk = E.outCubic(prog(t, t0 + 1.5, t0 + 2.0));
   if (tk > 0) { const s = 760 / TG.w, x = CX - TG.w * s / 2, y = 1420 + 20 * (1 - tk); c.save(); c.globalAlpha = tk; c.translate(x, y); c.scale(s, s); c.fillStyle = '#2a2a2a'; c.fill(TAG); c.restore(); }
-  line(c, 'made by @f4rh4t._', t, t0 + 2.0, CX, 1800, JO(500, 42), col('#1a1a1a', 0.85), { ls: 4 });
+  line(c, 'made by @frht.work', t, t0 + 2.0, CX, 1800, JO(500, 42), col('#1a1a1a', 0.85), { ls: 4 });
   c.restore();
 }
 

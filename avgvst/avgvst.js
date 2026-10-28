@@ -525,7 +525,7 @@ function shotFin(c, t) {
   if (ul > 0) { c.save(); c.setLineDash([22, 14]); thread(c, poly([[lx + 60, 1050], [lx + lw - 60, 1050]]), (lw - 120) * ul, { w: 6, shadow: false }); c.restore(); }
   label(c, 'QAZAQ WEAR', t, t0 + 2.0, CX, 1170, 44, '#4E2416', 22, null, 500);
   label(c, 'MADE IN ALMATY · ORDER WORLDWIDE', t, t0 + 2.2, CX, 1245, 26, col(C.brown, 0.8), 8);
-  label(c, 'made by @f4rh4t._', t, t0 + 2.5, CX, 1810, 28, col(C.brown, 0.85), 6);
+  label(c, 'made by @frht.work', t, t0 + 2.5, CX, 1810, 28, col(C.brown, 0.85), 6);
 }
 
 // ---------------------------------------------------------------- transitions + frame

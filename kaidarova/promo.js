@@ -338,7 +338,7 @@ function shotFin(c, t) {
   const tk = E.outCubic(prog(t, t0 + 0.7, t0 + 1.1));
   if (tk > 0) { const s = 760 / TG.w; c.save(); c.globalAlpha = tk; c.translate(CX - TG.w * s / 2, 1360 + 16 * (1 - tk)); c.scale(s, s); c.fillStyle = '#3a2a28'; c.fill(TAG); c.restore(); }
   line(c, '@kaidarova.ethnic', t, t0 + 0.9, CX, 1520, JO(500, 46), C.burg, { ls: 4, shadow: false });
-  line(c, 'made by @f4rh4t._', t, t0 + 1.1, CX, 1800, JO(500, 42), col(C.ink, 0.85), { ls: 4, shadow: false });
+  line(c, 'made by @frht.work', t, t0 + 1.1, CX, 1800, JO(500, 42), col(C.ink, 0.85), { ls: 4, shadow: false });
   c.restore();
   if (up < 1) knitBand(c, CX, top, 0, 150, t * 900);
 }

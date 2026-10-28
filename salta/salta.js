@@ -553,6 +553,12 @@ function shotFinale(c, t) {
     const sk2 = prog(t, 15.45, 15.85); c.fillStyle = `rgba(255,255,255,${sk2})`; c.fillText('WALK WITH PRIDE.', CX + 4.5, 1680 + 20 * (1 - E.outCubic(sk2)));
     c.restore();
   }
+  // author credit, held to the end
+  const ck = prog(t, 15.6, 15.95);
+  if (ck > 0) {
+    c.save(); c.textAlign = 'center'; c.font = OS(400, 36); c.letterSpacing = '5px'; c.fillStyle = `rgba(255,255,255,${0.85 * ck})`;
+    c.shadowColor = 'rgba(0,0,0,0.6)'; c.shadowBlur = 12; c.fillText('made by @frht.work', CX + 2.5, 1800 + 14 * (1 - E.outCubic(ck))); c.restore();
+  }
 }
 
 // ---------------------------------------------------------------- transitions between the day's scenes
