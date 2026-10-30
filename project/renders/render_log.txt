@@ -1,0 +1,18 @@
+Fontconfig warning: "/usr/share/fontconfig/conf.avail/05-reset-dirs-sample.conf", line 6: unknown element "reset-dirs"
+Fontconfig warning: "/usr/share/fontconfig/conf.avail/05-reset-dirs-sample.conf", line 6: unknown element "reset-dirs"
+Fontconfig warning: "/usr/share/fontconfig/conf.avail/05-reset-dirs-sample.conf", line 6: unknown element "reset-dirs"
+Fontconfig warning: "/usr/share/fontconfig/conf.avail/05-reset-dirs-sample.conf", line 6: unknown element "reset-dirs"
+frame 0/3804  1s
+frame 300/3804  53s
+frame 600/3804  82s
+frame 900/3804  133s
+frame 1200/3804  184s
+frame 1500/3804  234s
+frame 1800/3804  274s
+frame 2100/3804  316s
+frame 2400/3804  351s
+frame 2700/3804  388s
+frame 3000/3804  435s
+frame 3300/3804  479s
+frame 3600/3804  515s
+done 520.2754287719727

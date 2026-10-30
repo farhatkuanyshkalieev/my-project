@@ -1,0 +1,37 @@
+"""Voice casting + take registry for episode 01 (ElevenLabs eleven_v4). Single source of truth for dialogue."""
+VOICES = {
+    "arman":  {"voice_id": "g1G73EpCIdK4HUyDiLYF", "name": "Egor — Young & Energetic", "model": "eleven_v4"},
+    "double": {"voice_id": "g1G73EpCIdK4HUyDiLYF", "name": "Egor (same actor) + post: -1.3 st pitch, hall reverb", "model": "eleven_v4"},
+    "mom":    {"voice_id": "wlkyM0h4j74QgqHxZi4F", "name": "Soldani — warm, mature, light Kazakh accent", "model": "eleven_v4"},
+}
+LINES = {
+    # id: (speaker, text for subtitles, ElevenLabs prompt with direction tags, [takes], direction notes)
+    "A01": ("arman", "Мам… ты мне писала?", "[curious] Мам… ты мне писала?", ["dxkZy2smV7PsXicoE8Hk", "Z0EOMnefk08u1rjim6qr"],
+            "лёгкое недоумение; разговорно; средний темп; пауза после «Мам»"),
+    "M01": ("mom", "Нет. Что случилось?", "[warmly] Нет. [curious] Что случилось?", ["enNK2jipG9dRsXSnI0sX", "IHerAIGBOTthIEakt1Sc"],
+            "тепло, спокойно; второе предложение — заинтересованно"),
+    "A02": ("arman", "Это что… прикол какой-то?", "[nervous laugh] Это что… прикол какой-то?", ["FyoLX8ZnUgjLXhpcyrEv", "f97duU60jINtPjYSjtNy"],
+            "нервный смешок, попытка шутить; средне-быстрый темп"),
+    "M02": ("mom", "Не отвечай.", "[whispers] [nervous] Не отвечай.", ["EKe83lHhpWDWHZP0gZ0N", "velMDCa5HPRan3tLmh4i"],
+            "тихо, напряжённо; тревога, которую она скрывает; медленно"),
+    "A03": ("arman", "Почему?", "[confused] [nervous] Почему?", ["Y7ca9C80pLdjaUYnVGJE", "wFukqTF3TFtIgNp8hmWV"],
+            "растерянно, тише обычного"),
+    "M03": ("mom", "Потому что я тоже… ответила.", "[sad] [softly] Потому что я тоже… ответила.", ["4hV5a05DPaR5P1p1nb7B"],
+            "грустно, мягко; пауза перед «ответила»"),
+    "A04": ("arman", "Мам?", "[scared] [softly] Мам?", ["gCA8RvgJcrw59awF5ojt", "8LZP3iuMZgvPYQxUgXXX"],
+            "испуг, тихо, вопросительно"),
+    "M04": ("mom", "Сынок, я задерживаюсь. Буду через полчаса.", "[warmly] [tired] Сынок, я задерживаюсь. Буду через полчаса.", ["0AOkbfPSZE3JRc4JntL0"],
+            "обычная, немного уставшая мама по телефону; телефонная обработка"),
+    "A05": ("arman", "Ты же… только что здесь сидела.", "[trembling voice] Ты же… только что здесь сидела.", ["sitgiGJwnqK4CQdD4JoP", "YAFzLRSH3V180OUzHxBw"],
+            "дрожащий голос, недоверие; пауза после «Ты же»"),
+    "M05": ("mom", "Арман, я ещё на работе.", "[surprised] [laughs softly] Арман, я ещё на работе.", ["2hPDTHma3unYBUCVraGm"],
+            "удивлённо, с лёгким смешком — она не понимает, о чём он"),
+    "A06": ("arman", "Кто… ты?", "[whispers] Кто… ты?", ["flu3tnEKaqUejK2XWoSd", "8COFKsMoJHkAlfOPXJnJ"],
+            "шёпотом, пока печатает"),
+    "D01": ("double", "Не верь ему.", "[calm] [deep voice] Не верь ему.", ["o9dCFQfcORFLa7c7nQRK"],
+            "низко, спокойно, из темноты коридора"),
+    "D02": ("double", "Он всегда пишет… первым.", "[calm] [deep voice] [mischievously] Он всегда пишет… [short pause] первым.", ["wQ03c2tcYuYvqmhZBkhG"],
+            "спокойная уверенность с иронией; пауза перед «первым»"),
+    "A07": ("arman", "Ч-что?..", "[gasps] [breathless] Ч-что?..", ["6tEFbmCvermI3AUqqpxG", "Nd2Of687AyGEpGIKxL1o"],
+            "резкий вдох, сбившееся дыхание"),
+}

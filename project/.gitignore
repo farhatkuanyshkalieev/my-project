@@ -1,0 +1,6 @@
+renders/*.mp4
+renders/*.wav
+renders/stems/
+renders/x264_2pass*
+__pycache__/
+*.pyc

@@ -1,0 +1,966 @@
+{
+ "project": "ТЕБЯ ЗДЕСЬ НЕ БЫЛО",
+ "episode": 1,
+ "episode_title": "НЕ ОТВЕЧАЙ",
+ "language": "ru",
+ "format": "vertical 9:16",
+ "duration_s": 63.4,
+ "resolution": [
+  1080,
+  1920
+ ],
+ "fps": 60,
+ "style": "CINEMATIC STICKMAN 2.5D — procedural vector animation (skia), multiplicative lighting passes, DOF, parallax",
+ "pipeline": [
+  "1 voice: ElevenLabs eleven_v4 (tagged emotional direction) -> voices/raw/*.mp3",
+  "2 voice QC: faster-whisper small (ru) transcription vs script -> voices/qc_report.json",
+  "3 audio_build.py: trim, process (room / phone / double pitch -1.3 st + hall reverb), lip-sync envelopes, synth SFX, original score, mix, limiter",
+  "4 ep01_shots.py + render.py: every frame drawn at its own time (true 60 fps, no interpolation) -> renders/ep01_picture_master.mp4",
+  "5 subtitles.py: SRT + overlay PNGs from real dialogue timing",
+  "6 finalize.py: loudnorm -14 LUFS / -1.5 dBTP, grain, 2-pass H.264, subtitle burn-in",
+  "7 qc.py: ffprobe, duplicate-frame analysis, loudness, black-bar check"
+ ],
+ "rebuild": [
+  "python3 scripts/audio_build.py",
+  "python3 scripts/render.py renders/ep01_picture_master.mp4",
+  "python3 scripts/subtitles.py",
+  "python3 scripts/finalize.py",
+  "python3 scripts/qc.py",
+  "python3 scripts/make_manifest.py"
+ ],
+ "rerender_one_scene": "edit scripts/ep01_shots.py::sNN, then python3 scripts/render.py renders/ep01_picture_master.mp4 (renders 3804 frames, ~9 min on 4 CPU); stills: python3 scripts/render_stills.py OUT_DIR T1 T2...",
+ "tools": {
+  "python": "3.13.17",
+  "skia_python": "144.1",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "elevenlabs": {
+   "model": "eleven_v4",
+   "flow": "https://elevenlabs.io/app/flows/IwBapBwwAluvM3OQnm5C"
+  },
+  "whisper": "faster-whisper small int8 (QC only)",
+  "fonts": [
+   "Russo One (OFL)",
+   "Rubik (OFL)",
+   "Oswald (OFL)",
+   "Inter (OFL, system)"
+  ]
+ },
+ "characters": {
+  "arman": {
+   "style_sheet": "characters/arman_reference_sheet.png"
+  },
+  "double": {
+   "style_sheet": "characters/double_reference_sheet.png"
+  },
+  "mom": {
+   "style_sheet": "characters/mom_reference_sheet.png"
+  },
+  "girl": {
+   "style_sheet": "characters/girl_reference_sheet.png"
+  },
+  "barista": {
+   "style_sheet": "characters/barista_reference_sheet.png"
+  },
+  "operator": {
+   "style_sheet": "characters/operator_reference_sheet.png"
+  }
+ },
+ "voices": {
+  "arman": {
+   "voice_id": "g1G73EpCIdK4HUyDiLYF",
+   "name": "Egor — Young & Energetic",
+   "model": "eleven_v4"
+  },
+  "double": {
+   "voice_id": "g1G73EpCIdK4HUyDiLYF",
+   "name": "Egor (same actor) + post: -1.3 st pitch, hall reverb",
+   "model": "eleven_v4"
+  },
+  "mom": {
+   "voice_id": "wlkyM0h4j74QgqHxZi4F",
+   "name": "Soldani — warm, mature, light Kazakh accent",
+   "model": "eleven_v4"
+  }
+ },
+ "dialogue": {
+  "A01": {
+   "speaker": "arman",
+   "text": "Мам… ты мне писала?",
+   "eleven_prompt": "[curious] Мам… ты мне писала?",
+   "takes": [
+    "dxkZy2smV7PsXicoE8Hk",
+    "Z0EOMnefk08u1rjim6qr"
+   ],
+   "selected_take": "dxkZy2smV7PsXicoE8Hk",
+   "direction": "лёгкое недоумение; разговорно; средний темп; пауза после «Мам»",
+   "start_s": 4.9,
+   "fx_chain": "room",
+   "processed": "voices/processed/A01.wav"
+  },
+  "M01": {
+   "speaker": "mom",
+   "text": "Нет. Что случилось?",
+   "eleven_prompt": "[warmly] Нет. [curious] Что случилось?",
+   "takes": [
+    "enNK2jipG9dRsXSnI0sX",
+    "IHerAIGBOTthIEakt1Sc"
+   ],
+   "selected_take": "enNK2jipG9dRsXSnI0sX",
+   "direction": "тепло, спокойно; второе предложение — заинтересованно",
+   "start_s": 7.15,
+   "fx_chain": "room",
+   "processed": "voices/processed/M01.wav"
+  },
+  "A02": {
+   "speaker": "arman",
+   "text": "Это что… прикол какой-то?",
+   "eleven_prompt": "[nervous laugh] Это что… прикол какой-то?",
+   "takes": [
+    "FyoLX8ZnUgjLXhpcyrEv",
+    "f97duU60jINtPjYSjtNy"
+   ],
+   "selected_take": "FyoLX8ZnUgjLXhpcyrEv",
+   "direction": "нервный смешок, попытка шутить; средне-быстрый темп",
+   "start_s": 14.75,
+   "fx_chain": "room",
+   "processed": "voices/processed/A02.wav"
+  },
+  "M02": {
+   "speaker": "mom",
+   "text": "Не отвечай.",
+   "eleven_prompt": "[whispers] [nervous] Не отвечай.",
+   "takes": [
+    "EKe83lHhpWDWHZP0gZ0N",
+    "velMDCa5HPRan3tLmh4i"
+   ],
+   "selected_take": "velMDCa5HPRan3tLmh4i",
+   "direction": "тихо, напряжённо; тревога, которую она скрывает; медленно",
+   "start_s": 18.3,
+   "fx_chain": "room_close",
+   "processed": "voices/processed/M02.wav"
+  },
+  "A03": {
+   "speaker": "arman",
+   "text": "Почему?",
+   "eleven_prompt": "[confused] [nervous] Почему?",
+   "takes": [
+    "Y7ca9C80pLdjaUYnVGJE",
+    "wFukqTF3TFtIgNp8hmWV"
+   ],
+   "selected_take": "wFukqTF3TFtIgNp8hmWV",
+   "direction": "растерянно, тише обычного",
+   "start_s": 20.15,
+   "fx_chain": "room",
+   "processed": "voices/processed/A03.wav"
+  },
+  "M03": {
+   "speaker": "mom",
+   "text": "Потому что я тоже… ответила.",
+   "eleven_prompt": "[sad] [softly] Потому что я тоже… ответила.",
+   "takes": [
+    "4hV5a05DPaR5P1p1nb7B"
+   ],
+   "selected_take": "4hV5a05DPaR5P1p1nb7B",
+   "direction": "грустно, мягко; пауза перед «ответила»",
+   "start_s": 21.45,
+   "fx_chain": "room_close",
+   "processed": "voices/processed/M03.wav"
+  },
+  "A04": {
+   "speaker": "arman",
+   "text": "Мам?",
+   "eleven_prompt": "[scared] [softly] Мам?",
+   "takes": [
+    "gCA8RvgJcrw59awF5ojt",
+    "8LZP3iuMZgvPYQxUgXXX"
+   ],
+   "selected_take": "gCA8RvgJcrw59awF5ojt",
+   "direction": "испуг, тихо, вопросительно",
+   "start_s": 27.55,
+   "fx_chain": "room",
+   "processed": "voices/processed/A04.wav"
+  },
+  "M04": {
+   "speaker": "mom",
+   "text": "Сынок, я задерживаюсь. Буду через полчаса.",
+   "eleven_prompt": "[warmly] [tired] Сынок, я задерживаюсь. Буду через полчаса.",
+   "takes": [
+    "0AOkbfPSZE3JRc4JntL0"
+   ],
+   "selected_take": "0AOkbfPSZE3JRc4JntL0",
+   "direction": "обычная, немного уставшая мама по телефону; телефонная обработка",
+   "start_s": 32.45,
+   "fx_chain": "phone",
+   "processed": "voices/processed/M04.wav"
+  },
+  "A05": {
+   "speaker": "arman",
+   "text": "Ты же… только что здесь сидела.",
+   "eleven_prompt": "[trembling voice] Ты же… только что здесь сидела.",
+   "takes": [
+    "sitgiGJwnqK4CQdD4JoP",
+    "YAFzLRSH3V180OUzHxBw"
+   ],
+   "selected_take": "sitgiGJwnqK4CQdD4JoP",
+   "direction": "дрожащий голос, недоверие; пауза после «Ты же»",
+   "start_s": 36.4,
+   "fx_chain": "room",
+   "processed": "voices/processed/A05.wav"
+  },
+  "M05": {
+   "speaker": "mom",
+   "text": "Арман, я ещё на работе.",
+   "eleven_prompt": "[surprised] [laughs softly] Арман, я ещё на работе.",
+   "takes": [
+    "2hPDTHma3unYBUCVraGm"
+   ],
+   "selected_take": "2hPDTHma3unYBUCVraGm",
+   "direction": "удивлённо, с лёгким смешком — она не понимает, о чём он",
+   "start_s": 39.2,
+   "fx_chain": "phone",
+   "processed": "voices/processed/M05.wav"
+  },
+  "A06": {
+   "speaker": "arman",
+   "text": "Кто… ты?",
+   "eleven_prompt": "[whispers] Кто… ты?",
+   "takes": [
+    "flu3tnEKaqUejK2XWoSd",
+    "8COFKsMoJHkAlfOPXJnJ"
+   ],
+   "selected_take": "8COFKsMoJHkAlfOPXJnJ",
+   "direction": "шёпотом, пока печатает",
+   "start_s": 46.1,
+   "fx_chain": "whisper",
+   "processed": "voices/processed/A06.wav"
+  },
+  "D01": {
+   "speaker": "double",
+   "text": "Не верь ему.",
+   "eleven_prompt": "[calm] [deep voice] Не верь ему.",
+   "takes": [
+    "o9dCFQfcORFLa7c7nQRK"
+   ],
+   "selected_take": "o9dCFQfcORFLa7c7nQRK",
+   "direction": "низко, спокойно, из темноты коридора",
+   "start_s": 52.9,
+   "fx_chain": "double_offscreen",
+   "processed": "voices/processed/D01.wav"
+  },
+  "D02": {
+   "speaker": "double",
+   "text": "Он всегда пишет… первым.",
+   "eleven_prompt": "[calm] [deep voice] [mischievously] Он всегда пишет… [short pause] первым.",
+   "takes": [
+    "wQ03c2tcYuYvqmhZBkhG"
+   ],
+   "selected_take": "wQ03c2tcYuYvqmhZBkhG",
+   "direction": "спокойная уверенность с иронией; пауза перед «первым»",
+   "start_s": 56.7,
+   "fx_chain": "double_hall",
+   "processed": "voices/processed/D02.wav"
+  },
+  "A07": {
+   "speaker": "arman",
+   "text": "Ч-что?..",
+   "eleven_prompt": "[gasps] [breathless] Ч-что?..",
+   "takes": [
+    "6tEFbmCvermI3AUqqpxG",
+    "Nd2Of687AyGEpGIKxL1o"
+   ],
+   "selected_take": "6tEFbmCvermI3AUqqpxG",
+   "direction": "резкий вдох, сбившееся дыхание",
+   "start_s": 54.45,
+   "fx_chain": "room",
+   "processed": "voices/processed/A07.wav"
+  }
+ },
+ "locations": {
+  "sets_code": "scripts/engine/sets.py, scripts/engine/sets_future.py",
+  "sheet": "references/environment_reference_sheet.png",
+  "backgrounds": [
+   "apartment_corridor.png",
+   "apartment_kitchen_east.png",
+   "apartment_kitchen_north_wide.png",
+   "apartment_kitchen_west.png",
+   "cafe.png",
+   "observation_room.png",
+   "stairwell_048.png",
+   "street_night.png",
+   "white_room.png"
+  ]
+ },
+ "scenes": [
+  {
+   "id": "S01",
+   "start": 0.0,
+   "end": 4.4,
+   "duration": 4.4,
+   "description": "ECU телефон: уведомление → перевод фокуса на маму",
+   "location": "Кухня (восток) + инсерт",
+   "characters": "Арман (руки), Мама (фон)",
+   "shot_type": "ДКП телефона → КП мамы",
+   "camera_position": "из-за плеча Армана, на уровне стола",
+   "camera_move": "перевод фокуса + наклон вниз",
+   "action": "Телефон загорается, падает уведомление; фокус уходит на маму с кружкой",
+   "emotion": "тревожная тишина / мама спокойна",
+   "dialogue": [],
+   "sfx": "щелчок пробуждения, пинг, вибро",
+   "lighting": "тёплая лампа, свет экрана",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s01",
+   "keyframe": "storyboard/frames/S01.png"
+  },
+  {
+   "id": "S02",
+   "start": 4.4,
+   "end": 9.6,
+   "duration": 5.2,
+   "description": "Двухшотовый средний план за столом: «Мам, ты мне писала?»",
+   "location": "Кухня (общий)",
+   "characters": "Арман, Мама",
+   "shot_type": "двухшотовый средний",
+   "camera_position": "сбоку, через стол",
+   "camera_move": "медленный наезд",
+   "action": "Арман поднимает голову; мама ставит кружку; Арман протягивает телефон",
+   "emotion": "недоумение / тепло→интерес",
+   "dialogue": [
+    "arman: Мам… ты мне писала?",
+    "mom: Нет. Что случилось?"
+   ],
+   "sfx": "стук кружки, шорох одежды, скрип стула",
+   "lighting": "тёплый ключ от лампы, холодный контур от окна",
+   "transition": "склейка по действию",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s02",
+   "keyframe": "storyboard/frames/S02.png"
+  },
+  {
+   "id": "S03",
+   "start": 9.6,
+   "end": 11.9,
+   "duration": 2.3,
+   "description": "КП мамы через плечо Армана: читает сообщение, улыбка гаснет",
+   "location": "Кухня (восток)",
+   "characters": "Мама, Арман (плечо, телефон)",
+   "shot_type": "КП через плечо",
+   "camera_position": "за Арманом",
+   "camera_move": "лёгкий наезд",
+   "action": "Мама читает (глаза бегают), улыбка гаснет",
+   "emotion": "тепло → тревога",
+   "dialogue": [],
+   "sfx": "мигание лампы",
+   "lighting": "тёплый, лёгкое мерцание",
+   "transition": "match cut на телефон",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s03",
+   "keyframe": "storyboard/frames/S03.png"
+  },
+  {
+   "id": "S04",
+   "start": 11.9,
+   "end": 14.4,
+   "duration": 2.5,
+   "description": "Инсерт: входящий звонок «МАМА»",
+   "location": "Инсерт",
+   "characters": "телефон",
+   "shot_type": "деталь",
+   "camera_position": "сверху-спереди",
+   "camera_move": "микро-наезд, вибрация",
+   "action": "Входящий «МАМА»",
+   "emotion": "шок",
+   "dialogue": [],
+   "sfx": "рингтон + вибро",
+   "lighting": "экран, расфокус кухни",
+   "transition": "звуковой мост",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s04",
+   "keyframe": "storyboard/frames/S04.png"
+  },
+  {
+   "id": "S05",
+   "start": 14.4,
+   "end": 17.9,
+   "duration": 3.5,
+   "description": "СКП Армана: «Это что, прикол какой-то?»",
+   "location": "Кухня (запад)",
+   "characters": "Арман, Мама (плечо)",
+   "shot_type": "СКП",
+   "camera_position": "за мамой",
+   "camera_move": "лёгкий наезд",
+   "action": "Арман смотрит то на телефон, то на маму, нервно улыбается",
+   "emotion": "нервная ирония",
+   "dialogue": [
+    "arman: Это что… прикол какой-то?"
+   ],
+   "sfx": "рингтон (тише)",
+   "lighting": "тёплый + подсветка экрана снизу",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s05",
+   "keyframe": "storyboard/frames/S05.png"
+  },
+  {
+   "id": "S06",
+   "start": 17.9,
+   "end": 19.8,
+   "duration": 1.9,
+   "description": "КП мамы: «Не отвечай»",
+   "location": "Кухня (восток)",
+   "characters": "Мама",
+   "shot_type": "КП",
+   "camera_position": "за Арманом",
+   "camera_move": "наезд",
+   "action": "Мама наклоняется, говорит тихо",
+   "emotion": "скрытая тревога",
+   "dialogue": [
+    "mom: Не отвечай."
+   ],
+   "sfx": "рингтон, гул лампы",
+   "lighting": "мерцание",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s06",
+   "keyframe": "storyboard/frames/S06.png"
+  },
+  {
+   "id": "S07",
+   "start": 19.8,
+   "end": 21.1,
+   "duration": 1.3,
+   "description": "КП Армана: «Почему?»",
+   "location": "Кухня (запад)",
+   "characters": "Арман",
+   "shot_type": "КП",
+   "camera_position": "за мамой",
+   "camera_move": "статично",
+   "action": "«Почему?»",
+   "emotion": "растерянность",
+   "dialogue": [
+    "arman: Почему?"
+   ],
+   "sfx": "рингтон",
+   "lighting": "тёплый",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s07",
+   "keyframe": "storyboard/frames/S07.png"
+  },
+  {
+   "id": "S08",
+   "start": 21.1,
+   "end": 24.5,
+   "duration": 3.4,
+   "description": "КП мамы: «Потому что я тоже ответила»",
+   "location": "Кухня (восток)",
+   "characters": "Мама",
+   "shot_type": "КП",
+   "camera_position": "за Арманом",
+   "camera_move": "медленный наезд",
+   "action": "Опускает глаза на телефон, потом на него",
+   "emotion": "грусть",
+   "dialogue": [
+    "mom: Потому что я тоже… ответила."
+   ],
+   "sfx": "рингтон, начало треска лампы",
+   "lighting": "свет начинает холодеть",
+   "transition": "звук мерцания до склейки",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s08",
+   "keyframe": "storyboard/frames/S08.png"
+  },
+  {
+   "id": "S09",
+   "start": 24.5,
+   "end": 26.9,
+   "duration": 2.4,
+   "description": "Общий: мигание света, мама исчезает",
+   "location": "Кухня (общий)",
+   "characters": "Арман, Мама",
+   "shot_type": "общий",
+   "camera_position": "сбоку",
+   "camera_move": "тряска камеры",
+   "action": "Лампа мигает, мама рассыпается глитчем и исчезает; Арман отшатывается",
+   "emotion": "ужас",
+   "dialogue": [],
+   "sfx": "треск, глитч, суб-удар",
+   "lighting": "стробоскоп → холодный",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s09",
+   "keyframe": "storyboard/frames/S09.png"
+  },
+  {
+   "id": "S10",
+   "start": 26.9,
+   "end": 28.7,
+   "duration": 1.8,
+   "description": "КП Армана: «Мам?»",
+   "location": "Кухня (запад)",
+   "characters": "Арман",
+   "shot_type": "КП",
+   "camera_position": "за пустым стулом",
+   "camera_move": "медленный наезд",
+   "action": "«Мам?» — смотрит на пустое место",
+   "emotion": "страх",
+   "dialogue": [
+    "arman: Мам?"
+   ],
+   "sfx": "рингтон продолжается",
+   "lighting": "холодный",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s10",
+   "keyframe": "storyboard/frames/S10.png"
+  },
+  {
+   "id": "S11",
+   "start": 28.7,
+   "end": 30.3,
+   "duration": 1.6,
+   "description": "POV: пустой стул, пар от кружки",
+   "location": "Кухня (восток)",
+   "characters": "— (пустой стул)",
+   "shot_type": "POV",
+   "camera_position": "глазами Армана",
+   "camera_move": "наезд",
+   "action": "Пустой стул, пар от кружки ещё идёт",
+   "emotion": "пустота",
+   "dialogue": [],
+   "sfx": "рингтон, тиканье",
+   "lighting": "холодный",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s11",
+   "keyframe": "storyboard/frames/S11.png"
+  },
+  {
+   "id": "S12",
+   "start": 30.3,
+   "end": 32.0,
+   "duration": 1.7,
+   "description": "Инсерт: палец нажимает «Ответить»",
+   "location": "Инсерт",
+   "characters": "телефон, палец",
+   "shot_type": "деталь",
+   "camera_position": "сверху",
+   "camera_move": "статично",
+   "action": "Палец нажимает «Ответить» — звонок обрывается",
+   "emotion": "решимость",
+   "dialogue": [],
+   "sfx": "тап, тишина",
+   "lighting": "экран",
+   "transition": "резкая тишина",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s12",
+   "keyframe": "storyboard/frames/S12.png"
+  },
+  {
+   "id": "S13",
+   "start": 32.0,
+   "end": 36.2,
+   "duration": 4.2,
+   "description": "СКП Армана с телефоном у уха: мама по телефону",
+   "location": "Кухня (запад)",
+   "characters": "Арман",
+   "shot_type": "СКП",
+   "camera_position": "фронтально",
+   "camera_move": "наезд",
+   "action": "Телефон к уху; голос мамы из трубки",
+   "emotion": "шок",
+   "dialogue": [
+    "mom_phone: Сынок, я задерживаюсь. Буду через полчаса."
+   ],
+   "sfx": "голос в телефонной обработке",
+   "lighting": "холодный",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s13",
+   "keyframe": "storyboard/frames/S13.png"
+  },
+  {
+   "id": "S14",
+   "start": 36.2,
+   "end": 38.9,
+   "duration": 2.7,
+   "description": "КП Армана: «Ты же только что здесь сидела»",
+   "location": "Кухня (запад)",
+   "characters": "Арман",
+   "shot_type": "КП",
+   "camera_position": "фронтально",
+   "camera_move": "наезд",
+   "action": "«Ты же только что здесь сидела» — дрожит",
+   "emotion": "недоверие",
+   "dialogue": [
+    "arman: Ты же… только что здесь сидела."
+   ],
+   "sfx": "тиканье",
+   "lighting": "холодный",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s14",
+   "keyframe": "storyboard/frames/S14.png"
+  },
+  {
+   "id": "S15",
+   "start": 38.9,
+   "end": 42.7,
+   "duration": 3.8,
+   "description": "Общий с наездом на пустой стул: «Я ещё на работе»",
+   "location": "Кухня (общий)",
+   "characters": "Арман",
+   "shot_type": "общий → средний",
+   "camera_position": "сбоку",
+   "camera_move": "наезд на пустой стул",
+   "action": "«Я ещё на работе»; Арман опускает телефон",
+   "emotion": "оцепенение",
+   "dialogue": [
+    "mom_phone: Арман, я ещё на работе."
+   ],
+   "sfx": "гудки конца звонка",
+   "lighting": "холодный, тёплая лампа слабее",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s15",
+   "keyframe": "storyboard/frames/S15.png"
+  },
+  {
+   "id": "S16",
+   "start": 42.7,
+   "end": 45.3,
+   "duration": 2.6,
+   "description": "Инсерт чат: «ТЫ ОТВЕТИЛ. ТЕПЕРЬ У НАС ПРОБЛЕМА»",
+   "location": "Инсерт",
+   "characters": "телефон",
+   "shot_type": "деталь",
+   "camera_position": "сверху",
+   "camera_move": "микро-наезд",
+   "action": "Новое сообщение: «ТЫ ОТВЕТИЛ. ТЕПЕРЬ У НАС ПРОБЛЕМА.»",
+   "emotion": "угроза",
+   "dialogue": [],
+   "sfx": "вибро, поп",
+   "lighting": "экран",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s16_18",
+   "keyframe": "storyboard/frames/S16.png"
+  },
+  {
+   "id": "S17",
+   "start": 45.3,
+   "end": 48.3,
+   "duration": 3.0,
+   "description": "Инсерт: печатает «КТО ТЫ?»",
+   "location": "Инсерт",
+   "characters": "телефон",
+   "shot_type": "деталь клавиатуры",
+   "camera_position": "сверху",
+   "camera_move": "статично",
+   "action": "Печатает «КТО ТЫ?», шёпот, отправка",
+   "emotion": "напряжение",
+   "dialogue": [
+    "arman: Кто… ты?"
+   ],
+   "sfx": "тапы клавиш, свуш",
+   "lighting": "экран",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s16_18",
+   "keyframe": "storyboard/frames/S17.png"
+  },
+  {
+   "id": "S18",
+   "start": 48.3,
+   "end": 51.5,
+   "duration": 3.2,
+   "description": "Инсерт: «ТЫ. ТОЛЬКО Я УЖЕ ПРОХОДИЛ ЭТО»",
+   "location": "Инсерт",
+   "characters": "телефон",
+   "shot_type": "деталь",
+   "camera_position": "сверху",
+   "camera_move": "медленный наезд",
+   "action": "«печатает…» → «ТЫ. ТОЛЬКО Я УЖЕ ПРОХОДИЛ ЭТО.»",
+   "emotion": "шок",
+   "dialogue": [],
+   "sfx": "поп, сердцебиение",
+   "lighting": "экран",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s16_18",
+   "keyframe": "storyboard/frames/S18.png"
+  },
+  {
+   "id": "S19",
+   "start": 51.5,
+   "end": 54.2,
+   "duration": 2.7,
+   "description": "ДКП глаз Армана; голос из коридора «Не верь ему»",
+   "location": "Кухня (запад)",
+   "characters": "Арман",
+   "shot_type": "ДКП глаз",
+   "camera_position": "фронтально",
+   "camera_move": "медленный наезд",
+   "action": "Музыка исчезает; голос из коридора; глаза резко вправо",
+   "emotion": "ужас, оцепенение",
+   "dialogue": [
+    "double: Не верь ему."
+   ],
+   "sfx": "тишина, тиканье, голос с реверберацией",
+   "lighting": "холодный + красный отсвет из коридора",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s19",
+   "keyframe": "storyboard/frames/S19.png"
+  },
+  {
+   "id": "S20",
+   "start": 54.2,
+   "end": 55.7,
+   "duration": 1.5,
+   "description": "Арман резко оборачивается",
+   "location": "Кухня (запад)",
+   "characters": "Арман",
+   "shot_type": "КП",
+   "camera_position": "фронтально",
+   "camera_move": "whip pan вправо",
+   "action": "Упреждающий присед → резкий поворот головы",
+   "emotion": "испуг",
+   "dialogue": [
+    "arman: Ч-что?.."
+   ],
+   "sfx": "свист, скрип стула, вдох",
+   "lighting": "холодный → красный",
+   "transition": "whip pan → коридор",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s20",
+   "keyframe": "storyboard/frames/S20.png"
+  },
+  {
+   "id": "S21",
+   "start": 55.7,
+   "end": 59.9,
+   "duration": 4.2,
+   "description": "Коридор: двойник с красным контуром «Он всегда пишет первым»",
+   "location": "Коридор",
+   "characters": "Двойник, Арман (затылок)",
+   "shot_type": "средний через плечо",
+   "camera_position": "из кухни в коридор",
+   "camera_move": "медленный наезд",
+   "action": "Двойник стоит, делает шаг, наклоняет голову, ухмыляется",
+   "emotion": "спокойная угроза",
+   "dialogue": [
+    "double: Он всегда пишет… первым."
+   ],
+   "sfx": "суб-бум, шаг, кластер",
+   "lighting": "холодная лампа + красный контур",
+   "transition": "жёсткая склейка в чёрное",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s21",
+   "keyframe": "storyboard/frames/S21.png"
+  },
+  {
+   "id": "S22",
+   "start": 59.9,
+   "end": 60.2,
+   "duration": 0.3,
+   "description": "Резкая склейка в чёрный",
+   "location": "—",
+   "characters": "—",
+   "shot_type": "чёрный",
+   "camera_position": "—",
+   "camera_move": "—",
+   "action": "Резкий обрыв",
+   "emotion": "—",
+   "dialogue": [],
+   "sfx": "абсолютная тишина",
+   "lighting": "—",
+   "transition": "склейка",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s22",
+   "keyframe": "storyboard/frames/S22.png"
+  },
+  {
+   "id": "S23",
+   "start": 60.2,
+   "end": 63.4,
+   "duration": 3.2,
+   "description": "Титр «А КОМУ БЫ ПОВЕРИЛ ТЫ?»",
+   "location": "Титр",
+   "characters": "—",
+   "shot_type": "титр",
+   "camera_position": "—",
+   "camera_move": "глитч-появление",
+   "action": "«А КОМУ БЫ ПОВЕРИЛ ТЫ?» + название серии",
+   "emotion": "вопрос зрителю",
+   "dialogue": [],
+   "sfx": "низкий удар + мотив музыкальной шкатулки",
+   "lighting": "чёрный, красный акцент",
+   "transition": "конец",
+   "method": "процедурная 2.5D-анимация (skia, риг scripts/engine/rig.py), нативные 60 fps",
+   "source": "scripts/ep01_shots.py::s23",
+   "keyframe": "storyboard/frames/S23.png"
+  }
+ ],
+ "events": {
+  "phone_wake": 0.35,
+  "notif": 0.55,
+  "mug_down": 6.45,
+  "show_phone": 8.95,
+  "read": 9.9,
+  "smile_fade": 10.7,
+  "ring_start": 11.95,
+  "answer": 31.25,
+  "flicker_a": 11.5,
+  "flicker_b": 18.0,
+  "flicker_start": 24.6,
+  "vanish": 26.0,
+  "vanish_end": 26.35,
+  "startle": 26.15,
+  "call_end": 42.45,
+  "msg1": 43.0,
+  "type_start": 45.65,
+  "type_end": 47.45,
+  "send": 47.85,
+  "dots": 48.6,
+  "msg2": 49.55,
+  "music_drop": 52.4,
+  "turn": 54.25,
+  "reveal": 55.7,
+  "step": 56.35,
+  "cut_black": 59.9,
+  "end_card": 60.2,
+  "title2": 61.6
+ },
+ "audio": {
+  "score": "music/ep01_score.wav (original, synthesized in audio_build.py)",
+  "sfx": [
+   "boom.wav",
+   "call_end.wav",
+   "clink.wav",
+   "cloth.wav",
+   "creak.wav",
+   "footstep.wav",
+   "glitch.wav",
+   "heartbeat.wav",
+   "ping.wav",
+   "pop.wav",
+   "reverse_swell.wav",
+   "ring.wav",
+   "swoosh.wav",
+   "tap.wav",
+   "tick.wav",
+   "tock.wav",
+   "vibe.wav",
+   "whoosh.wav"
+  ],
+  "mix_premaster": "renders/ep01_mix_premaster.wav",
+  "lipsync": "compositions/lipsync.json"
+ },
+ "outputs": {
+  "final": {
+   "path": "final/episode_01_final.mp4",
+   "sha256_16": "50825030fb032b3d"
+  },
+  "no_subtitles": {
+   "path": "final/episode_01_no_subtitles.mp4",
+   "sha256_16": "3daaa67f711747d4"
+  },
+  "thumbnail": {
+   "path": "final/episode_01_thumbnail.png",
+   "sha256_16": "12f0b942032b97c4"
+  },
+  "subtitles": {
+   "path": "final/episode_01_subtitles.srt",
+   "sha256_16": "5603544971775825"
+  },
+  "storyboard": {
+   "path": "storyboard/storyboard.md",
+   "sha256_16": "8ce4b99813866989"
+  },
+  "storyboard_sheet": {
+   "path": "storyboard/storyboard_sheet.png",
+   "sha256_16": "5f83bb9568dad5e7"
+  },
+  "report": {
+   "path": "production_report.md",
+   "sha256_16": "9e150659d6256ea2"
+  }
+ },
+ "qc": {
+  "episode_01_final.mp4": {
+   "size_mb": 97.2,
+   "duration": 63.4,
+   "bitrate_mbps": 12.26,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3804,
+    "bitrate_mbps": 12.0
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 252
+   },
+   "loudness_lufs": -14.3,
+   "true_peak_dbfs": -1.3,
+   "motion": {
+    "transitions_checked": 3592,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.427
+   },
+   "edge_luma": {
+    "left": 47.90702933315808,
+    "right": 50.795810331230285,
+    "top": 57.1760203684231,
+    "bottom": 26.01468240059197
+   }
+  },
+  "episode_01_no_subtitles.mp4": {
+   "size_mb": 97.1,
+   "duration": 63.4,
+   "bitrate_mbps": 12.26,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3804,
+    "bitrate_mbps": 11.99
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 252
+   },
+   "loudness_lufs": -14.3,
+   "true_peak_dbfs": -1.3,
+   "motion": {
+    "transitions_checked": 3592,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.443
+   },
+   "edge_luma": {
+    "left": 47.90644195802664,
+    "right": 50.79155439449702,
+    "top": 57.175191805896326,
+    "bottom": 26.0100576391323
+   }
+  }
+ }
+}
