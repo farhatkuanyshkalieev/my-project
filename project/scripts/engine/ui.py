@@ -105,8 +105,7 @@ class Phone:
         p = skia.Path()
         p.addOval(skia.Rect.MakeXYWH(x + 41, y + 40, 32, 26))
         c.drawPath(p, fill(hexc("#fff")))
-        draw_text(c, sender, x + 100, y + 66, self.f_title, hexc("#111318"))
-        draw_text(c, "сейчас", x + w - 30, y + 66, self.f_small, hexc("#6a6f7c"), align="right")
+        draw_text(c, sender, x + 100, y + 66, font("rubik", 34, 600), hexc("#111318"))
         for i, ln in enumerate(lines):
             _rich_line(c, ln, x + 34, y + 140 + i * 60, self.f_msg, hexc("#111318"))
         c.restore()

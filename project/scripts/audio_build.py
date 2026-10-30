@@ -520,18 +520,27 @@ def build_score():
 
 # ============================================================================ flicker curve (shared idea with picture)
 def flicker(t):
-    E = T.EV
-    v = 1.0
-    for c0 in (E["flicker_a"], E["flicker_b"]):
-        if c0 <= t < c0 + 0.35:
-            v = 0.55 if int((t - c0) * 22) % 2 == 0 else 1.0
-    if E["flicker_start"] <= t < E["vanish_end"] + 0.2:
-        u = (t - E["flicker_start"]) / (E["vanish_end"] + 0.2 - E["flicker_start"])
-        v = 0.15 + 0.85 * (int(t * (14 + 30 * u)) % 2) if u < 0.92 else 0.2
-    return v
+    return T.flicker(t)
 
 
 # ============================================================================ mix
+def duck_key(D, look=0.08, att=0.03, rel=0.45):
+    """0..1 ducking key from the dialogue bus: 80 ms look-ahead, 30 ms attack, 450 ms release (no pumping)."""
+    hop = SR // 1000
+    lvl = np.abs(D).max(1)
+    n = len(lvl) // hop
+    act = (lvl[: n * hop].reshape(n, hop).max(1) > 0.008).astype(float)
+    k = np.zeros(n)
+    a_a, a_r = np.exp(-1 / (att * 1000)), np.exp(-1 / (rel * 1000))
+    for i in range(1, n):
+        c = a_a if act[i] > k[i - 1] else a_r
+        k[i] = act[i] + (k[i - 1] - act[i]) * c
+    k = np.roll(k, -int(look * 1000))
+    k[-int(look * 1000):] = k[-int(look * 1000) - 1]
+    out = np.interp(np.arange(len(lvl)), np.arange(n) * hop, k)
+    return np.clip(out * 1.2, 0, 1)
+
+
 def limiter(x, ceil, release=0.08):
     """Peak limiter with 2 ms look-ahead (gain computed on the max of both channels)."""
     la = int(0.002 * SR)
@@ -586,8 +595,10 @@ def main():
     ring = S["ring"].copy()
     tt = E["ring_start"] + t_(len(ring))
     g = np.where(((tt >= 11.9) & (tt < 14.4)) | ((tt >= 30.3) & (tt < 32.0)), 1.0, 0.55)
+    g = np.where((tt >= E["vanish_end"]) & (tt < 30.1), 0.22, g)   # shock: the ring recedes after Mom vanishes
     g = signal.lfilter([0.002], [1, -0.998], g) / 1.0
-    sfx.add(E["ring_start"], ring * g, -9)
+    ring_bus = Bus()
+    ring_bus.add(E["ring_start"], ring * g, -9)
     sfx.add(E["answer"] - 0.02, sfx_tap(1.0), -6)
     for c0 in (E["flicker_a"], E["flicker_b"]):
         sfx.add(c0, lamp_buzz(c0, c0 + 0.5, flicker), 0)
@@ -607,11 +618,11 @@ def main():
     sfx.add(E["send"], S["swoosh"], -8)
     sfx.add(E["msg2"], S["vibe"], -9)
     sfx.add(E["msg2"] + 0.05, S["pop"], -8)
-    for i in range(5):
-        sfx.add(E["msg2"] + 0.9 + i * 0.82, S["heartbeat"], -7 + i)
-    sfx.add(E["turn"], S["whoosh"], -6, 0.3)
+    for i in range(3):
+        sfx.add(E["msg2"] + 0.75 + i * 0.78, S["heartbeat"], -12 + i)
+    sfx.add(E["turn"], S["whoosh"], -12, 0.3)
     sfx.add(E["turn"] + 0.05, sfx_creak(0.4, 340), -8, -0.2)
-    sfx.add(E["reveal"], S["boom"], -3)
+    sfx.add(E["reveal"], S["boom"], -11)
     sfx.add(E["step"], S["footstep"], -6, 0.2)
     # wall clock ticks (more audible when it is quiet)
     t = 0.0
@@ -626,19 +637,22 @@ def main():
     rt[int(E["cut_black"] * SR):] = 0
     amb.add(0.0, np.stack([rt, np.roll(rt, 2400)], 1), -6)
 
+    # ---- dialogue-keyed ducking (dialogue must sit >= 10 dB above everything else)
+    key = duck_key(D)
+    sfx_duck = 1 - 0.6 * key        # ~ -8 dB
+    ring_duck = 1 - 0.78 * key      # ~ -13 dB
     M = build_score()
     M = M - 0.5 * signal.sosfilt(sos("low", 110, 2), M, axis=0)      # tame sub-bass (~ -6 dB below 110 Hz)
     M = signal.sosfilt(sos("high", 32, 2), M, axis=0) * db(-4)
     # duck music under dialogue
-    d_env = np.abs(D).max(1)
-    d_env = signal.lfilter([1 - 0.9995], [1, -0.9995], (d_env > 0.01).astype(float))
-    duck = 1 - 0.55 * np.clip(d_env * 3, 0, 1)
-    mix = D * db(0) + sfx.out() * db(-2) + amb.out() + M * db(-3) * duck[:, None]
+    duck = 1 - 0.72 * key           # ~ -11 dB
+    SFX = sfx.out() * db(-2) * sfx_duck[:, None] + ring_bus.out() * db(-2) * ring_duck[:, None]
+    mix = D * db(0) + SFX + amb.out() + M * db(-3) * duck[:, None]
     mix = limiter(mix, db(-3))
     end = int(E["cut_black"] * SR)
     mix[end:int(E["end_card"] * SR)] = 0
     write_wav(P("renders", "ep01_mix_premaster.wav"), mix)
-    for nm, st in (("dialogue", D), ("sfx", sfx.out() * db(-2)), ("ambience", amb.out()), ("music", M * db(-3) * duck[:, None])):
+    for nm, st in (("dialogue", D), ("sfx", SFX), ("ambience", amb.out()), ("music", M * db(-3) * duck[:, None])):
         write_wav(P("renders", "stems", f"ep01_stem_{nm}.wav"), st)
     print("mix peak dB", 20 * np.log10(np.abs(mix).max()))
 

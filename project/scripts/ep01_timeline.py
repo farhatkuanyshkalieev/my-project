@@ -75,10 +75,45 @@ SHOTS = [  # id, start, end, description
 
 # key story events used by both picture and sound
 EV = dict(
-    phone_wake=0.35, notif=0.55, mug_down=6.45, show_phone=8.95, read=9.9, smile_fade=10.7,
+    phone_wake=0.15, notif=0.32, mug_down=6.45, show_phone=8.95, read=9.9, smile_fade=10.7,
     ring_start=11.95, answer=31.25, flicker_a=11.5, flicker_b=18.0,
     flicker_start=24.6, vanish=26.0, vanish_end=26.35, startle=26.15,
     call_end=42.45, msg1=43.0, type_start=45.65, type_end=47.45, send=47.85, dots=48.6, msg2=49.55,
     music_drop=52.4, turn=54.25, reveal=55.7, step=56.35, cut_black=59.9, end_card=60.2, title2=61.6,
 )
 TYPED = "КТО ТЫ?"
+
+
+# ------------------------------------------------------------------ lamp flicker (shared by picture and sound)
+# Photosensitivity-safe: at most ~3 dips per second, smooth (eased) dips instead of a square-wave strobe.
+def _dip(T, t0, depth, dur=0.16):
+    import math
+    u = (T - t0) / dur
+    return depth * math.sin(math.pi * u) ** 2 if 0.0 <= u <= 1.0 else 0.0
+
+
+FLICKER_DIPS = [  # (time, depth, duration)
+    (11.50, 0.35, 0.16), (11.78, 0.22, 0.14),                       # first unease while Mom reads
+    (18.05, 0.30, 0.15), (18.40, 0.18, 0.14),                       # «Не отвечай»
+    (24.62, 0.30, 0.18), (24.98, 0.45, 0.18), (25.33, 0.55, 0.20),  # build-up before she vanishes
+    (25.68, 0.70, 0.22),
+]
+BLACKOUT = (25.93, 26.30)   # lamp dies while Mom glitches out; comes back colder
+
+
+def flicker(T):
+    v = 1.0
+    for t0, d, du in FLICKER_DIPS:
+        v -= _dip(T, t0, d, du)
+    b0, b1 = BLACKOUT
+    if b0 - 0.06 <= T < b1 + 0.6:
+        if T < b0:
+            v = min(v, 1.0 - 0.8 * (T - (b0 - 0.06)) / 0.06)
+        elif T < b1:
+            v = 0.2
+        else:  # recovers to a dimmer, colder level
+            u = min(1.0, (T - b1) / 0.6)
+            v = 0.2 + 0.65 * (1 - (1 - u) ** 3)
+    elif T >= b1 + 0.6:
+        v = 0.85
+    return max(0.0, v)

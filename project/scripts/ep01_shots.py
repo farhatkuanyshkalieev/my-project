@@ -48,18 +48,7 @@ def talking(who, T):
 
 
 def flicker(T):
-    v = 1.0
-    for c0 in (EV["flicker_a"], EV["flicker_b"]):
-        if c0 <= T < c0 + 0.35:
-            v = 0.55 if int((T - c0) * 22) % 2 == 0 else 1.0
-    if EV["flicker_start"] <= T < EV["vanish_end"] + 0.2:
-        u = (T - EV["flicker_start"]) / (EV["vanish_end"] + 0.2 - EV["flicker_start"])
-        v = 0.15 + 0.85 * (int(T * (14 + 30 * u)) % 2) if u < 0.92 else 0.2
-    elif EV["vanish_end"] + 0.2 <= T < EV["vanish_end"] + 0.8:
-        v = lerp(0.2, 0.85, ramp(T, EV["vanish_end"] + 0.2, EV["vanish_end"] + 0.8, "out"))
-    elif T >= EV["vanish_end"] + 0.8:
-        v = 0.85
-    return v
+    return TL.flicker(T)
 
 
 def coldness(T):
@@ -193,8 +182,8 @@ def black_hand(c, x, y, s=1.0, rot=0.0, rim=0.6, thumb=(0, 0)):
 
 def draw_phone_insert(c, T, content_fn, x=220, y=280, rot=-3.0, s=1.0, shake=0.0, glow=1.0):
     """Phone close-up: hand + phone + content drawn by content_fn(canvas)."""
-    jx = math.sin(T * 61) * shake * 6 + math.sin(T * 37) * shake * 4
-    jy = math.cos(T * 53) * shake * 5
+    jx = (math.sin(T * 2 * math.pi * 23) * 1.6 + math.sin(T * 2 * math.pi * 31) * 0.9) * shake
+    jy = math.cos(T * 2 * math.pi * 27) * 1.2 * shake
     c.save()
     c.translate(x + jx + Phone.SW / 2, y + jy + Phone.SH / 2)
     c.rotate(rot + fbm(T * 0.5, 77) * 1.2)
@@ -280,7 +269,7 @@ EAST_TABLE_Y = 1485
 
 
 def east_world(c, T, power, cold, mom=None, mom_alpha=1.0, bg_blur=7.0, cam_args=(540, 1180, 1.25), fg_arman=True,
-               show_phone_back=None, mug=True, shake=3.0, mug_in_hand=False):
+               show_phone_back=None, mug=True, shake=3.0, mug_in_hand=False, before_table=None):
     cx, cy, z = cam_args
     c.save()
     cam(c, cx, cy, z * 0.94 + 0.06, T=T, shake=shake * 0.5)
@@ -292,6 +281,8 @@ def east_world(c, T, power, cold, mom=None, mom_alpha=1.0, bg_blur=7.0, cam_args
     c.restore()
     c.save()
     cam(c, cx, cy, z, T=T, shake=shake)
+    if before_table:
+        before_table(c)
     if mom and mom_alpha > 0:
         MOM.draw(c, dict(mom, alpha=mom_alpha), passes=("legs", "body", "head"))
     table_band(c, EAST_TABLE_Y, power)
@@ -374,7 +365,7 @@ def s01(c, u, T):
     rack = ramp(T, 3.25, 4.25, "io")
     # background: Mom (east set) out of focus -> in focus
     c.save()
-    bg_alpha = ramp(T, 0.35, 1.2)
+    bg_alpha = ramp(T, 0.15, 1.0)
     c.saveLayerAlpha(None, int(255 * bg_alpha))
     mom = mom_cu_pose(T, emotion("neutral", smile=0.5, squint=0.15), look=(-0.2, 0.15 - 0.15 * rack))
     mom["hand_b"] = (0.42, -1.72)  # holding the mug near her lips
@@ -400,7 +391,9 @@ def s01(c, u, T):
             cc.drawRect(skia.Rect.MakeWH(Phone.SW, Phone.SH), fill(with_alpha(hexc("#000"), 1 - wake)))
 
     vib = 1.0 if 0 < notif_t < 0.5 else 0.0
-    draw_phone_insert(c, T, content, x=220, y=py, rot=lerp(-3, -8, rack), s=lerp(1.0, 1.05, rack), shake=vib, glow=wake)
+    push = ease_in_out(ramp(T, EV["notif"] + 0.3, 3.25))
+    draw_phone_insert(c, T, content, x=220, y=py + lerp(0, 60, push), rot=lerp(-3, -8, rack) + lerp(0, 1.5, push),
+                      s=lerp(1.0, 1.12, push) + lerp(0, 0.05, rack), shake=vib, glow=wake)
     c.restore()
     if T < EV["phone_wake"]:
         c.drawColor(hexc("#000"))
@@ -460,7 +453,7 @@ def s04(c, u, T):
         else:
             PHONE.call(cc, T)
             if rt < 0.12:
-                cc.drawRect(skia.Rect.MakeWH(Phone.SW, Phone.SH), fill(with_alpha(hexc("#fff"), 0.5 * (1 - rt / 0.12))))
+                cc.drawRect(skia.Rect.MakeWH(Phone.SW, Phone.SH), fill(with_alpha(hexc("#fff"), 0.12 * (1 - rt / 0.12))))
 
     vib = 1.0 if rt > 0 and ((rt % 2.2) < 0.9) else 0.0
     draw_phone_insert(c, T, content, x=220, y=lerp(300, 270, u), rot=-2, s=lerp(1.0, 1.04, u), shake=vib * 0.9 + 0.15)
@@ -592,8 +585,17 @@ def s10(c, u, T):
 def s11(c, u, T):
     """POV: the empty chair; steam still rising from her mug."""
     z = lerp(1.18, 1.36, ease_in_out(u))
+    rock = 2.2 * math.exp(-(T - 28.7) * 1.6) * math.sin((T - 28.7) * 9)
+
+    def chair(cc):
+        cc.save()
+        cc.translate(540, 1560)
+        cc.rotate(rock)
+        cc.translate(-540, -1560)
+        front_chair(cc, 540, 1560, 1.12)
+        cc.restore()
     east_world(c, T, flicker(T), coldness(T), mom=None, cam_args=(560, 1250, z), bg_blur=4.0, fg_arman=True,
-               show_phone_back=(320, 1660, -10), shake=2.5)
+               show_phone_back=(320, 1660, -10), shake=2.5, before_table=chair)
     grade(c, T, warm=0.15, cold=coldness(T), vig=0.86)
 
 
@@ -613,8 +615,11 @@ def s12(c, u, T):
     c.save()
     c.translate(tx, ty)
     c.rotate(-28)
-    c.drawRRect(rrect(-55, -60, 110, 420, 55), fill(hexc("#121318")))
-    c.drawRRect(rrect(-55, -60, 110, 420, 55), stroke(with_alpha(hexc("#5aa8ff"), 0.4), 4, blur=3))
+    c.drawCircle(40, 430, 210, fill(hexc("#121318")))                       # palm
+    c.drawRRect(rrect(-58, -40, 116, 360, 58), fill(hexc("#121318")))        # thumb
+    c.drawRRect(rrect(-58, -40, 116, 360, 58), stroke(with_alpha(hexc("#5aa8ff"), 0.45), 4, blur=3))
+    c.drawOval(skia.Rect.MakeXYWH(-30, -22, 60, 70), fill(with_alpha(hexc("#3a4258"), 0.9)))  # nail
+    c.drawLine(-40, 150, 40, 140, stroke(with_alpha(hexc("#2a3042"), 0.9), 4))              # knuckle crease
     c.restore()
     grade(c, T, cold=coldness(T), vig=0.78)
 
@@ -624,23 +629,27 @@ def s13(c, u, T):
     raise_ = ramp(T, 32.0, 32.35, "out")
     emo = blend_emotions(emotion("fear", mouth_open=0, brow_raise=0.6, smile=-0.3, lid=-0.1, pupil_k=0.7),
                          emotion("surprise", mouth_open=0.15, pupil_k=0.6, brow_raise=0.9), ramp(T, 32.6, 33.2))
-    look = (lerp(0.2, 0.55, ramp(T, 34.2, 34.6)), 0.05)
-    a = arman_cu_pose(T, emo, look=look, phone="a", phone_glow=0.0, uplight=0.15,
+    look = (lerp(0.2, 0.75, ramp(T, 34.3, 34.7)), lerp(0.05, 0.15, ramp(T, 34.3, 34.7)))
+    a = arman_cu_pose(T, emo, look=look, phone="a", phone_glow=0.0, uplight=0.15, ht=lerp(0.12, 0.38, ramp(T, 34.4, 35.2)),
                       hand_a=(lerp(-0.6, -1.12, raise_), lerp(-0.3, -2.12, raise_)), phone_rot=lerp(0, 18, raise_),
                       hand_b=(0.5, -0.36), elbow_a=1)
-    a["tilt"] += -6 * raise_
-    west_world(c, T, flicker(T), coldness(T), a, cam_args=(540, 1150, lerp(1.32, 1.42, ease_in_out(u))), fg_mom=False)
+    a["tilt"] += -6 * raise_ - 4 * ramp(T, 34.4, 35.2)
+    a["hdy"] += 0.03 * math.exp(-max(0.0, T - 35.0) * 6) * (T > 35.0)   # small swallow/flinch
+    west_world(c, T, flicker(T), coldness(T), a, cam_args=(lerp(540, 600, ease_in_out(u)), 1150, lerp(1.3, 1.48, ease_in_out(u))),
+               fg_mom=False)
     grade(c, T, warm=0.2, cold=coldness(T), vig=0.8)
 
 
 def s14(c, u, T):
     """«Ты же… только что здесь сидела.»"""
     emo = emotion("fear", mouth_open=0, brow_raise=0.7, brow_angle=-0.9, smile=-0.5, lid=0.0, pupil_k=0.65)
-    a = arman_cu_pose(T, emo, look=(0.6, 0.12), phone="a", phone_glow=0.0, uplight=0.12, hand_a=(-1.12, -2.12),
-                      phone_rot=18, hand_b=(0.5, -0.36), elbow_a=1)
-    a["tilt"] += -6 + 1.5 * math.sin(T * 13) * 0.3  # trembling
+    a = arman_cu_pose(T, emo, look=(0.8, 0.15), phone="a", phone_glow=0.0, uplight=0.12, hand_a=(-1.12, -2.12),
+                      phone_rot=18, hand_b=(0.5, -0.36), elbow_a=1, ht=0.38)
+    a["tilt"] += -10 + 1.5 * math.sin(T * 13) * 0.3  # trembling
     a["hdx"] += 0.006 * math.sin(T * 23)
-    west_world(c, T, flicker(T), coldness(T), a, cam_args=(560, 1110, lerp(1.48, 1.62, ease_in_out(u))), fg_mom=False)
+    # tight close-up, Dutch angle, camera on the empty-chair side: a clear change of size + axis vs S13
+    west_world(c, T, flicker(T), coldness(T), a, cam_args=(lerp(570, 560, u), lerp(1185, 1195, u), lerp(1.95, 2.08, ease_in_out(u))),
+               fg_mom=False, rot=-5.0, bg_blur=11)
     grade(c, T, warm=0.2, cold=coldness(T), vig=0.84)
 
 
@@ -694,11 +703,11 @@ def s16_18(c, u, T):
         PHONE.chat(cc, T, chat_items(T), typing_dots_t=dots, input_text=typed, show_keyboard=kb, pressed=pressed)
 
     if T < 45.3:     # S16
-        s, x, y, rot = lerp(1.0, 1.06, ramp(T, 42.7, 45.3)), 220, 300, -2
+        s, x, y, rot = lerp(1.28, 1.34, ramp(T, 42.7, 45.3)), 220, -190, -2
     elif T < 48.3:   # S17 — tighter on the keyboard / input
         s, x, y, rot = lerp(1.12, 1.16, ramp(T, 45.3, 48.3)), 180, 120, -1
     else:            # S18 — slow creep in on the reply
-        s, x, y, rot = lerp(1.08, 1.2, ease_in_out(ramp(T, 48.3, 51.5))), 210, lerp(250, 200, ramp(T, 48.3, 51.5)), -2.5
+        s, x, y, rot = lerp(1.26, 1.38, ease_in_out(ramp(T, 48.3, 51.5))), 210, lerp(-80, -120, ramp(T, 48.3, 51.5)), -2.5
     vib = 1.0 if (EV["msg1"] < T < EV["msg1"] + 0.5) or (EV["msg2"] < T < EV["msg2"] + 0.45) else 0.0
     draw_phone_insert(c, T, content, x=x, y=y, rot=rot, s=s, shake=vib * 0.8 + 0.15)
     grade(c, T, cold=cold, vig=0.8)
@@ -759,7 +768,8 @@ def s21(c, u, T):
     d["breath"] = T * 0.18
     d["y"] += -12 * step
     d["glow_k"] = 0.45 + 0.4 * last_word
-    pc = 0.55 + 0.45 * (1 if (int(T * 9) % 7) else 0) * (0.6 + 0.4 * math.sin(T * 3))
+    pc = 0.9 - TL._dip(T, 56.55, 0.35, 0.22) - TL._dip(T, 57.45, 0.25, 0.2) - TL._dip(T, 58.75, 0.4, 0.25) \
+        + 0.06 * math.sin(T * 2.1)
     z = lerp(1.08, 1.28, ease_in_out(ramp(T, t0, 59.9))) + 0.06 * last_word
     c.save()
     cam(c, 540 + 30 * settle, lerp(980, 1000, ease_in_out(ramp(T, t0, 59.9))), z, rot=1.5 * settle, T=T, shake=2 + 8 * settle)
