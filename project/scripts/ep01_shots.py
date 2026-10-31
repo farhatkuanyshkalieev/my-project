@@ -17,6 +17,9 @@ from engine.core import (W, H, clamp, lerp, ramp, Track, fbm, vnoise, blink_curv
                          fill, stroke, radial, linear, rrect, path_poly, font, draw_text, new_surface, surface_rgba,
                          ease_out_back, ease_in_out, ease_out, ease_in, _hash)
 from engine.rig import RIGS, emotion, blend_emotions  # noqa: E402
+from engine.rig2 import RIGS2  # noqa: E402
+from engine import sets2 as S2  # noqa: E402
+from engine.look import concept_look  # noqa: E402
 from engine import sets as S  # noqa: E402
 from engine.ui import Phone  # noqa: E402
 
@@ -24,7 +27,38 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LIPS = json.load(open(os.path.join(ROOT, "compositions", "lipsync.json")))
 EV = TL.EV
 PHONE = Phone()
-ARMAN, MOM, DOUBLE = RIGS["arman"], RIGS["mom"], RIGS["double"]
+_SCENE = {"cold": 0.0}   # per-frame scene light state (set in render_frame)
+
+
+class V2Rig:
+    """Approved v2 «concept» look: wraps rig2 and derives rim colour / phone uplight from the scene light."""
+
+    def __init__(self, name):
+        self.r = RIGS2[name]
+        self.name = name
+
+    def _p(self, pose):
+        p = dict(pose)
+        if self.name == "arman":
+            if not p.get("rim_col"):
+                p["rim_col"] = mix(hexc("#ffae55"), hexc("#8fb4ff"), clamp(_SCENE["cold"] * 1.2))
+                p["rim_col"] = "#%02x%02x%02x" % (skia.ColorGetR(p["rim_col"]), skia.ColorGetG(p["rim_col"]), skia.ColorGetB(p["rim_col"]))
+            p["uplight"] = p.get("uplight", 0.0) * 0.35
+        if self.name == "mom" and p.get("rim_col") == "#9fbfff":
+            p["rim_col"] = "#ffd29a" if _SCENE["cold"] < 0.4 else "#9fbfff"
+        return p
+
+    def draw(self, c, pose, passes=("legs", "body", "head", "arms")):
+        self.r.draw(c, self._p(pose), passes)
+
+    def head_pos(self, pose):
+        return self.r.head_pos(self._p(pose))
+
+    def shoulder_pos(self, pose, side="a"):
+        return self.r.shoulder_pos(self._p(pose), side)
+
+
+ARMAN, MOM, DOUBLE = V2Rig("arman"), V2Rig("mom"), V2Rig("double")
 
 
 # =============================================================================================== helpers
@@ -170,11 +204,11 @@ def black_hand(c, x, y, s=1.0, rot=0.0, rim=0.6, thumb=(0, 0)):
     c.translate(x, y)
     c.rotate(rot)
     col = hexc("#121318")
-    sleeve = hexc("#1d2b4f")
+    sleeve = hexc("#161515")
     c.drawRRect(rrect(-150 * s, 120 * s, 260 * s, 600 * s, 110 * s), fill(sleeve, shader=linear(-150 * s, 0, 110 * s, 0, [shade(sleeve, 1.25), shade(sleeve, 0.6)])))
     c.drawRRect(rrect(-150 * s, 120 * s, 260 * s, 70 * s, 30 * s), fill(shade(sleeve, 0.7)))
     c.drawCircle(-30 * s, 60 * s, 130 * s, fill(col))
-    c.drawCircle(-30 * s, 60 * s, 130 * s, stroke(with_alpha(hexc("#5aa8ff"), 0.5 * rim), 6 * s, blur=4 * s))
+    c.drawCircle(-30 * s, 60 * s, 130 * s, stroke(with_alpha(hexc("#ffae55"), 0.45 * rim), 6 * s, blur=4 * s))
     tx, ty = thumb
     c.drawRRect(rrect(-150 * s + tx, -90 * s + ty, 70 * s, 170 * s, 35 * s), fill(col))
     c.restore()
@@ -197,7 +231,7 @@ def draw_phone_insert(c, T, content_fn, x=220, y=280, rot=-3.0, s=1.0, shake=0.0
     col = hexc("#121318")
     for i in range(3):
         c.drawRRect(rrect(Phone.SW - 6, 620 + i * 120, 78, 96, 40), fill(col))
-        c.drawRRect(rrect(Phone.SW - 6, 620 + i * 120, 78, 96, 40), stroke(with_alpha(hexc("#5aa8ff"), 0.35), 3))
+        c.drawRRect(rrect(Phone.SW - 6, 620 + i * 120, 78, 96, 40), stroke(with_alpha(hexc("#ffae55"), 0.35), 3))
     c.restore()
 
 
@@ -227,10 +261,17 @@ def north_mom_idle(T):
 
 def north_world(c, T, power, cold, arman=None, mom=None, mom_alpha=1.0, mug=True, mom_mug_in_hand=False,
                 mom_layer_fn=None, extra_after=None):
-    c.drawPicture(S.pic_kitchen_north_bg())
-    S.kitchen_north_lights_back(c, T, power, cold)
-    S.kitchen_north_animated(c, T, power)
-    c.drawPicture(S.pic_kitchen_north_chairs())
+    c.drawPicture(S2.pic_kitchen_north_v2())
+    lx0, ly0 = K["lamp_x"], K["lamp_y"]
+    c.drawCircle(lx0, ly0 + 120, 700, fill(0, shader=radial(lx0, ly0 + 120, 700, [with_alpha(hexc(S2.AMBER), 0.38 * power),
+                                                                              with_alpha(hexc(S2.AMBER), 0.10 * power),
+                                                                              with_alpha(hexc(S2.AMBER), 0)], [0, 0.45, 1]),
+                                           blend=skia.BlendMode.kPlus))
+    wx0, wy0, wx1, wy1 = K["window"]
+    c.drawRect(skia.Rect.MakeLTRB(wx0, wy0, wx1, wy1), fill(with_alpha(hexc("#5f8fd6"), 0.10 + 0.12 * cold), blend=skia.BlendMode.kPlus))
+    S.draw_clock(c, K["clock"][0], K["clock"][1] - 40, K["clock"][2] * 0.9, T)
+    S.draw_plant(c, K["window"][0] + 70, K["window"][3] + 12, 0.75, T)
+    c.drawPicture(S2.pic_north_furniture_v2())
     if arman:
         ARMAN.draw(c, arman, passes=("legs", "body", "head"))
     if mom and mom_alpha > 0:
@@ -255,16 +296,16 @@ def north_world(c, T, power, cold, arman=None, mom=None, mom_alpha=1.0, mug=True
             S.draw_mug(c, mx - 8, my + 30, s=0.9, t=T)
     if extra_after:
         extra_after(c)
-    S.kitchen_north_lamp(c, T, power)
+    S2.lamp_v2(c, K["lamp_x"], K["lamp_y"], power)
     lx, ly = K["lamp_x"], K["lamp_y"]
-    light_multiply(c, "#57505f" if cold < 0.5 else "#454c66",
-                   [(lx, ly + 260, 900, "#ffd9a8", 0.75 * power), (lx, ly + 420, 480, "#fff0d8", 0.45 * power),
+    light_multiply(c, "#8a7c80" if cold < 0.5 else "#6e7896",
+                   [(lx, ly + 260, 900, "#ffd09a", 0.5 * power), (lx, ly + 420, 480, "#ffe6c4", 0.25 * power),
                     (850, 650, 560, "#8fb0ff", 0.35 + 0.2 * cold), (150, 900, 420, "#52648f", 0.2)])
 
 
 # =============================================================================================== EAST (mom CU) world
 MOM_CU = dict(x=540, y=1560, s=1.75, bt=0.0, ht=-0.12, key=(0.15, -0.75), rim_dir=(-1, -0.3), rim_col="#9fbfff",
-              warm=0.9, hand_a=(-0.42, -0.42), hand_b=(0.55, -0.42), elbow_a=-1, elbow_b=1, look=(-0.35, 0.08))
+              warm=0.9, hand_a=(-0.78, -0.3), hand_b=(0.82, -0.3), elbow_a=1, elbow_b=-1, look=(-0.35, 0.08))
 EAST_TABLE_Y = 1485
 
 
@@ -274,8 +315,8 @@ def east_world(c, T, power, cold, mom=None, mom_alpha=1.0, bg_blur=7.0, cam_args
     c.save()
     cam(c, cx, cy, z * 0.94 + 0.06, T=T, shake=shake * 0.5)
     layer_blur(c, bg_blur)
-    c.drawPicture(S.pic_kitchen_east())
-    S.kitchen_east_lights(c, T, power, cold)
+    c.drawPicture(S2.pic_kitchen_east_v2())
+    S2.kitchen_east_v2_lights(c, T, power, cold)
     front_chair(c, 540, 1560, 1.0)
     c.restore()
     c.restore()
@@ -293,9 +334,9 @@ def east_world(c, T, power, cold, mom=None, mom_alpha=1.0, bg_blur=7.0, cam_args
         if mug_in_hand:
             R = 100 * mom["s"] * 0.97
             S.draw_mug(c, mom["x"] + mom["hand_b"][0] * R - 10, mom["y"] + mom["hand_b"][1] * R + 62, s=1.5, t=T)
-    light_multiply(c, "#544a58" if cold < 0.5 else "#434b64",
-                   [(560, 800, 1250, "#ffdcb0", 0.8 * power), (540, 1500, 750, "#ffe9cc", 0.4 * power),
-                    (-100, 1000, 750, "#8fb0ff", 0.35 + 0.25 * cold)])
+    light_multiply(c, "#8a7c80" if cold < 0.5 else "#6e7896",
+                   [(560, 800, 1250, "#ffcf9a", 0.45 * power), (540, 1500, 750, "#ffe0bb", 0.2 * power),
+                    (-100, 1000, 750, "#8fb0ff", 0.3 + 0.25 * cold)])
     c.restore()
     if fg_arman:
         c.save()
@@ -324,8 +365,9 @@ def west_world(c, T, power, cold, arman, bg_blur=7.0, cam_args=(540, 1200, 1.25)
     c.save()
     cam(c, cx, cy, z * 0.94 + 0.06, rot=rot, T=T, shake=shake * 0.5)
     layer_blur(c, bg_blur)
-    c.drawPicture(S.pic_kitchen_west())
-    S.kitchen_west_lights(c, T, power, cold, hall_red)
+    S2.kitchen_west_v2_bg(c, T, power, hall_red)
+    c.drawRect(skia.Rect.MakeWH(W, H), fill(0, shader=linear(W, 0, W - 520, 0, [with_alpha(hexc("#5f8fd6"), 0.12 + 0.12 * cold),
+                                                                            with_alpha(hexc("#5f8fd6"), 0)]), blend=skia.BlendMode.kPlus))
     front_chair(c, 540, 1580, 1.0)
     c.restore()
     c.restore()
@@ -337,8 +379,8 @@ def west_world(c, T, power, cold, arman, bg_blur=7.0, cam_args=(540, 1200, 1.25)
     if arman:
         ARMAN.draw(c, arman, passes=("arms",))
     arman = arman or {}
-    light_multiply(c, "#504858" if cold < 0.5 else "#404862",
-                   [(420, 750, 1300, "#ffdcb4", 0.8 * power), (1080, 900, 700, "#8fb0ff", 0.3 + 0.3 * cold),
+    light_multiply(c, "#8a7c80" if cold < 0.5 else "#6e7896",
+                   [(420, 750, 1300, "#ffd2a0", 0.5 * power), (1080, 900, 700, "#8fb0ff", 0.3 + 0.3 * cold),
                     (540, 1250, 520, "#cfe0ff", 0.3 * arman.get("uplight", 0))])
     c.restore()
     if fg_mom and mom_fg_alpha > 0:
@@ -617,7 +659,7 @@ def s12(c, u, T):
     c.rotate(-28)
     c.drawCircle(40, 430, 210, fill(hexc("#121318")))                       # palm
     c.drawRRect(rrect(-58, -40, 116, 360, 58), fill(hexc("#121318")))        # thumb
-    c.drawRRect(rrect(-58, -40, 116, 360, 58), stroke(with_alpha(hexc("#5aa8ff"), 0.45), 4, blur=3))
+    c.drawRRect(rrect(-58, -40, 116, 360, 58), stroke(with_alpha(hexc("#ffae55"), 0.45), 4, blur=3))
     c.drawOval(skia.Rect.MakeXYWH(-30, -22, 60, 70), fill(with_alpha(hexc("#3a4258"), 0.9)))  # nail
     c.drawLine(-40, 150, 40, 140, stroke(with_alpha(hexc("#2a3042"), 0.9), 4))              # knuckle crease
     c.restore()
@@ -631,7 +673,7 @@ def s13(c, u, T):
                          emotion("surprise", mouth_open=0.15, pupil_k=0.6, brow_raise=0.9), ramp(T, 32.6, 33.2))
     look = (lerp(0.2, 0.75, ramp(T, 34.3, 34.7)), lerp(0.05, 0.15, ramp(T, 34.3, 34.7)))
     a = arman_cu_pose(T, emo, look=look, phone="a", phone_glow=0.0, uplight=0.15, ht=lerp(0.12, 0.38, ramp(T, 34.4, 35.2)),
-                      hand_a=(lerp(-0.6, -1.12, raise_), lerp(-0.3, -2.12, raise_)), phone_rot=lerp(0, 18, raise_),
+                      hand_a=(lerp(-0.6, -1.3, raise_), lerp(-0.3, -1.92, raise_)), phone_rot=lerp(0, 22, raise_),
                       hand_b=(0.5, -0.36), elbow_a=1)
     a["tilt"] += -6 * raise_ - 4 * ramp(T, 34.4, 35.2)
     a["hdy"] += 0.03 * math.exp(-max(0.0, T - 35.0) * 6) * (T > 35.0)   # small swallow/flinch
@@ -643,8 +685,8 @@ def s13(c, u, T):
 def s14(c, u, T):
     """«Ты же… только что здесь сидела.»"""
     emo = emotion("fear", mouth_open=0, brow_raise=0.7, brow_angle=-0.9, smile=-0.5, lid=0.0, pupil_k=0.65)
-    a = arman_cu_pose(T, emo, look=(0.8, 0.15), phone="a", phone_glow=0.0, uplight=0.12, hand_a=(-1.12, -2.12),
-                      phone_rot=18, hand_b=(0.5, -0.36), elbow_a=1, ht=0.38)
+    a = arman_cu_pose(T, emo, look=(0.8, 0.15), phone="a", phone_glow=0.0, uplight=0.12, hand_a=(-1.3, -1.92),
+                      phone_rot=22, hand_b=(0.5, -0.36), elbow_a=1, ht=0.38)
     a["tilt"] += -10 + 1.5 * math.sin(T * 13) * 0.3  # trembling
     a["hdx"] += 0.006 * math.sin(T * 23)
     # tight close-up, Dutch angle, camera on the empty-chair side: a clear change of size + axis vs S13
@@ -773,12 +815,11 @@ def s21(c, u, T):
     z = lerp(1.08, 1.28, ease_in_out(ramp(T, t0, 59.9))) + 0.06 * last_word
     c.save()
     cam(c, 540 + 30 * settle, lerp(980, 1000, ease_in_out(ramp(T, t0, 59.9))), z, rot=1.5 * settle, T=T, shake=2 + 8 * settle)
-    c.drawPicture(S.pic_corridor())
-    S.corridor_lights(c, T, pc, red=0.35 + 0.25 * last_word)
+    S2.corridor_v2(c, T, pc, red=0.45 + 0.3 * last_word)
     # red floor reflection + shadow
     c.drawOval(skia.Rect.MakeXYWH(360, 1700, 360, 70), fill(with_alpha(hexc("#000"), 0.6), blur=14))
     DOUBLE.draw(c, d)
-    light_multiply(c, "#3e4460", [(540, 330, 1000, "#c8d6ff", 0.6 * pc), (540, 1000, 650, "#ffb0b0", 0.3),
+    light_multiply(c, "#7a8098", [(540, 330, 1000, "#c8d6ff", 0.6 * pc), (540, 1000, 650, "#ffb0b0", 0.3),
                                   (540, 1920, 700, "#ffcf9a", 0.35)])
     # eyes keep glowing above the multiply pass
     hx, hy, R = DOUBLE.head_pos(d)
@@ -855,10 +896,20 @@ def render_frame(T):
     c = _SURF.getCanvas()
     c.clear(hexc("#000"))
     sid, a, b = shot_at(T)
+    _SCENE["cold"] = coldness(T) if sid not in ("S21",) else 0.9
     c.save()
     SHOT_FN[sid](c, (T - a) / (b - a), T)
     c.restore()
-    return surface_rgba(_SURF)
+    rgba = surface_rgba(_SURF)
+    if sid in ("S22", "S23"):
+        return rgba
+    cold = _SCENE["cold"]
+    insert = sid in ("S01", "S04", "S12", "S16", "S17", "S18")
+    rgb = concept_look(rgba[:, :, :3], t=T, warm=max(0.25, 1.0 - cold), cold=cold, sat=1.2,
+                       bloom=0.45 if insert else 0.6, soften=0.25 if insert else 0.6, grain=0.0)
+    out = rgba.copy()
+    out[:, :, :3] = rgb
+    return out
 
 
 def S_new():

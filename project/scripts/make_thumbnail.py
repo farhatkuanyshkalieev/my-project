@@ -4,7 +4,12 @@ sys.path.insert(0, os.path.dirname(__file__))
 import skia
 from engine.core import W, H, new_surface, save_png, hexc, fill, stroke, font, draw_text, with_alpha, radial, linear, rrect
 from engine import sets as S
-from engine.rig import RIGS, emotion
+from engine.rig import emotion
+from engine.rig2 import RIGS2 as RIGS
+from engine import sets2 as S2
+from engine.look import concept_look
+from engine.core import surface_rgba
+import numpy as np
 from engine.ui import Phone, _rich_line
 import ep01_shots as E
 
@@ -15,8 +20,7 @@ c = s.getCanvas()
 E.layer_blur(c, 5)
 c.save()
 E.cam(c, 540, 900, 1.12)
-c.drawPicture(S.pic_corridor())
-S.corridor_lights(c, 0, 0.9, red=0.6)
+S2.corridor_v2(c, 0, 0.9, red=0.6)
 d = dict(x=760, y=1200, s=1.35, key=(0, -1), rim_dir=(0, -1), rim_k=1.6, glow_k=0.9, **emotion("calm_smirk", lid=0.25, smile=0.45))
 RIGS["double"].draw(c, d)
 E.light_multiply(c, "#3e4460", [(540, 330, 1000, "#c8d6ff", 0.5), (760, 900, 600, "#ffb0b0", 0.45)])
@@ -27,10 +31,12 @@ c.restore()
 c.restore()
 c.drawRect(skia.Rect.MakeWH(W, H), fill(0, shader=linear(0, 0, 0, H, [with_alpha(hexc("#000"), 0.55), with_alpha(hexc("#000"), 0.0), with_alpha(hexc("#000"), 0.0), with_alpha(hexc("#000"), 0.7)], [0, 0.3, 0.6, 1])))
 # Arman foreground
-a = dict(x=380, y=2200, s=3.2, ht=0.18, key=(0.4, -0.6), rim_dir=(1, -0.3), rim_k=1.3, uplight=1.0, phone="b",
-         phone_glow=1.0, hand_b=(0.45, -0.95), phone_rot=-10, hand_a=None, look=(0.85, 0.0),
+a = dict(x=380, y=2200, s=3.2, ht=0.18, key=(0.4, -0.6), rim_dir=(1, -0.3), rim_k=1.3, uplight=0.25, phone="b",
+         phone_glow=0.2, hand_b=(1.1, -1.05), phone_rot=-14, hand_a=None, look=(0.85, 0.0), rim_col="#ffae55",
          **emotion("fear", brow_raise=0.8, brow_angle=-0.8, mouth_open=0.25, pupil_k=0.55))
 RIGS["arman"].draw(c, a)
+img = concept_look(surface_rgba(s)[:, :, :3], warm=0.8, cold=0.6, sat=1.2, grain=0.0)
+c.drawImage(skia.Image.fromarray(np.dstack([img, np.full(img.shape[:2], 255, np.uint8)])), 0, 0)
 # notification bubble
 f = font("rubik", 50, 700)
 c.save()

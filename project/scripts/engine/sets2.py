@@ -27,9 +27,9 @@ def lamp_v2(c, x, y, power, s=1.0, cord_top=-50):
     lit = with_alpha(hexc(CREAM), 1.0)
     c.drawPath(shade_p, fill(lit, shader=linear(x, y - 95 * s, x, y, [hexc("#d9b98a"), hexc("#fbe8c4")])))
     if power > 0.02:
-        c.drawPath(shade_p, fill(with_alpha(hexc("#fff3d6"), 0.55 * power)))
-        glow(c, x, y - 40 * s, 230 * s, hexc(AMBER), 0.55 * power)
-        glow(c, x, y + 10 * s, 90 * s, hexc("#fff4dc"), 0.75 * power)
+        c.drawPath(shade_p, fill(with_alpha(hexc("#fff3d6"), 0.3 * power)))
+        glow(c, x, y - 40 * s, 230 * s, hexc(AMBER), 0.35 * power)
+        glow(c, x, y + 10 * s, 70 * s, hexc("#fff4dc"), 0.4 * power)
         # warm light cone down to the table
         cone = path_poly([(x - 80 * s, y), (x + 80 * s, y), (x + 330 * s, y + 470 * s), (x - 330 * s, y + 470 * s)])
         c.drawPath(cone, fill(0, shader=linear(0, y, 0, y + 470 * s, [with_alpha(hexc(AMBER), 0.28 * power),
@@ -182,8 +182,8 @@ def table_lamp(c, x, y, power, s=1.0):
     c.drawOval(skia.Rect.MakeXYWH(x - 40 * s, y - 12 * s, 80 * s, 22 * s), fill(hexc("#2a1c12")))
     sh = path_poly([(x - 40 * s, y - 210 * s), (x + 40 * s, y - 210 * s), (x + 72 * s, y - 110 * s), (x - 72 * s, y - 110 * s)])
     c.drawPath(sh, fill(0, shader=linear(0, y - 210 * s, 0, y - 110 * s, [hexc("#f2d39c"), hexc("#ffe9c2")])))
-    glow(c, x, y - 150 * s, 260 * s, hexc(AMBER), 0.45 * power)
-    glow(c, x, y - 150 * s, 80 * s, hexc("#fff0d0"), 0.45 * power)
+    glow(c, x, y - 150 * s, 260 * s, hexc(AMBER), 0.3 * power)
+    glow(c, x, y - 150 * s, 70 * s, hexc("#fff0d0"), 0.25 * power)
 
 
 def kitchen_west_v2_bg(c, t, power=1.0, hall_red=0.0):
@@ -253,3 +253,64 @@ def corridor_v2(c, t, power=1.0, red=0.0):
                     blend=skia.BlendMode.kPlus))
     if red > 0:
         glow(c, W / 2, 1050, 620, hexc("#ff1a2a"), 0.3 * red)
+
+
+# =========================================================================== KITCHEN v2 — behind Mom (east wall)
+def _kitchen_east_v2_static(c):
+    _wall(c, 0, 0, W, H, "#2a1b12", "#120b06")
+    wood, wood_d = hexc("#3a2414"), hexc("#1e120a")
+    # upper cabinets (dark wood, glass doors on two of them)
+    for i in range(4):
+        x = 30 + i * 260
+        c.drawRRect(rrect(x, 250, 240, 420, 8), fill(0, shader=linear(0, 250, 0, 670, [wood, wood_d])))
+        if i in (1, 2):
+            c.drawRRect(rrect(x + 26, 276, 188, 368, 6), fill(hexc("#120c08")))
+            for k in range(2):
+                yy = 276 + 120 + k * 120
+                c.drawRect(skia.Rect.MakeXYWH(x + 26, yy, 188, 8), fill(wood))
+                for j in range(4):
+                    col = hexc(["#d8c7a0", "#c25a3a", "#e8dcc4", "#6f8796"][(i + j + k) % 4])
+                    c.drawRRect(rrect(x + 40 + j * 42, yy - 56, 30, 56, 6), fill(col, shader=linear(0, yy - 56, 0, yy, [shade(col, 1.1), shade(col, 0.5)])))
+        else:
+            c.drawRRect(rrect(x + 22, 272, 196, 376, 6), stroke(with_alpha(hexc("#000"), 0.45), 4))
+        c.drawRRect(rrect(x + (200 if i % 2 else 24), 450, 12, 56, 6), fill(hexc("#b08a4a")))
+    # backsplash (dark tiles)
+    c.drawRect(skia.Rect.MakeXYWH(0, 690, W, 330), fill(hexc("#2b2622")))
+    for yy in range(690, 1020, 40):
+        off = 0 if ((yy - 690) // 40) % 2 == 0 else 40
+        c.drawLine(0, yy, W, yy, stroke(with_alpha(hexc("#000"), 0.45), 2))
+        for xx in range(-off, W, 80):
+            c.drawLine(xx, yy, xx, yy + 40, stroke(with_alpha(hexc("#000"), 0.45), 2))
+    # countertop + lower cabinets
+    c.drawRect(skia.Rect.MakeXYWH(0, 1020, W, 40), fill(hexc("#4a3020")))
+    c.drawRect(skia.Rect.MakeXYWH(0, 1060, W, 700), fill(0, shader=linear(0, 1060, 0, 1760, [hexc("#2c1b10"), hexc("#0e0805")])))
+    for i in range(5):
+        c.drawRRect(rrect(20 + i * 214, 1090, 196, 500, 8), stroke(with_alpha(hexc("#000"), 0.5), 4))
+    # kettle, board, utensils
+    kx, ky = 250, 1020
+    c.drawRRect(rrect(kx - 70, ky - 150, 140, 150, 40), fill(0, shader=linear(kx - 70, 0, kx + 70, 0, [hexc("#9a9fa8"), hexc("#4a4e56"), hexc("#25282e")])))
+    c.drawArc(skia.Rect.MakeXYWH(kx - 50, ky - 210, 100, 110), 180, 180, False, stroke(hexc("#141414"), 12))
+    c.drawRRect(rrect(560, 880, 150, 140, 20), fill(hexc("#7a4e2c")))
+    c.drawRRect(rrect(800, 930, 80, 90, 10), fill(hexc("#b8ad9c")))
+    for i, a in enumerate([-12, 0, 10, 20]):
+        c.drawLine(820 + i * 14, 940, 820 + i * 14 + a, 840, stroke(hexc("#3a2a1a"), 8))
+
+
+@functools.lru_cache(maxsize=None)
+def pic_kitchen_east_v2():
+    return _record(_kitchen_east_v2_static)
+
+
+def kitchen_east_v2_lights(c, t, power, cold=0.0):
+    c.drawRect(skia.Rect.MakeXYWH(30, 670, 1020, 8), fill(mix_c("#fff0c8", power)))
+    c.drawRect(skia.Rect.MakeXYWH(0, 678, W, 340), fill(0, shader=linear(0, 678, 0, 1018, [with_alpha(hexc(AMBER), 0.32 * power), with_alpha(hexc(AMBER), 0)]),
+                                                      blend=skia.BlendMode.kPlus))
+    c.drawCircle(540, 260, 900, fill(0, shader=radial(540, 260, 900, [with_alpha(hexc(AMBER), 0.26 * power), with_alpha(hexc(AMBER), 0)]),
+                                     blend=skia.BlendMode.kPlus))
+    c.drawRect(skia.Rect.MakeWH(W, H), fill(0, shader=linear(0, 0, 480, 0, [with_alpha(hexc("#5f8fd6"), 0.16 + 0.12 * cold), with_alpha(hexc("#5f8fd6"), 0)]),
+                                            blend=skia.BlendMode.kPlus))
+
+
+def mix_c(col, power):
+    from .core import mix
+    return mix(hexc("#3a2a1a"), hexc(col), max(0.0, min(1.0, power)))

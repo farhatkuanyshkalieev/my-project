@@ -34,13 +34,13 @@ CONCEPT = {
         shirt="#120d0d", shirt_hi="#2a1414", collar="#201414", tie="#8e1219", tie_dark="#5a0a0f",
         pants="#0f0b0b", shoes="#090707", hand="#100c0c", height=1.0, glow="#ff1a1a"),
     "mom": dict(
-        kind="mom", head=("#f7ece2", "#ecdccf", "#c9ae9c"), rim="#ffd29a", rim_k=0.5,
+        kind="mom", head=("#e8d6c6", "#d9c3b0", "#a88a74"), rim="#ffd29a", rim_k=0.45,
         eye="#ffffff", eye_rx=0.2, eye_ry=0.25, eye_dx=0.33, eye_y=0.12, lid_base=0.06, lid_angle=0.0,
         iris="#3a2219", iris_r=0.16, pupil="#120806", lashes="#24140e",
         brow="#4a3026", brow_w=0.035, mouth="#9a5a4c", mouth_in="#5a1f1f", blush="#ff9c8c",
         hair="#3b2820", hair_hi="#5e4234", ear="#ead6c6",
-        shirt="#d9cfc3", shirt_hi="#efe7dd", apron="#2f2b2f", apron_hi="#47424a",
-        pants="#3a3436", shoes="#e7ddd2", hand="#efdccd", height=0.97, glow=None),
+        shirt="#b9ab9c", shirt_hi="#cfc2b4", apron="#2f2b2f", apron_hi="#47424a",
+        pants="#3a3436", shoes="#cfc3b6", hand="#d9c3b0", height=0.97, glow=None),
 }
 
 
