@@ -91,6 +91,9 @@ def voices():
     os.makedirs(os.path.join(EP, "compositions"), exist_ok=True)
     clips, lips = {}, {}
     for lid, L in T.LINES.items():
+        if not L["take"]:
+            print("WARNING: no take yet for", lid)
+            continue
         raw = os.path.join(ROOT, L.get("raw", "ep03"), "voices", "raw", L["take"] + ".mp3")
         x = V.process(raw, L["fx"], who=L["who"])
         clips[lid] = x

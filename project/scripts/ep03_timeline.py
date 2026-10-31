@@ -18,9 +18,9 @@ LINES = {
     "G1": dict(take="LrcAmtRv9WSC0007kL2W", t=26.05, who="girl", fx="stair_off"),
     "A3": dict(take="5a5irp1g0Fqg4umQa6Bt", t=28.45, who="arman", fx="stair"),
     "G2": dict(take="SixsjQNf9t0Zarp2YLbF", t=31.45, who="girl", fx="stair"),
-    "G3": dict(take=None, t=35.25, who="girl", fx="stair"),
+    "G3": dict(take="StrojBlsSvnbnmXOuQmE", t=35.25, who="girl", fx="stair"),
     "M3": dict(take="OHYu55FlRlivTDQsAhTf", raw="ep02", t=42.45, who="mom", fx="behind_door"),
-    "G4": dict(take=None, t=45.65, who="girl", fx="whisper"),
+    "G4": dict(take="8m6Zl76ZfK7ZGhDH8iJT", t=45.65, who="girl", fx="whisper"),
     "O1": dict(take=None, t=51.75, who="operator", fx="operator"),
 }
 
@@ -32,7 +32,7 @@ SUBTITLES = [  # (line, text, red keywords, colour) — same style as ep. 1–2
     ("G1", "Ты тоже ходишь по кругу?", ("по", "кругу"), "#ffffff"),
     ("A3", "Ты… ты кто такая?", (), "#ffffff"),
     ("G2", "Я тут давно. Здесь все двери — твои.", ("твои",), "#ffffff"),
-    ("G3", "Каждый раз ты убегаешь. И каждый раз возвращаешься.", ("возвращаешься",), "#ffffff"),
+    ("G3", "Каждый раз ты убегаешь из квартиры. И каждый раз возвращаешься.", ("возвращаешься",), "#ffffff"),
     ("M3", "Сынок, садись. Чай остывает.", (), "#ffffff"),
     ("G4", "Не заходи. Там уже есть ты.", ("уже", "есть", "ты"), "#ffffff"),
     ("O1", "Объект 048 вне зоны. Начинаю перезапуск.", ("перезапуск",), "#bfe3ff"),
@@ -73,6 +73,9 @@ LIGHTS_OUT = [55.45, 55.95, 56.45, 56.95]      # far → near, one smooth fade e
 
 # per-cue subtitle baseline (px, last line) where the default SUB_Y=1395 would cross a face; 560 = above the heads and
 # above the brass «048» plate in the door shots (the plate is a story element and must stay readable).
+# a line whose subtitle needs more than 2 lines is shown as two cues, split at the pause between its sentences
+# (measured on the processed take: G3 pause 2.16–2.71 s into the clip)
+SUB_SPLIT = {"G3": ("Каждый раз ты убегаешь из квартиры.", "И каждый раз возвращаешься.", 37.86)}
 SUB_POS = {"A1": 560, "A2": 560, "G1": 560, "G3": 560, "M3": 560, "G4": 560}
 
 

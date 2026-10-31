@@ -16,7 +16,14 @@ def cues():
         speech = len(lips[lid]["env"]) / 60.0
         a = L["t"] - 0.08
         b = max(a + 1.0, L["t"] + speech + 0.25)
-        out.append(dict(id=lid, start=a, end=b, text=text, red=red, color=col, y=getattr(TL, "SUB_POS", {}).get(lid)))
+        y = getattr(TL, "SUB_POS", {}).get(lid)
+        split = getattr(TL, "SUB_SPLIT", {}).get(lid)
+        if split:   # two cues for one long line, cut at the pause between its sentences
+            t1, t2, ts = split
+            out.append(dict(id=lid + "a", start=a, end=ts - 0.04, text=t1, red=red, color=col, y=y))
+            out.append(dict(id=lid + "b", start=ts - 0.02, end=b, text=t2, red=red, color=col, y=y))
+            continue
+        out.append(dict(id=lid, start=a, end=b, text=text, red=red, color=col, y=y))
     for i in range(len(out) - 1):          # never overlap the next cue
         out[i]["end"] = min(out[i]["end"], out[i + 1]["start"] - 0.04)
     out[-1]["end"] = min(out[-1]["end"], TL.EV["cut_black"])

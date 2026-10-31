@@ -1,0 +1,102 @@
+{
+ "M1": {
+  "take": "1l0G6B8GulluFtOg3k0Q",
+  "expected": "Сынок, ты чего? Садись.",
+  "heard": "Сынок, ты чего? Садись.",
+  "similarity": 1.0,
+  "dur": 2.8,
+  "onset": 0.221,
+  "offset": 2.593,
+  "peak_db": -11.5
+ },
+ "A1": {
+  "take": "HqgLEctwwBbLxGIiJhK5",
+  "expected": "Где моя мама?",
+  "heard": "Где моя мама?",
+  "similarity": 1.0,
+  "dur": 1.6,
+  "onset": 0.173,
+  "offset": 1.206,
+  "peak_db": -8.3
+ },
+ "M2": {
+  "take": "NHNHxoetg1rLunrttMXc",
+  "expected": "Я здесь. Я всегда здесь.",
+  "heard": "Я здесь. Я всегда здесь.",
+  "similarity": 1.0,
+  "dur": 2.72,
+  "onset": 0.177,
+  "offset": 2.561,
+  "peak_db": -12.4
+ },
+ "A2": {
+  "take": "6Xtf24XqCOfrmxXXmxbQ",
+  "expected": "Так. Спокойно. Это просто… тот же этаж.",
+  "heard": "Так, спокойно, это просто тот же этаж.",
+  "similarity": 1.0,
+  "dur": 4.96,
+  "onset": 0.038,
+  "offset": 4.767,
+  "peak_db": -9.6
+ },
+ "G1": {
+  "take": "LrcAmtRv9WSC0007kL2W",
+  "expected": "Ты тоже ходишь по кругу?",
+  "heard": "Ты тоже ходишь по кругу?",
+  "similarity": 1.0,
+  "dur": 2.0,
+  "onset": 0.105,
+  "offset": 1.677,
+  "peak_db": -16.6
+ },
+ "A3": {
+  "take": "5a5irp1g0Fqg4umQa6Bt",
+  "expected": "Ты… ты кто такая?",
+  "heard": "Ты... ты кто такая?",
+  "similarity": 1.0,
+  "dur": 2.0,
+  "onset": 0.122,
+  "offset": 1.67,
+  "peak_db": -7.9
+ },
+ "G2": {
+  "take": "SixsjQNf9t0Zarp2YLbF",
+  "expected": "Я тут давно. Здесь все двери — твои.",
+  "heard": "Я тут давно, здесь все двери твои.",
+  "similarity": 0.985,
+  "dur": 3.52,
+  "onset": 0.041,
+  "offset": 3.164,
+  "peak_db": -9.7
+ },
+ "G3": {
+  "take": "StrojBlsSvnbnmXOuQmE",
+  "expected": "Каждый раз ты убегаешь из квартиры. И каждый раз возвращаешься.",
+  "heard": "Каждый раз ты убегаешь из квартиры и каждый раз возвращаешься.",
+  "similarity": 1.0,
+  "dur": 4.64,
+  "onset": 0.093,
+  "offset": 4.477,
+  "peak_db": -19.2
+ },
+ "M3": {
+  "take": "OHYu55FlRlivTDQsAhTf",
+  "expected": "Сынок, садись. Чай остывает.",
+  "heard": "Сынок, садись, чай остывает.",
+  "similarity": 1.0,
+  "dur": 2.64,
+  "onset": 0.038,
+  "offset": 2.272,
+  "peak_db": -8.2
+ },
+ "G4": {
+  "take": "8m6Zl76ZfK7ZGhDH8iJT",
+  "expected": "Не заходи. Там уже есть ты.",
+  "heard": "Не заходи, там уже есть ты.",
+  "similarity": 1.0,
+  "dur": 2.88,
+  "onset": 0.129,
+  "offset": 2.508,
+  "peak_db": -15.3
+ }
+}
