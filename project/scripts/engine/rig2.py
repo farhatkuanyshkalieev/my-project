@@ -49,6 +49,16 @@ CONCEPT = {
         hair="#3b2820", hair_hi="#5e4234", ear="#ead6c6",
         shirt="#b9ab9c", shirt_hi="#cfc2b4", apron="#2f2b2f", apron_hi="#47424a",
         pants="#3a3436", shoes="#cfc3b6", hand="#d9c3b0", height=0.97, glow=None),
+    "girl": dict(  # SERIES STANDARD (v3) port of characters/girl_reference_sheet.png (v1): ponytail, bangs, light zip jacket,
+        #            jeans, red sneakers; same eye/lid language as Mom v3, slightly larger eyes, child proportions
+        kind="mom", head=("#e8d3be", "#d4bba3", "#9c7b62"), rim="#ffe0b0", rim_k=0.7,
+        eye="#fbf8f2", eye_rx=0.29, eye_ry=0.27, eye_dx=0.36, eye_y=0.17, lid_base=0.05, lid_angle=-3.0,
+        iris="#5a3420", iris_r=0.14, pupil="#140906", lashes=None, lid_line="#2a1810", lid_flick=False,
+        brow="#4a2c1c", brow_w=0.05, mouth="#8a4a3a", mouth_in="#5a1c1c", blush="#ff9088",
+        hair="#5a3622", hair_hi="#7e5238", ear=None, hair_strands=False, ponytail=True, bangs=True,
+        scrunchie="#e05a6a", apron=None, zipper="#8a8478",
+        shirt="#cfc6b8", shirt_hi="#e8e1d6", pants="#3e4c68", shoes="#e0545a", shoe_sole="#f2ebe4",
+        hand="#d4bba3", height=0.72, child=True, glow=None),
 }
 
 
@@ -58,7 +68,7 @@ class ConceptRig(Rig):
         self.cs = CONCEPT[name]
         # keep a style dict compatible with the base class helpers
         self.st = dict(height=self.cs["height"], pants=self.cs["pants"], shoes=self.cs["shoes"],
-                       shoe_sole="#2a2a2a" if self.cs["kind"] == "stick" else "#b5a79a",
+                       shoe_sole=self.cs.get("shoe_sole") or ("#2a2a2a" if self.cs["kind"] == "stick" else "#b5a79a"),
                        skin_hand=self.cs["hand"], top=self.cs["shirt"], top_dark=self.cs["shirt"],
                        hood=False, strings=False, glow=self.cs.get("glow"))
 
@@ -71,6 +81,11 @@ class ConceptRig(Rig):
         # head sits on the collar (short, thick neck as in the key art)
         hx, hy = g["head"]
         g["head"] = (hx, hy + 0.24 * R)
+        if self.cs.get("child"):          # child: torso 0.86 of the adult ratio, head sits correspondingly lower
+            d = g["torso_h"] * 0.14
+            g["torso_h"] -= d
+            g["neck"] = (g["neck"][0], g["neck"][1] + d)
+            g["head"] = (g["head"][0], g["head"][1] + d)
         return g
 
     def _rim_paint(self, P, R, width, alpha=1.0, blur=0.0, dirv=None):
@@ -149,8 +164,16 @@ class ConceptRig(Rig):
                             stroke(with_alpha(hexc("#8a7a60"), 0.5), 0.015 * R))
                 # placket
                 c.drawLine(fc, -th + 0.1 * R, fc, -0.14 * R, stroke(with_alpha(hexc("#000"), 0.5), 0.02 * R))
+        elif cs.get("zipper"):
+            if not P["back"]:   # zip jacket: zipper line + pull, pocket seams, hem band
+                zc = hexc(cs["zipper"])
+                c.drawLine(fc, -th + 0.04 * R, fc, 0.04 * R, stroke(zc, 0.03 * R))
+                c.drawRRect(rrect_(fc - 0.03 * R, -th + 0.16 * R, 0.06 * R, 0.12 * R, 0.02 * R), fill(shade(zc, 0.8)))
+                for sgn in (-1, 1):
+                    c.drawLine(fc + sgn * 0.18 * R, -0.42 * R, fc + sgn * 0.3 * R, -0.2 * R, stroke(with_alpha(hexc("#000"), 0.22), 0.025 * R))
+            c.drawRect(skia.Rect.MakeLTRB(cx - sw - R, -0.12 * R, cx + sw + R, 0.06 * R), fill(with_alpha(hexc("#000"), 0.12)))
         else:
-            if not P["back"]:
+            if not P["back"] and cs.get("apron"):
                 ap = hexc(cs["apron"])
                 aw = hw * 1.05 * (1 - 0.3 * abs(bt))
                 apath = path_poly([(fc - aw * 0.75, -th * 0.72), (fc + aw * 0.75, -th * 0.72),
@@ -161,7 +184,7 @@ class ConceptRig(Rig):
         c.restore()
         # body rim
         c.drawPath(p, self._rim_paint(P, R, 0.035 * R, 0.7, blur=0.01 * R))
-        if cs["kind"] == "mom" and not P["back"]:
+        if cs["kind"] == "mom" and not P["back"] and cs.get("apron"):
             ap = hexc(cs["apron"])
             for sgn in (-1, 1):  # apron straps
                 c.drawLine(cx + bt * 0.22 * R + sgn * 0.22 * R * (1 - 0.3 * abs(bt)), -th * 0.72,
@@ -188,6 +211,13 @@ class ConceptRig(Rig):
                                 (fc + sgn * 0.17 * R, ct + 0.17 * R)])
                 c.drawPath(cp, fill(col))
                 c.drawPath(cp, stroke(with_alpha(hexc("#000"), 0.6), 0.012 * R))
+        elif cs["kind"] == "mom" and not P["back"] and cs.get("zipper"):
+            fc = cx + bt * 0.22 * R
+            for sgn in (-1, 1):   # stand-up jacket collar
+                cp = path_poly([(fc + sgn * 0.03 * R, -th + 0.06 * R), (fc + sgn * 0.24 * R, -th - 0.06 * R),
+                                (fc + sgn * 0.22 * R, -th + 0.14 * R)])
+                c.drawPath(cp, fill(hexc(cs["shirt_hi"])))
+                c.drawPath(cp, stroke(with_alpha(hexc("#000"), 0.25), 0.012 * R))
         elif cs["kind"] == "mom" and not P["back"]:
             c.drawArc(skia.Rect.MakeXYWH(nx - 0.2 * R, -th - 0.12 * R, 0.4 * R, 0.22 * R), 0, 180, False,
                       stroke(hexc(cs["shirt_hi"]), 0.04 * R))
@@ -453,7 +483,8 @@ class ConceptRig(Rig):
                     c.restore()
                     # small outer flick (graphic, not lash strokes)
                     yo = (yl + (dy if side > 0 else -dy)) if lid > 0.001 else ey - ry * 0.45
-                    c.drawLine(ex + side * rx * 0.9, yo + 0.01 * R, ex + side * rx * 1.16, yo - 0.06 * R, stroke(lc, 0.035 * R))
+                    if cs.get("lid_flick", True):
+                        c.drawLine(ex + side * rx * 0.9, yo + 0.01 * R, ex + side * rx * 1.16, yo - 0.06 * R, stroke(lc, 0.035 * R))
             # brows
             raise_ = P["brow_raise"] + (P["brow_asym"] * 0.5 if side > 0 else -P["brow_asym"] * 0.15)
             by = ey - ry - 0.09 * R - raise_ * 0.13 * R + cs["lid_base"] * 0.45 * ry
@@ -506,6 +537,33 @@ class ConceptRig(Rig):
     def _mom_back_hair(self, c, P, R, ht):
         cs = self.cs
         hair = hexc(cs["hair"])
+        if cs.get("ponytail"):
+            self._ponytail(c, P, R, ht)
+        else:
+            self._bun(c, P, R, ht)
+        self._side_locks_and_ears(c, P, R, ht)
+
+    def _ponytail(self, c, P, R, ht):
+        """High ponytail at the back of the head, swinging with P['hair_sway'] (secondary motion)."""
+        cs = self.cs
+        hair = hexc(cs["hair"])
+        sway = P.get("hair_sway", 0.0)
+        side = 1 if ht <= 0.15 else -1          # tail shows on the side away from the turn
+        bx, by = side * 0.62 * R - ht * 0.45 * R, -0.62 * R
+        a = math.radians(18 + 14 * sway) * side
+        tx, ty = bx + math.sin(a) * 0.95 * R + side * 0.2 * R, by + math.cos(a) * 0.95 * R
+        p = skia.Path()
+        p.moveTo(bx - side * 0.16 * R, by - 0.08 * R)
+        p.cubicTo(bx + side * 0.55 * R, by - 0.05 * R, tx + side * 0.25 * R, ty - 0.45 * R, tx, ty)
+        p.cubicTo(tx - side * 0.12 * R, ty - 0.35 * R, bx + side * 0.05 * R, by + 0.3 * R, bx - side * 0.1 * R, by + 0.14 * R)
+        p.close()
+        c.drawPath(p, fill(hair, shader=radial(bx, by, 1.1 * R, [hexc(cs["hair_hi"]), hair])))
+        c.drawPath(p, self._rim_paint(P, R, 0.025 * R, 0.5, blur=0.01 * R))
+        c.drawCircle(bx, by + 0.02 * R, 0.1 * R, fill(hexc(cs.get("scrunchie") or cs["hair_hi"])))
+
+    def _bun(self, c, P, R, ht):
+        cs = self.cs
+        hair = hexc(cs["hair"])
         bx = -ht * 0.5 * R
         by = -0.82 * R if not P["back"] else -0.6 * R
         c.drawCircle(bx, by, 0.44 * R, fill(hair, shader=radial(bx - 0.12 * R, by - 0.15 * R, 0.5 * R, [hexc(cs["hair_hi"]), hair])))
@@ -513,6 +571,10 @@ class ConceptRig(Rig):
             a = i * 0.9
             c.drawArc(skia.Rect.MakeXYWH(bx - 0.36 * R, by - 0.36 * R, 0.72 * R, 0.72 * R), 200 + i * 35, 70, False,
                       stroke(shade(hair, 0.7), 0.02 * R))
+
+    def _side_locks_and_ears(self, c, P, R, ht):
+        cs = self.cs
+        hair = hexc(cs["hair"])
         # side locks behind the face
         for sgn in (-1, 1):
             x0 = sgn * 0.88 * R - ht * 0.3 * R
@@ -551,6 +613,9 @@ class ConceptRig(Rig):
         cp.addCircle(0, 0, R * 1.03)
         c.clipPath(cp, doAntiAlias=True)
         o = ht * 0.55 * R
+        if cs.get("bangs"):
+            self._bangs(c, P, R, ht, o, hair)
+            return
         hp = skia.Path()
         hp.moveTo(-1.2 * R, 0.1 * R)
         hp.lineTo(-1.2 * R, -1.2 * R)
@@ -596,6 +661,34 @@ class ConceptRig(Rig):
             p2.moveTo(x0 + sgn * 0.05 * R, -0.45 * R)
             p2.cubicTo(x0 + sgn * 0.26 * R, -0.2 * R, x0 + sgn * 0.22 * R, 0.05 * R, x0 + sgn * 0.3 * R, 0.2 * R)
             c.drawPath(p2, stroke(shade(hair, 0.85), 0.025 * R))
+
+
+    def _bangs(self, c, P, R, ht, o, hair):
+        """Girl: straight fringe with soft scallops across the forehead + hair framing the cheeks."""
+        cs = self.cs
+        hp = skia.Path()
+        hp.moveTo(-1.2 * R, 0.25 * R)
+        hp.lineTo(-1.2 * R, -1.2 * R)
+        hp.lineTo(1.2 * R, -1.2 * R)
+        hp.lineTo(1.2 * R, 0.25 * R)
+        hp.cubicTo(0.95 * R + o * 0.3, 0.05 * R, 0.86 * R + o * 0.4, -0.25 * R, 0.78 * R + o * 0.5, -0.3 * R)
+        n = 5
+        xs = [lerp(0.78, -0.78, i / n) * R + o * 0.5 for i in range(n + 1)]
+        for i in range(n):
+            xa, xb = xs[i], xs[i + 1]
+            hp.quadTo((xa + xb) / 2, -0.24 * R + (0.05 if i % 2 else 0.0) * R, xb, -0.33 * R - (0.02 if i % 2 else 0.0) * R)
+        hp.cubicTo(-0.86 * R + o * 0.4, -0.25 * R, -0.95 * R + o * 0.3, 0.05 * R, -1.2 * R, 0.25 * R)
+        hp.close()
+        c.drawPath(hp, fill(hair, shader=radial(-0.25 * R + o * 0.3, -0.95 * R, 1.25 * R, [hexc(cs["hair_hi"]), hair])))
+        for i in range(1, n):   # fringe separations
+            c.drawLine(xs[i], -0.33 * R, xs[i] * 0.85, -0.7 * R, stroke(shade(hair, 0.72), 0.016 * R))
+        c.restore()
+        c.save()
+        cp2 = skia.Path()
+        cp2.addCircle(0, 0, R * 1.03)
+        c.clipPath(cp2, doAntiAlias=True)
+        c.drawPath(hp, self._rim_paint(P, R, 0.03 * R, 0.6, blur=0.01 * R))
+        c.restore()
 
 
 RIGS2 = {k: ConceptRig(k) for k in CONCEPT}

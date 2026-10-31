@@ -45,7 +45,9 @@ def sheet(name):
     for i, (e, lb) in enumerate(EMOS):
         x = 200 + i * 330
         c.save(); c.clipRect(skia.Rect.MakeXYWH(x - 160, 1180, 320, 440))
-        rig.draw(c, dict(x=x, y=1780, s=1.2, ht=0.12 if i % 2 else -0.12, rim_dir=rim_dir, key=(-0.3, -0.7), warm=1, **emotion(e)), passes=("body", "head"))
+        es = 1.2 / CONCEPT[name]["height"]   # emotion heads at the same on-sheet size for every character
+        rig.draw(c, dict(x=x, y=1780 - (40 if CONCEPT[name].get("child") else 0), s=es, ht=0.12 if i % 2 else -0.12, rim_dir=rim_dir,
+                         key=(-0.3, -0.7), warm=1, **emotion(e)), passes=("body", "head"))
         c.restore()
     img = concept_look(surface_rgba(s)[:, :, :3], warm=0.0 if name == "double" else 1.0, cold=0.3 if name == "double" else 0.0, grain=0.02)
     s2 = new_surface(SW, SH); c2 = s2.getCanvas()
