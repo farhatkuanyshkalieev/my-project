@@ -8,3 +8,4 @@ renders/ep*/ep*_picture_master.mp4
 renders/ep*/*.wav
 renders/ep*/stems/
 renders/ep*/x264_2pass*
+renders/ep*/render.log
