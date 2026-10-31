@@ -1,0 +1,407 @@
+{
+ "project": "ТЕБЯ ЗДЕСЬ НЕ БЫЛО",
+ "episode": 2,
+ "episode_title": "НЕ СЛУШАЙ ЕГО",
+ "language": "ru",
+ "duration_s": 62.4,
+ "format": {
+  "resolution": "1080x1920",
+  "aspect": "9:16",
+  "fps": "60/1 CFR (every frame drawn at its own time)",
+  "video": "H.264 High 4.2, 12 Mb/s 2-pass, yuv420p",
+  "audio": "AAC 256k, 48 kHz stereo, -14 LUFS"
+ },
+ "style_standard": {
+  "source": "final/episode_01_final.mp4 (approved ep. 1 v2)",
+  "bible": "references/standard/series_standard_bible.png",
+  "doc": "references/standard/SERIES_STANDARD.md",
+  "sheets": [
+   "characters/standard/arman_standard_sheet.png",
+   "characters/standard/double_standard_sheet.png",
+   "characters/standard/mom_standard_sheet.png"
+  ],
+  "identity_test": "renders/ep02/ep02_corridor_test.mp4 + references/standard/identity_check_corridor_test.png",
+  "changes_vs_ep1": [
+   "Arman's rim locked to blue #8fb8ff in every location (ep. 1 used the scene light colour in the kitchen)",
+   "Mom redrawn to standard v3 geometry with the same rig (CONCEPT['mom']); ep. 1 design kept as CONCEPT['mom_ep1']"
+  ]
+ },
+ "dialogue": [
+  {
+   "id": "A1",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "DqPitd3KMSMK584okctZ",
+   "start_s": 0.55,
+   "text": "Ты… это я?",
+   "fx": "whisper",
+   "whisper_heard": "Ты? Это я?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 24.5
+  },
+  {
+   "id": "D1",
+   "who": "double",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF (pitch ×0.928, formant kept, hall)",
+   "take": "ozuN4o8EWPkPAKyc7yr9",
+   "start_s": 3.45,
+   "text": "Видишь? Опять… первым.",
+   "fx": "double_hall",
+   "whisper_heard": "Видишь? Опять первым.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 21.6
+  },
+  {
+   "id": "A2",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "IASzU8ZYUjkWj2IsEOzX",
+   "start_s": 9.75,
+   "text": "Тогда кто из вас… мне пишет?",
+   "fx": "room",
+   "whisper_heard": "Тогда кто из вас мне пишет?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 45.3
+  },
+  {
+   "id": "D2",
+   "who": "double",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF (pitch ×0.928, formant kept, hall)",
+   "take": "ZRStn9nb1Phq8iUOYIKa",
+   "start_s": 12.75,
+   "text": "Я — это ты. Только я… уже ответил.",
+   "fx": "double_hall",
+   "whisper_heard": "Я – это ты. Только я уже ответил.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 26.0
+  },
+  {
+   "id": "D3",
+   "who": "double",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF (pitch ×0.928, formant kept, hall)",
+   "take": "td9aIZ2jc6gdHfbkqbDn",
+   "start_s": 17.45,
+   "text": "Посмотри на часы.",
+   "fx": "double_hall",
+   "whisper_heard": "Посмотри на часы.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 20.4
+  },
+  {
+   "id": "D4",
+   "who": "double",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF (pitch ×0.928, formant kept, hall)",
+   "take": "DPp8uJj6oQssHmtyWR6s",
+   "start_s": 20.7,
+   "text": "23:17. Каждую ночь.",
+   "fx": "double_offscreen",
+   "whisper_heard": "Двадцать три семнадцать каждую ночь.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 18.9
+  },
+  {
+   "id": "D5",
+   "who": "double",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF (pitch ×0.928, formant kept, hall)",
+   "take": "qK05TNbppUnIS2OnK3Ca",
+   "start_s": 30.05,
+   "text": "Не отвечай.",
+   "fx": "double_hall",
+   "whisper_heard": "Не отвечай!",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 17.2
+  },
+  {
+   "id": "M1",
+   "who": "mom_phone",
+   "voice": "Soldani wlkyM0h4j74QgqHxZi4F (phone band 320–3300 Hz)",
+   "take": "gJHoPysfEzcVNuVyCieR",
+   "start_s": 34.45,
+   "text": "Арман? Ты почему не спишь?",
+   "fx": "phone",
+   "whisper_heard": "Арман, ты почему не спишь?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 21.6
+  },
+  {
+   "id": "A3",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "lQo6HZUcIjVCYUELFgGa",
+   "start_s": 38.95,
+   "text": "Мам… ты где сейчас?",
+   "fx": "room",
+   "whisper_heard": "Мам, ты где сейчас?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 18.0
+  },
+  {
+   "id": "M2",
+   "who": "mom_phone",
+   "voice": "Soldani wlkyM0h4j74QgqHxZi4F (phone band 320–3300 Hz)",
+   "take": "qywC0xbdea9poDqDm1Kz",
+   "start_s": 41.45,
+   "text": "Дома. На кухне. Иди сюда.",
+   "fx": "phone",
+   "whisper_heard": "Дома.  На кухне.  Иди сюда.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 23.3
+  },
+  {
+   "id": "M3",
+   "who": "mom",
+   "voice": "Soldani wlkyM0h4j74QgqHxZi4F",
+   "take": "OHYu55FlRlivTDQsAhTf",
+   "start_s": 49.45,
+   "text": "Сынок, садись. Чай остывает.",
+   "fx": "room",
+   "whisper_heard": "Сынок, садись, чай остывает.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 25.8
+  }
+ ],
+ "shots": [
+  {
+   "id": "S01",
+   "start": 0.0,
+   "end": 3.2,
+   "description": "Коридор: двойник выходит из темноты; шёпот Армана «Ты… это я?»"
+  },
+  {
+   "id": "S02",
+   "start": 3.2,
+   "end": 6.4,
+   "description": "СКП двойника: «Видишь? Опять… первым.» — указывает на телефон"
+  },
+  {
+   "id": "S03",
+   "start": 6.4,
+   "end": 9.4,
+   "description": "Инсерт чат: «НЕ СЛУШАЙ ЕГО. ОН ХОЧЕТ ЗАНЯТЬ ТВОЁ МЕСТО.»"
+  },
+  {
+   "id": "S04",
+   "start": 9.4,
+   "end": 12.4,
+   "description": "КП Армана: «Тогда кто из вас… мне пишет?»"
+  },
+  {
+   "id": "S05",
+   "start": 12.4,
+   "end": 17.2,
+   "description": "КП двойника: «Я — это ты. Только я… уже ответил.»"
+  },
+  {
+   "id": "S06",
+   "start": 17.2,
+   "end": 19.8,
+   "description": "Двойник кивает в сторону кухни: «Посмотри на часы.»"
+  },
+  {
+   "id": "S07",
+   "start": 19.8,
+   "end": 24.0,
+   "description": "Инсерт часы: 23:17:59 → 23:18 → откат на 23:17; «Каждую ночь.»"
+  },
+  {
+   "id": "S08",
+   "start": 24.0,
+   "end": 26.6,
+   "description": "ДКП Армана: осознание, лампа на кухне мигает"
+  },
+  {
+   "id": "S09",
+   "start": 26.6,
+   "end": 29.6,
+   "description": "Инсерт: входящий «МАМА»"
+  },
+  {
+   "id": "S10",
+   "start": 29.6,
+   "end": 32.0,
+   "description": "КП двойника: «Не отвечай.»"
+  },
+  {
+   "id": "S11",
+   "start": 32.0,
+   "end": 34.0,
+   "description": "Инсерт: Арман всё равно отвечает"
+  },
+  {
+   "id": "S12",
+   "start": 34.0,
+   "end": 38.6,
+   "description": "Арман с телефоном у уха; оглядывается — коридор пуст"
+  },
+  {
+   "id": "S13",
+   "start": 38.6,
+   "end": 41.2,
+   "description": "КП Армана: «Мам… ты где сейчас?»"
+  },
+  {
+   "id": "S14",
+   "start": 41.2,
+   "end": 44.6,
+   "description": "Арман медленно поворачивается к свету кухни: «Дома. На кухне. Иди сюда.»"
+  },
+  {
+   "id": "S15",
+   "start": 44.6,
+   "end": 49.0,
+   "description": "Общий кухни через плечо Армана: мама за столом, пар от кружки"
+  },
+  {
+   "id": "S16",
+   "start": 49.0,
+   "end": 53.4,
+   "description": "КП мамы: «Сынок, садись. Чай остывает.» — красный проблеск в глазах"
+  },
+  {
+   "id": "S17",
+   "start": 53.4,
+   "end": 56.2,
+   "description": "Инсерт: «ЭТО НЕ ОНА.»"
+  },
+  {
+   "id": "S18",
+   "start": 56.2,
+   "end": 58.6,
+   "description": "ДКП Армана: взгляд с телефона на маму"
+  },
+  {
+   "id": "S19",
+   "start": 58.6,
+   "end": 58.9,
+   "description": "Резкая склейка в чёрный"
+  },
+  {
+   "id": "S20",
+   "start": 58.9,
+   "end": 62.4,
+   "description": "Титр «ТОГДА КТО ОНА?»"
+  }
+ ],
+ "events": {
+  "step": 0.9,
+  "buzz1": 3.95,
+  "msg1": 6.75,
+  "clock_tick": 20.2,
+  "clock_turn": 21.0,
+  "clock_rewind": 21.9,
+  "lamp_flick": 24.6,
+  "ring_start": 26.85,
+  "answer": 33.2,
+  "double_gone": 37.1,
+  "turn_kitchen": 42.6,
+  "mug": 46.0,
+  "mom_glitch": 52.55,
+  "buzz2": 53.75,
+  "msg2": 53.85,
+  "music_drop": 55.9,
+  "cut_black": 58.6,
+  "end_card": 58.9,
+  "title2": 60.3
+ },
+ "rebuild": [
+  "python3 scripts/ep02_voice_qc.py <whisper_model_dir>",
+  "python3 scripts/ep02_audio.py",
+  "python3 scripts/ep02_snr.py",
+  "EP=02 python3 scripts/render.py renders/ep02/ep02_picture_master.mp4",
+  "EP=02 python3 scripts/subtitles.py",
+  "EP=02 python3 scripts/finalize.py",
+  "EP=02 python3 scripts/qc.py",
+  "python3 scripts/make_thumbnail_ep02.py",
+  "python3 scripts/make_storyboard_ep02.py",
+  "python3 scripts/make_standard_refs.py",
+  "python3 scripts/make_manifest_ep02.py"
+ ],
+ "outputs": {
+  "final": "final/episode_02_final.mp4",
+  "no_subtitles": "final/episode_02_no_subtitles.mp4",
+  "subtitles": "final/episode_02_subtitles.srt",
+  "thumbnail": "final/episode_02_thumbnail.png",
+  "storyboard": "ep02/storyboard/storyboard.md",
+  "storyboard_sheet": "ep02/storyboard/storyboard_sheet.png",
+  "score": "music/ep02_score.wav",
+  "mix_premaster": "renders/ep02/ep02_mix_premaster.wav",
+  "stems": "renders/ep02/stems/",
+  "voices_raw": "ep02/voices/raw/",
+  "voices_processed": "ep02/voices/processed/",
+  "lipsync": "ep02/compositions/lipsync.json"
+ },
+ "qc": {
+  "episode_02_final.mp4": {
+   "size_mb": 95.6,
+   "duration": 62.4,
+   "bitrate_mbps": 12.25,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3744,
+    "bitrate_mbps": 12.0
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 240
+   },
+   "loudness_lufs": -14.3,
+   "true_peak_dbfs": -1.7,
+   "motion": {
+    "transitions_checked": 3514,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.386
+   },
+   "edge_luma": {
+    "left": 25.263661580751425,
+    "right": 25.671646578970797,
+    "top": 20.75988198401393,
+    "bottom": 15.47605205365622
+   }
+  },
+  "episode_02_no_subtitles.mp4": {
+   "size_mb": 95.5,
+   "duration": 62.4,
+   "bitrate_mbps": 12.24,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3744,
+    "bitrate_mbps": 11.99
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 240
+   },
+   "loudness_lufs": -14.3,
+   "true_peak_dbfs": -1.7,
+   "motion": {
+    "transitions_checked": 3514,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.402
+   },
+   "edge_luma": {
+    "left": 25.261187065972223,
+    "right": 25.66718499599359,
+    "top": 20.755308246280467,
+    "bottom": 15.469018577872745
+   }
+  }
+ }
+}

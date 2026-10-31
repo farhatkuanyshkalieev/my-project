@@ -1,0 +1,112 @@
+{
+ "A1": {
+  "take": "DqPitd3KMSMK584okctZ",
+  "expected": "Ты… это я?",
+  "heard": "Ты? Это я?",
+  "similarity": 1.0,
+  "dur": 2.0,
+  "onset": 0.197,
+  "offset": 1.701,
+  "peak_db": -11.0
+ },
+ "D1": {
+  "take": "ozuN4o8EWPkPAKyc7yr9",
+  "expected": "Видишь? Опять… первым.",
+  "heard": "Видишь? Опять первым.",
+  "similarity": 1.0,
+  "dur": 2.8,
+  "onset": 0.198,
+  "offset": 2.609,
+  "peak_db": -13.8
+ },
+ "A2": {
+  "take": "IASzU8ZYUjkWj2IsEOzX",
+  "expected": "Тогда кто из вас… мне пишет?",
+  "heard": "Тогда кто из вас мне пишет?",
+  "similarity": 1.0,
+  "dur": 2.96,
+  "onset": 0.2,
+  "offset": 2.815,
+  "peak_db": -15.2
+ },
+ "D2": {
+  "take": "ZRStn9nb1Phq8iUOYIKa",
+  "expected": "Я — это ты. Только я… уже ответил.",
+  "heard": "Я – это ты. Только я уже ответил.",
+  "similarity": 1.0,
+  "dur": 4.24,
+  "onset": 0.202,
+  "offset": 4.075,
+  "peak_db": -12.0
+ },
+ "D3": {
+  "take": "td9aIZ2jc6gdHfbkqbDn",
+  "expected": "Посмотри на часы.",
+  "heard": "Посмотри на часы.",
+  "similarity": 1.0,
+  "dur": 2.32,
+  "onset": 0.164,
+  "offset": 1.935,
+  "peak_db": -20.8
+ },
+ "D4": {
+  "take": "DPp8uJj6oQssHmtyWR6s",
+  "expected": "Двадцать три семнадцать. Каждую ночь.",
+  "heard": "Двадцать три семнадцать каждую ночь.",
+  "similarity": 1.0,
+  "dur": 4.64,
+  "onset": 0.255,
+  "offset": 4.393,
+  "peak_db": -10.9
+ },
+ "D5": {
+  "take": "qK05TNbppUnIS2OnK3Ca",
+  "expected": "Не отвечай.",
+  "heard": "Не отвечай!",
+  "similarity": 1.0,
+  "dur": 1.2,
+  "onset": 0.258,
+  "offset": 0.948,
+  "peak_db": -15.7
+ },
+ "M1": {
+  "take": "gJHoPysfEzcVNuVyCieR",
+  "expected": "Арман? Ты почему не спишь?",
+  "heard": "Арман, ты почему не спишь?",
+  "similarity": 1.0,
+  "dur": 2.56,
+  "onset": 0.245,
+  "offset": 2.341,
+  "peak_db": -10.9
+ },
+ "A3": {
+  "take": "lQo6HZUcIjVCYUELFgGa",
+  "expected": "Мам… ты где сейчас?",
+  "heard": "Мам, ты где сейчас?",
+  "similarity": 1.0,
+  "dur": 2.32,
+  "onset": 0.204,
+  "offset": 1.994,
+  "peak_db": -17.0
+ },
+ "M2": {
+  "take": "qywC0xbdea9poDqDm1Kz",
+  "expected": "Дома. На кухне. Иди сюда.",
+  "heard": "Дома.  На кухне.  Иди сюда.",
+  "similarity": 1.0,
+  "dur": 3.04,
+  "onset": 0.034,
+  "offset": 2.804,
+  "peak_db": -9.0
+ },
+ "M3": {
+  "take": "OHYu55FlRlivTDQsAhTf",
+  "expected": "Сынок, садись. Чай остывает.",
+  "heard": "Сынок, садись, чай остывает.",
+  "similarity": 1.0,
+  "dur": 2.64,
+  "onset": 0.038,
+  "offset": 2.272,
+  "peak_db": -8.2
+ }
+}

@@ -4,3 +4,7 @@ renders/stems/
 renders/x264_2pass*
 __pycache__/
 *.pyc
+renders/ep*/ep*_picture_master.mp4
+renders/ep*/*.wav
+renders/ep*/stems/
+renders/ep*/x264_2pass*

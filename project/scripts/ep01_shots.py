@@ -28,6 +28,7 @@ LIPS = json.load(open(os.path.join(ROOT, "compositions", "lipsync.json")))
 EV = TL.EV
 PHONE = Phone()
 _SCENE = {"cold": 0.0}   # per-frame scene light state (set in render_frame)
+RIM_MODE = "scene"       # "scene" = ep. 1 (gold→blue by story); "standard" = series standard (Arman's rim always blue)
 
 
 class V2Rig:
@@ -40,7 +41,7 @@ class V2Rig:
     def _p(self, pose):
         p = dict(pose)
         if self.name == "arman":
-            if not p.get("rim_col"):
+            if not p.get("rim_col") and RIM_MODE == "scene":   # ep. 1 as approved; series standard = rig default blue
                 p["rim_col"] = mix(hexc("#ffae55"), hexc("#8fb4ff"), clamp(_SCENE["cold"] * 1.2))
                 p["rim_col"] = "#%02x%02x%02x" % (skia.ColorGetR(p["rim_col"]), skia.ColorGetG(p["rim_col"]), skia.ColorGetB(p["rim_col"]))
             p["uplight"] = p.get("uplight", 0.0) * 0.35

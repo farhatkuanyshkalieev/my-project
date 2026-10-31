@@ -19,6 +19,13 @@ INFO = {"arman": ("АРМАН · v2 «concept»", "Матово-чёрная г�
         "mom": ("МАМА · v2 «concept»", "Фарфоровое лицо · тёмно-каштановый пучок, пробор, пряди у висков · уши · аниме-глаза · бежевый верх, графитовый фартук")}
 BG = {"arman": ("#3a2a20", "#120c08", (0.8, -0.6), None), "double": ("#2a0c0c", "#070303", (0, -1), None),
       "mom": ("#5a3a22", "#1a110b", (0.6, -0.8), None)}
+RULES = {"arman": ["ПРАВИЛА:", "голова — круг R; рост ≈ 5.3R; торс 1.25R;", "шея короткая, голова сидит на воротнике;",
+                   "глаза в нижней половине головы,", "верхнее веко срезает 16% (двойник 33%);", "контур — цвет ключевого света сцены;",
+                   "руки — крупные перчатки с пальцами."],
+         "mom": ["ПРАВИЛА:", "пробор по центру, пучок сзади-сверху;", "пряди у висков, уши видны;", "глаза большие, тёмно-карие, с ресницами;",
+                 "фартук графитовый поверх бежевого;", "контур тёплый, мягкий."]}
+SOURCE = "Источник: references/concept/original_concept.png + references/v2/ai_canva/*"
+SUFFIX = "v2_reference_sheet"
 EMOS = [("neutral", "нейтрально"), ("joy", "радость"), ("surprise", "удивление"), ("fear", "страх"),
         ("irritation", "раздражение"), ("suspicion", "подозрение")]
 
@@ -59,15 +66,11 @@ def sheet(name):
         y = 330 + j * 52
         c2.drawRRect(rrect(1720, y, 64, 40, 8), fill(hexc(col))); c2.drawRRect(rrect(1720, y, 64, 40, 8), stroke(with_alpha(hexc("#fff"), 0.35), 2))
         draw_text(c2, f"{k}  {col}", 1800, y + 30, font("rubik", 28, 400), hexc("#d0c7bd"))
-    rules = ["ПРАВИЛА:", "голова — круг R; рост ≈ 5.3R; торс 1.25R;", "шея короткая, голова сидит на воротнике;",
-             "глаза в нижней половине головы,", "верхнее веко срезает 16% (двойник 33%);", "контур — цвет ключевого света сцены;",
-             "руки — крупные перчатки с пальцами."] if name != "mom" else \
-            ["ПРАВИЛА:", "пробор по центру, пучок сзади-сверху;", "пряди у висков, уши видны;", "глаза большие, тёмно-карие, с ресницами;",
-             "фартук графитовый поверх бежевого;", "контур тёплый, мягкий."]
+    rules = RULES.get(name, RULES["arman"])
     for j, r in enumerate(rules):
         draw_text(c2, r, 1720, 980 + j * 42, font("rubik", 27, 600 if j == 0 else 400), hexc("#c9c0b6"))
-    draw_text(c2, "Источник: references/concept/original_concept.png + references/v2/ai_canva/*", 70, 1950, font("rubik", 24, 400), hexc("#8a8178"))
-    s2.makeImageSnapshot().save(os.path.join(OUT_C, f"{name}_v2_reference_sheet.png"), skia.kPNG)
+    draw_text(c2, SOURCE, 70, 1950, font("rubik", 24, 400), hexc("#8a8178"))
+    s2.makeImageSnapshot().save(os.path.join(OUT_C, f"{name}_{SUFFIX}.png"), skia.kPNG)
 
 
 def plate(fn, path, warm=1.0, cold=0.0):

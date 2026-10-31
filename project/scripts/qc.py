@@ -1,13 +1,12 @@
-"""Final QC: ffprobe specs, true-60fps check (no duplicated frames), loudness, black-bar check, frame strip."""
+"""(EP=NN selects the episode) Final QC: ffprobe specs, true-60fps check (no duplicated frames), loudness, black-bar check, frame strip."""
 import json, os, subprocess, sys
 import numpy as np
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
-import ep01_timeline as TL
-P = lambda *a: os.path.join(ROOT, *a)
+from episode_paths import TL, P, EP, FINAL, QC_REPORT, RENDERS
 rep = {}
-for name in ("episode_01_final.mp4", "episode_01_no_subtitles.mp4"):
+for name in (f"episode_{EP}_final.mp4", f"episode_{EP}_no_subtitles.mp4"):
     f = P("final", name)
     pr = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", f],
                                    capture_output=True, text=True).stdout)
@@ -44,8 +43,8 @@ for name in ("episode_01_final.mp4", "episode_01_no_subtitles.mp4"):
                                  median_frame_diff=round(float(np.median(diff[content])), 3)),
                      edge_luma=edges)
     print(name, json.dumps(rep[name], ensure_ascii=False, indent=1))
-json.dump(rep, open(P("final", "qc_report.json"), "w"), ensure_ascii=False, indent=1)
+json.dump(rep, open(QC_REPORT, "w"), ensure_ascii=False, indent=1)
 # visual strip, every 2 s, with subtitles
-os.makedirs(P("renders", "qc"), exist_ok=True)
-subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", P("final", "episode_01_final.mp4"), "-vf",
-                "fps=0.5,scale=216:384,tile=8x4:padding=4", "-frames:v", "1", P("renders", "qc", "strip_every_2s.png")])
+os.makedirs(os.path.join(RENDERS, "qc"), exist_ok=True)
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", FINAL, "-vf",
+                "fps=0.5,scale=216:384,tile=8x4:padding=4", "-frames:v", "1", os.path.join(RENDERS, "qc", "strip_every_2s.png")])

@@ -1,0 +1,74 @@
+{
+ "episode_02_final.mp4": {
+  "size_mb": 95.6,
+  "duration": 62.4,
+  "bitrate_mbps": 12.25,
+  "video": {
+   "codec": "h264",
+   "profile": "High",
+   "width": 1080,
+   "height": 1920,
+   "pix_fmt": "yuv420p",
+   "r_frame_rate": "60/1",
+   "avg_frame_rate": "60/1",
+   "frames": 3744,
+   "bitrate_mbps": 12.0
+  },
+  "audio": {
+   "codec": "aac",
+   "sample_rate": 48000,
+   "channels": 2,
+   "bitrate_kbps": 240
+  },
+  "loudness_lufs": -14.3,
+  "true_peak_dbfs": -1.7,
+  "motion": {
+   "transitions_checked": 3514,
+   "duplicated_frames": 0,
+   "duplicated_pct": 0.0,
+   "median_frame_diff": 0.386
+  },
+  "edge_luma": {
+   "left": 25.263661580751425,
+   "right": 25.671646578970797,
+   "top": 20.75988198401393,
+   "bottom": 15.47605205365622
+  }
+ },
+ "episode_02_no_subtitles.mp4": {
+  "size_mb": 95.5,
+  "duration": 62.4,
+  "bitrate_mbps": 12.24,
+  "video": {
+   "codec": "h264",
+   "profile": "High",
+   "width": 1080,
+   "height": 1920,
+   "pix_fmt": "yuv420p",
+   "r_frame_rate": "60/1",
+   "avg_frame_rate": "60/1",
+   "frames": 3744,
+   "bitrate_mbps": 11.99
+  },
+  "audio": {
+   "codec": "aac",
+   "sample_rate": 48000,
+   "channels": 2,
+   "bitrate_kbps": 240
+  },
+  "loudness_lufs": -14.3,
+  "true_peak_dbfs": -1.7,
+  "motion": {
+   "transitions_checked": 3514,
+   "duplicated_frames": 0,
+   "duplicated_pct": 0.0,
+   "median_frame_diff": 0.402
+  },
+  "edge_luma": {
+   "left": 25.261187065972223,
+   "right": 25.66718499599359,
+   "top": 20.755308246280467,
+   "bottom": 15.469018577872745
+  }
+ }
+}

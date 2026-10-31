@@ -1,19 +1,19 @@
 """Render the episode picture: true 60 fps (every frame drawn at its own time), piped to ffmpeg.
 
-usage: python3 render.py OUT.mp4 [t_start t_end]
+usage: EP=02 python3 render.py OUT.mp4 [t_start t_end]   (EP defaults to 01)
 Output is a high-quality intermediate (H.264 CRF 12, yuv420p); final mux/encode is done by finalize.py.
 """
-import os, subprocess, sys, time
+import importlib, os, subprocess, sys, time
 from multiprocessing import Pool
 sys.path.insert(0, os.path.dirname(__file__))
-import ep01_timeline as TL
+EP = os.environ.get("EP", "01")
+TL = importlib.import_module(f"ep{EP}_timeline")
 
 FPS = TL.FPS
 
 
 def work(i):
-    from ep01_shots import render_frame
-    a = render_frame(i / FPS)
+    a = importlib.import_module(f"ep{EP}_shots").render_frame(i / FPS)
     return a[:, :, :3].tobytes()
 
 

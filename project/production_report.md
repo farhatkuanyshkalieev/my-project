@@ -89,3 +89,7 @@
 - Новая серия = новый `epNN_timeline.py` + `epNN_shots.py`; риг, сеты, UI телефона, звуковые функции, палитры и голоса переиспользуются.
 - Пересобрать: `audio_build.py → render.py → subtitles.py → finalize.py → qc.py → make_manifest.py`.
 - Поправить одну сцену: функция `sNN` в `scripts/ep01_shots.py`; превью кадров — `render_stills.py OUT T1 T2 …`.
+
+## Серия 2
+Серия 1 v2 утверждена как стандарт сериала: `references/standard/SERIES_STANDARD.md`, `references/standard/series_standard_bible.png`.
+Серия 02 «НЕ СЛУШАЙ ЕГО»: `final/episode_02_final.mp4`, отчёт `ep02/episode_02_report.md`, манифест `ep02/episode_02_manifest.json`.

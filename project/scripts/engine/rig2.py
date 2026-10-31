@@ -18,7 +18,7 @@ from .rig import Rig, DEFAULTS, _ik, rrect_
 
 CONCEPT = {
     "arman": dict(
-        kind="stick", head=("#1a1918", "#0f0e0e", "#050505"), rim="#ffae55", rim_k=1.0,
+        kind="stick", head=("#1a1918", "#0f0e0e", "#050505"), rim="#8fb8ff", rim_k=1.0,
         eye="#f6f3ec", eye_glow=0.18, eye_rx=0.31, eye_ry=0.25, eye_dx=0.36, eye_y=0.16, lid_base=0.16,
         lid_angle=16.0, pupil="#050505", pupil_r=0.115, iris=None,
         brow="#ece9e2", brow_w=0.075, brow_edge=None, mouth="#4a3f3b", mouth_in="#2a0c0e",
@@ -33,7 +33,15 @@ CONCEPT = {
         hair_lines="#2a1414", tuft=True,
         shirt="#120d0d", shirt_hi="#2a1414", collar="#201414", tie="#8e1219", tie_dark="#5a0a0f",
         pants="#0f0b0b", shoes="#090707", hand="#100c0c", height=1.0, glow="#ff1a1a"),
-    "mom": dict(
+    "mom": dict(   # SERIES STANDARD (v3): stickman 2.5D geometry, recognisable porcelain face + bun + apron
+        kind="mom", head=("#e2cdb9", "#cdb39d", "#94735c"), rim="#ffd9a6", rim_k=0.75,
+        eye="#fbf8f2", eye_rx=0.28, eye_ry=0.245, eye_dx=0.36, eye_y=0.16, lid_base=0.12, lid_angle=-5.0,
+        iris="#5a3420", iris_r=0.125, pupil="#140906", lashes=None, lid_line="#2a1810",
+        brow="#3a2418", brow_w=0.05, mouth="#8a4a3e", mouth_in="#4a1616", blush="#ff9c8c",
+        hair="#33221a", hair_hi="#5a3e2e", ear=None, hair_strands=False,
+        shirt="#4a3c38", shirt_hi="#655049", apron="#24202a", apron_hi="#3a3440",
+        pants="#1d1a1c", shoes="#2a2324", hand="#cdb39d", height=0.97, glow=None),
+    "mom_ep1": dict(
         kind="mom", head=("#e8d6c6", "#d9c3b0", "#a88a74"), rim="#ffd29a", rim_k=0.45,
         eye="#ffffff", eye_rx=0.2, eye_ry=0.25, eye_dx=0.33, eye_y=0.12, lid_base=0.06, lid_angle=0.0,
         iris="#3a2219", iris_r=0.16, pupil="#120806", lashes="#24140e",
@@ -426,6 +434,26 @@ class ConceptRig(Rig):
                     p.moveTo(ex - rx, ey)
                     p.quadTo(ex, ey - ry * 0.6, ex + rx, ey)
                     c.drawPath(p, stroke(hexc(cs["lashes"]), 0.045 * R))
+            if cs.get("lid_line"):
+                lc = hexc(cs["lid_line"])
+                if lid >= 0.97:
+                    p = skia.Path()
+                    p.moveTo(ex - rx, ey + ry * 0.2)
+                    p.quadTo(ex, ey - ry * 0.45, ex + rx, ey + ry * 0.2)
+                    c.drawPath(p, stroke(lc, 0.05 * R))
+                else:
+                    c.save()
+                    big = skia.Path()
+                    big.addOval(skia.Rect.MakeXYWH(ex - rx * 1.06, ey - ry * 1.06, 2.12 * rx, 2.12 * ry))
+                    c.clipPath(big, doAntiAlias=True)
+                    if lid > 0.001:
+                        c.drawLine(ex - rx * 1.5, yl - dy * 1.5, ex + rx * 1.5, yl + dy * 1.5, stroke(lc, 0.055 * R))
+                    else:
+                        c.drawArc(skia.Rect.MakeXYWH(ex - rx, ey - ry, 2 * rx, 2 * ry), 200, 140, False, stroke(lc, 0.05 * R))
+                    c.restore()
+                    # small outer flick (graphic, not lash strokes)
+                    yo = (yl + (dy if side > 0 else -dy)) if lid > 0.001 else ey - ry * 0.45
+                    c.drawLine(ex + side * rx * 0.9, yo + 0.01 * R, ex + side * rx * 1.16, yo - 0.06 * R, stroke(lc, 0.035 * R))
             # brows
             raise_ = P["brow_raise"] + (P["brow_asym"] * 0.5 if side > 0 else -P["brow_asym"] * 0.15)
             by = ey - ry - 0.09 * R - raise_ * 0.13 * R + cs["lid_base"] * 0.45 * ry
@@ -485,15 +513,25 @@ class ConceptRig(Rig):
             a = i * 0.9
             c.drawArc(skia.Rect.MakeXYWH(bx - 0.36 * R, by - 0.36 * R, 0.72 * R, 0.72 * R), 200 + i * 35, 70, False,
                       stroke(shade(hair, 0.7), 0.02 * R))
-        # long side locks behind the face
+        # side locks behind the face
         for sgn in (-1, 1):
-            p = skia.Path()
             x0 = sgn * 0.88 * R - ht * 0.3 * R
-            p.moveTo(x0, -0.2 * R)
-            p.quadTo(x0 + sgn * 0.1 * R, 0.3 * R, x0 - sgn * 0.04 * R, 0.55 * R)
-            c.drawPath(p, stroke(hair, 0.09 * R))
+            if cs.get("hair_strands", True):
+                p = skia.Path()
+                p.moveTo(x0, -0.2 * R)
+                p.quadTo(x0 + sgn * 0.1 * R, 0.3 * R, x0 - sgn * 0.04 * R, 0.55 * R)
+                c.drawPath(p, stroke(hair, 0.09 * R))
+            else:   # solid tapered lock (stickman-simple silhouette)
+                p = skia.Path()
+                p.moveTo(x0 - sgn * 0.12 * R, -0.35 * R)
+                p.quadTo(x0 + sgn * 0.16 * R, 0.0, x0 + sgn * 0.02 * R, 0.5 * R)
+                p.quadTo(x0 - sgn * 0.08 * R, 0.1 * R, x0 - sgn * 0.18 * R, -0.1 * R)
+                p.close()
+                c.drawPath(p, fill(hair))
         # ears
         for sgn in (-1, 1):
+            if not cs.get("ear"):
+                break
             far = (sgn < 0 and ht > 0) or (sgn > 0 and ht < 0)
             if far and abs(ht) > 0.5:
                 continue
@@ -522,7 +560,7 @@ class ConceptRig(Rig):
         hp.cubicTo(-0.62 * R + o * 0.8, -0.62 * R, -0.98 * R + o * 0.4, -0.25 * R, -1.2 * R, 0.1 * R)
         hp.close()
         c.drawPath(hp, fill(hair, shader=radial(-0.25 * R + o * 0.3, -0.95 * R, 1.2 * R, [hexc(cs["hair_hi"]), hair])))
-        for i in range(5):  # strands combed back from the parting
+        for i in (range(5) if cs.get("hair_strands", True) else range(2)):  # strands combed back from the parting
             for sgn in (-1, 1):
                 p = skia.Path()
                 p.moveTo(o + sgn * 0.04 * R, -0.66 * R - i * 0.02 * R)
@@ -530,6 +568,23 @@ class ConceptRig(Rig):
                 c.drawPath(p, stroke(shade(hair, 0.72), 0.016 * R))
         c.drawLine(o, -0.66 * R, o * 0.6, -1.0 * R, stroke(shade(hair, 0.6), 0.02 * R))
         c.restore()
+        # rim light along the hair silhouette
+        c.save()
+        cp2 = skia.Path()
+        cp2.addCircle(0, 0, R * 1.03)
+        c.clipPath(cp2, doAntiAlias=True)
+        c.drawPath(hp, self._rim_paint(P, R, 0.03 * R, 0.6, blur=0.01 * R))
+        c.restore()
+        if not cs.get("hair_strands", True):
+            for sgn in (-1, 1):   # soft temple locks as filled shapes
+                x0 = sgn * 0.66 * R + o * 0.5
+                p = skia.Path()
+                p.moveTo(x0 - sgn * 0.1 * R, -0.52 * R)
+                p.cubicTo(x0 + sgn * 0.18 * R, -0.3 * R, x0 + sgn * 0.12 * R, 0.05 * R, x0 + sgn * 0.24 * R, 0.3 * R)
+                p.cubicTo(x0 + sgn * 0.3 * R, 0.0, x0 + sgn * 0.3 * R, -0.35 * R, x0 + sgn * 0.08 * R, -0.62 * R)
+                p.close()
+                c.drawPath(p, fill(hair))
+            return
         # soft temple strands in front of the face edge
         for sgn in (-1, 1):
             p = skia.Path()
