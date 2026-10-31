@@ -17,7 +17,7 @@ LINES = {
     "A2": dict(take="6Xtf24XqCOfrmxXXmxbQ", t=19.85, who="arman", fx="stair"),
     "G1": dict(take="LrcAmtRv9WSC0007kL2W", t=26.05, who="girl", fx="stair_off"),
     "A3": dict(take="5a5irp1g0Fqg4umQa6Bt", t=28.45, who="arman", fx="stair"),
-    "G2": dict(take=None, t=31.45, who="girl", fx="stair"),
+    "G2": dict(take="SixsjQNf9t0Zarp2YLbF", t=31.45, who="girl", fx="stair"),
     "G3": dict(take=None, t=35.25, who="girl", fx="stair"),
     "M3": dict(take="OHYu55FlRlivTDQsAhTf", raw="ep02", t=42.45, who="mom", fx="behind_door"),
     "G4": dict(take=None, t=45.65, who="girl", fx="whisper"),
