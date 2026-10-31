@@ -1,0 +1,435 @@
+{
+ "project": "ТЕБЯ ЗДЕСЬ НЕ БЫЛО",
+ "episode": 3,
+ "episode_title": "ДВЕРЬ 048",
+ "language": "ru",
+ "duration_s": 61.6,
+ "format": {
+  "resolution": "1080x1920",
+  "aspect": "9:16",
+  "fps": "60/1 CFR (every frame drawn at its own time)",
+  "video": "H.264 High 4.2, 12 Mb/s 2-pass, yuv420p",
+  "audio": "AAC 256k, 48 kHz stereo, -14 LUFS"
+ },
+ "style_standard": {
+  "source": "final/episode_01_final.mp4 (approved ep. 1 v2)",
+  "bible": "references/standard/series_standard_bible.png",
+  "doc": "references/standard/SERIES_STANDARD.md",
+  "sheets": [
+   "characters/standard/arman_standard_sheet.png",
+   "characters/standard/double_standard_sheet.png",
+   "characters/standard/girl_standard_sheet.png",
+   "characters/standard/mom_standard_sheet.png"
+  ],
+  "identity_test": "renders/ep03/ep03_corridor_test.mp4 + references/standard/identity_check_corridor_test.png",
+  "new_in_ep3": [
+   "Girl v3 (rig2 CONCEPT['girl'], port of characters/girl_reference_sheet.png v1)",
+   "Stairwell / door 048 (engine/sets3.py, geography of backgrounds/stairwell_048.png v1)",
+   "Operator (voice + phone UI only)",
+   "test: renders/ep03/ep03_girl_door_test.mp4 (300 frames, 60/1, 0 duplicates)"
+  ],
+  "changes_vs_ep1": [
+   "Arman's rim locked to blue #8fb8ff in every location (ep. 1 used the scene light colour in the kitchen)",
+   "Mom redrawn to standard v3 geometry with the same rig (CONCEPT['mom']); ep. 1 design kept as CONCEPT['mom_ep1']"
+  ]
+ },
+ "dialogue": [
+  {
+   "id": "M1",
+   "who": "mom",
+   "voice": "Soldani wlkyM0h4j74QgqHxZi4F",
+   "take": "1l0G6B8GulluFtOg3k0Q",
+   "take_from": "ep03",
+   "start_s": 0.45,
+   "text": "Сынок, ты чего? Садись.",
+   "fx": "room",
+   "whisper_heard": "Сынок, ты чего? Садись.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 15.9
+  },
+  {
+   "id": "A1",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "HqgLEctwwBbLxGIiJhK5",
+   "take_from": "ep03",
+   "start_s": 3.55,
+   "text": "Где моя мама?",
+   "fx": "room",
+   "whisper_heard": "Где моя мама?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 26.7
+  },
+  {
+   "id": "M2",
+   "who": "mom",
+   "voice": "Soldani wlkyM0h4j74QgqHxZi4F",
+   "take": "NHNHxoetg1rLunrttMXc",
+   "take_from": "ep03",
+   "start_s": 6.15,
+   "text": "Я здесь. Я всегда здесь.",
+   "fx": "uncanny",
+   "whisper_heard": "Я здесь. Я всегда здесь.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 18.8
+  },
+  {
+   "id": "A2",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "6Xtf24XqCOfrmxXXmxbQ",
+   "take_from": "ep03",
+   "start_s": 19.85,
+   "text": "Так. Спокойно. Это просто… тот же этаж.",
+   "fx": "stair",
+   "whisper_heard": "Так, спокойно, это просто тот же этаж.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 22.0
+  },
+  {
+   "id": "G1",
+   "who": "girl",
+   "voice": "Mila Svetlova RxivyypsDodFBfmDDOZF (pitch ×1.07, formant kept)",
+   "take": "LrcAmtRv9WSC0007kL2W",
+   "take_from": "ep03",
+   "start_s": 26.05,
+   "text": "Ты тоже ходишь по кругу?",
+   "fx": "stair_off",
+   "whisper_heard": "Ты тоже ходишь по кругу?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 22.0
+  },
+  {
+   "id": "A3",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "5a5irp1g0Fqg4umQa6Bt",
+   "take_from": "ep03",
+   "start_s": 28.45,
+   "text": "Ты… ты кто такая?",
+   "fx": "stair",
+   "whisper_heard": "Ты... ты кто такая?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 24.5
+  },
+  {
+   "id": "G2",
+   "who": "girl",
+   "voice": "Mila Svetlova RxivyypsDodFBfmDDOZF (pitch ×1.07, formant kept)",
+   "take": "SixsjQNf9t0Zarp2YLbF",
+   "take_from": "ep03",
+   "start_s": 31.45,
+   "text": "Я тут давно. Здесь все двери — твои.",
+   "fx": "stair",
+   "whisper_heard": "Я тут давно, здесь все двери твои.",
+   "whisper_similarity": 0.985,
+   "speech_band_snr_db": 29.2
+  },
+  {
+   "id": "G3",
+   "who": "girl",
+   "voice": "Mila Svetlova RxivyypsDodFBfmDDOZF (pitch ×1.07, formant kept)",
+   "take": "StrojBlsSvnbnmXOuQmE",
+   "take_from": "ep03",
+   "start_s": 35.25,
+   "text": "Каждый раз ты убегаешь из квартиры. И каждый раз возвращаешься.",
+   "fx": "stair",
+   "whisper_heard": "Каждый раз ты убегаешь из квартиры и каждый раз возвращаешься.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 21.7
+  },
+  {
+   "id": "M3",
+   "who": "mom",
+   "voice": "Soldani wlkyM0h4j74QgqHxZi4F",
+   "take": "OHYu55FlRlivTDQsAhTf",
+   "take_from": "ep02",
+   "start_s": 42.45,
+   "text": "Сынок, садись. Чай остывает.",
+   "fx": "behind_door",
+   "whisper_heard": "Сынок, садись, чай остывает.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 29.8
+  },
+  {
+   "id": "G4",
+   "who": "girl",
+   "voice": "Mila Svetlova RxivyypsDodFBfmDDOZF (pitch ×1.07, formant kept)",
+   "take": "8m6Zl76ZfK7ZGhDH8iJT",
+   "take_from": "ep03",
+   "start_s": 45.65,
+   "text": "Не заходи. Там уже есть ты.",
+   "fx": "whisper",
+   "whisper_heard": "Не заходи, там уже есть ты.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 23.2
+  },
+  {
+   "id": "O1",
+   "who": "operator",
+   "voice": "Sofia ziugImoL1hGpJBhONQzw (band 160–6500 Hz + short echo)",
+   "take": "wFz4D2PiqqA1nJOmpx1C",
+   "take_from": "ep03",
+   "start_s": 51.75,
+   "text": "Объект 048 вне зоны. Начинаю перезапуск.",
+   "fx": "operator",
+   "whisper_heard": "Объект 048 вне зоны. Начинаю перезапуск.",
+   "whisper_similarity": 0.805,
+   "speech_band_snr_db": 15.6
+  }
+ ],
+ "shots": [
+  {
+   "id": "S01",
+   "start": 0.0,
+   "end": 3.2,
+   "description": "Кухня: КП мамы — слишком ровная улыбка, голова наклоняется чуть дальше нормы: «Сынок, ты чего? Садись.»"
+  },
+  {
+   "id": "S02",
+   "start": 3.2,
+   "end": 5.8,
+   "description": "ДКП Армана: пятится, свет телефона снизу: «Где моя мама?»"
+  },
+  {
+   "id": "S03",
+   "start": 5.8,
+   "end": 9.4,
+   "description": "КП мамы: «Я здесь. Я всегда здесь.» — лампа проседает, глаза медленно наливаются красным"
+  },
+  {
+   "id": "S04",
+   "start": 9.4,
+   "end": 11.6,
+   "description": "Коридор: Арман бежит к входной двери, она распахивается в холодный свет"
+  },
+  {
+   "id": "S05",
+   "start": 11.6,
+   "end": 14.6,
+   "description": "Подъезд: дверь 048 захлопывается, Арман прижимается к ней спиной, тяжело дышит"
+  },
+  {
+   "id": "S06",
+   "start": 14.6,
+   "end": 17.2,
+   "description": "Инсерт: «НЕ ВОЗВРАЩАЙСЯ. СПУСКАЙСЯ ВНИЗ.»"
+  },
+  {
+   "id": "S07",
+   "start": 17.2,
+   "end": 19.4,
+   "description": "Подъезд: Арман сбегает по лестнице вниз — и выходит на ту же площадку"
+  },
+  {
+   "id": "S08",
+   "start": 19.4,
+   "end": 23.2,
+   "description": "СП Армана перед той же дверью 048: «Так. Спокойно. Это просто… тот же этаж.»"
+  },
+  {
+   "id": "S09",
+   "start": 23.2,
+   "end": 25.8,
+   "description": "Общий подъезда: номера на всех дверях один за другим становятся «048»"
+  },
+  {
+   "id": "S10",
+   "start": 25.8,
+   "end": 28.0,
+   "description": "КП Армана; голос за кадром: «Ты тоже ходишь по кругу?» — резкий взгляд вверх"
+  },
+  {
+   "id": "S11",
+   "start": 28.0,
+   "end": 31.2,
+   "description": "Девочка сидит на ступеньках выше; Арман: «Ты… ты кто такая?»"
+  },
+  {
+   "id": "S12",
+   "start": 31.2,
+   "end": 35.0,
+   "description": "СП девочки: «Я тут давно. Здесь все двери — твои.»"
+  },
+  {
+   "id": "S13",
+   "start": 35.0,
+   "end": 39.6,
+   "description": "КП девочки, неожиданно серьёзно: «Каждый раз ты убегаешь. И каждый раз возвращаешься.»"
+  },
+  {
+   "id": "S14",
+   "start": 39.6,
+   "end": 42.0,
+   "description": "Инсерт: ручка двери 048 медленно поворачивается, из щели — тёплый свет"
+  },
+  {
+   "id": "S15",
+   "start": 42.0,
+   "end": 45.4,
+   "description": "Арман оборачивается; дверь приоткрыта, из кухни голос мамы: «Сынок, садись. Чай остывает.»"
+  },
+  {
+   "id": "S16",
+   "start": 45.4,
+   "end": 48.4,
+   "description": "Девочка хватает Армана за рукав, шёпотом: «Не заходи. Там уже есть ты.»"
+  },
+  {
+   "id": "S17",
+   "start": 48.4,
+   "end": 51.4,
+   "description": "Сквозь щель: за кухонным столом рядом с мамой сидит двойник — медленно поворачивается к двери"
+  },
+  {
+   "id": "S18",
+   "start": 51.4,
+   "end": 55.2,
+   "description": "Инсерт: экран телефона захвачен системой: «ОБЪЕКТ 048 · ВНЕ ЗОНЫ · ПЕРЕЗАПУСК»"
+  },
+  {
+   "id": "S19",
+   "start": 55.2,
+   "end": 57.8,
+   "description": "Общий подъезда: лампы гаснут одна за другой от дальней к ближней"
+  },
+  {
+   "id": "S20",
+   "start": 57.8,
+   "end": 58.1,
+   "description": "Чёрный"
+  },
+  {
+   "id": "S21",
+   "start": 58.1,
+   "end": 61.6,
+   "description": "Титр «СКОЛЬКО РАЗ ТЫ УЖЕ ЭТО ВИДЕЛ?»"
+  }
+ ],
+ "events": {
+  "head_tilt": 1.6,
+  "eyes_red": 7.4,
+  "chair_scrape": 9.3,
+  "run": 9.42,
+  "door_open": 10.9,
+  "door_slam": 11.75,
+  "buzz1": 14.85,
+  "msg1": 14.95,
+  "stairs_down": 17.6,
+  "arrive": 18.95,
+  "nums_flip": 23.6,
+  "look_up": 26.6,
+  "girl_reveal": 28.0,
+  "handle": 39.9,
+  "door_crack": 41.2,
+  "grab": 45.45,
+  "double_turn": 49.3,
+  "sys_takeover": 51.55,
+  "lights_out": 55.4,
+  "cut_black": 57.8,
+  "end_card": 58.1,
+  "title2": 59.6
+ },
+ "rebuild": [
+  "python3 scripts/ep03_voice_qc.py <whisper_model_dir>",
+  "python3 scripts/ep03_audio.py",
+  "python3 scripts/ep03_snr.py",
+  "EP=02 python3 scripts/render.py renders/ep03/ep03_picture_master.mp4",
+  "EP=02 python3 scripts/subtitles.py",
+  "EP=02 python3 scripts/finalize.py",
+  "EP=02 python3 scripts/qc.py",
+  "python3 scripts/make_thumbnail_ep03.py",
+  "python3 scripts/make_storyboard_ep03.py",
+  "python3 scripts/make_standard_refs.py",
+  "python3 scripts/make_manifest_ep03.py"
+ ],
+ "outputs": {
+  "final": "final/episode_03_final.mp4",
+  "no_subtitles": "final/episode_03_no_subtitles.mp4",
+  "subtitles": "final/episode_03_subtitles.srt",
+  "thumbnail": "final/episode_03_thumbnail.png",
+  "storyboard": "ep03/storyboard/storyboard.md",
+  "storyboard_sheet": "ep03/storyboard/storyboard_sheet.png",
+  "girl_test": "renders/ep03/ep03_girl_door_test.mp4",
+  "score": "music/ep03_score.wav",
+  "mix_premaster": "renders/ep03/ep03_mix_premaster.wav",
+  "stems": "renders/ep03/stems/",
+  "voices_raw": "ep03/voices/raw/",
+  "voices_processed": "ep03/voices/processed/",
+  "lipsync": "ep03/compositions/lipsync.json"
+ },
+ "qc": {
+  "episode_03_final.mp4": {
+   "size_mb": 94.5,
+   "duration": 61.6,
+   "bitrate_mbps": 12.28,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3696,
+    "bitrate_mbps": 12.01
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 253
+   },
+   "loudness_lufs": -14.4,
+   "true_peak_dbfs": -2.1,
+   "motion": {
+    "transitions_checked": 3466,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.418
+   },
+   "edge_luma": {
+    "left": 27.80287022005772,
+    "right": 26.335172032828282,
+    "top": 36.952661034952705,
+    "bottom": 16.536307519640854
+   }
+  },
+  "episode_03_no_subtitles.mp4": {
+   "size_mb": 94.2,
+   "duration": 61.6,
+   "bitrate_mbps": 12.24,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3696,
+    "bitrate_mbps": 11.97
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 253
+   },
+   "loudness_lufs": -14.4,
+   "true_peak_dbfs": -2.1,
+   "motion": {
+    "transitions_checked": 3466,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.425
+   },
+   "edge_luma": {
+    "left": 27.806597222222223,
+    "right": 26.33393448998918,
+    "top": 36.96267586580087,
+    "bottom": 16.530373677248676
+   }
+  }
+ }
+}

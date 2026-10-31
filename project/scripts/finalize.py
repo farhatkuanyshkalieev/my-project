@@ -21,7 +21,7 @@ r = subprocess.run(["ffmpeg", "-hide_banner", "-i", MIX, "-af", "loudnorm=I=-14:
 m = json.loads(re.search(r"\{[^{}]*\}\s*$", r.stderr, re.S).group(0))
 af = (f"loudnorm=I=-14:TP=-2.0:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
       f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true,"
-      "aresample=48000")
+      "aresample=192000,alimiter=limit=0.75:attack=2:release=60:level=disabled,aresample=48000")   # 4x-oversampled peak guard
 run(["ffmpeg", "-y", "-v", "error", "-i", MIX, "-af", af, "-ar", "48000", "-ac", "2", "-c:a", "pcm_s24le",
      MIX_MASTER])
 

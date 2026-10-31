@@ -93,3 +93,7 @@
 ## Серия 2
 Серия 1 v2 утверждена как стандарт сериала: `references/standard/SERIES_STANDARD.md`, `references/standard/series_standard_bible.png`.
 Серия 02 «НЕ СЛУШАЙ ЕГО»: `final/episode_02_final.mp4`, отчёт `ep02/episode_02_report.md`, манифест `ep02/episode_02_manifest.json`.
+
+## Серия 3
+Серия 03 «ДВЕРЬ 048»: `final/episode_03_final.mp4`, отчёт `ep03/episode_03_report.md`, манифест `ep03/episode_03_manifest.json`.
+Новое в стандарте: девочка v3 (`characters/standard/girl_standard_sheet.png`), подъезд (`scripts/engine/sets3.py`), голос оператора.

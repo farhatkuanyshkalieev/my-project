@@ -135,7 +135,7 @@ def stairwell_wide(c, T, lights=(1, 1, 1, 1), flip_t0=None, door048_open=0.0):
         c.drawPath(path_poly(q), fill(with_alpha(hexc(AMBER), 0.5 * door048_open), blur=8, blend=skia.BlendMode.kPlus))
     dark = 1 - sum(lights) / 4
     if dark > 0:
-        c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#03050a"), 0.82 * dark ** 1.3)))
+        c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#03050a"), 0.7 * dark ** 1.3)))
 
 
 # =========================================================================== DOOR 048 (frontal, on the right wall)

@@ -429,10 +429,13 @@ def s18(c, u, T):
     gl = ramp(t, 0.0, 0.08) * (1 - ramp(t, 0.25, 0.4))   # short slice-glitch while the screen is taken over
 
     def content(cc):
-        if t < 0.18:
+        x = ramp(t, 0.12, 0.3)          # short dissolve chat → system (no hard luminance jump)
+        if x < 1:
             E.PHONE.chat(cc, T, chat_items(T))
-        else:
+        if x > 0:
+            cc.saveLayerAlpha(None, int(255 * x))
             system_screen(cc, T)
+            cc.restore()
         if gl > 0:
             for i in range(6):
                 y = (i * 211 + int(T * 600)) % UI.Phone.SH
@@ -451,13 +454,13 @@ def s19(c, u, T):
                   hand_b=(0.9, -0.9), elbow_b=-1),
              emotion("worried", brow_raise=0.6), girl_life(T), look=(0.2, lerp(0.0, -0.8, up)))
     c.save()
-    cam(c, 540, 1000, lerp(1.04, 1.12, glide(u)), T=T, shake=2.0)
+    cam(c, 540, 1080, lerp(1.04, 1.28, glide(u)), T=T, shake=3.0)   # keeps creeping in after the last lamp dies
     S3.stairwell_wide(c, T, lights=lights, flip_t0=-100.0, door048_open=0.25)
     ARMAN.draw(c, a)
     GIRL.draw(c, g)
     L = sum(lights) / 4
     E.light_multiply(c, "#3a4256", [(540, 500, 1000, "#dfe8ff", 0.5 * L), (540, 1500, 600, "#a8c0ff", 0.35 * L),
-                                    (800, 1100, 500, "#ffcf9a", 0.2)])
+                                    (800, 1100, 500, "#ffcf9a", 0.2), (560, 1300, 420, "#8fb8ff", 0.25 * (1 - L))])
     c.restore()
     grade(c, T, cold=0.8, vig=0.85 + 0.1 * (1 - L))
 

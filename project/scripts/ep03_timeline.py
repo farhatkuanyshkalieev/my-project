@@ -21,7 +21,7 @@ LINES = {
     "G3": dict(take="StrojBlsSvnbnmXOuQmE", t=35.25, who="girl", fx="stair"),
     "M3": dict(take="OHYu55FlRlivTDQsAhTf", raw="ep02", t=42.45, who="mom", fx="behind_door"),
     "G4": dict(take="8m6Zl76ZfK7ZGhDH8iJT", t=45.65, who="girl", fx="whisper"),
-    "O1": dict(take=None, t=51.75, who="operator", fx="operator"),
+    "O1": dict(take="wFz4D2PiqqA1nJOmpx1C", t=51.75, who="operator", fx="operator"),
 }
 
 SUBTITLES = [  # (line, text, red keywords, colour) — same style as ep. 1–2
@@ -63,20 +63,20 @@ SHOTS = [
 ]
 
 EV = dict(
-    head_tilt=1.6, eyes_red=7.4, chair_scrape=9.35, run=9.6, door_open=10.9, door_slam=11.75, buzz1=14.85, msg1=14.95,
+    head_tilt=1.6, eyes_red=7.4, chair_scrape=9.3, run=9.42, door_open=10.9, door_slam=11.75, buzz1=14.85, msg1=14.95,
     stairs_down=17.6, arrive=18.95, nums_flip=23.6, look_up=26.6, girl_reveal=28.0, handle=39.9, door_crack=41.2,
     grab=45.45, double_turn=49.3, sys_takeover=51.55, lights_out=55.4, cut_black=57.8, end_card=58.1, title2=59.6,
 )
 MSG1 = "НЕ ВОЗВРАЩАЙСЯ. СПУСКАЙСЯ ВНИЗ."
 LAST_EP2_MSG = "ЭТО НЕ ОНА."                 # last message of ep. 2 (thread continuity)
-LIGHTS_OUT = [55.45, 55.95, 56.45, 56.95]      # far → near, one smooth fade each (≤ 2 per second)
+LIGHTS_OUT = [55.6, 56.15, 56.7, 57.25]      # far → near, one smooth fade each (≤ 2 per second)
 
 # per-cue subtitle baseline (px, last line) where the default SUB_Y=1395 would cross a face; 560 = above the heads and
 # above the brass «048» plate in the door shots (the plate is a story element and must stay readable).
 # a line whose subtitle needs more than 2 lines is shown as two cues, split at the pause between its sentences
 # (measured on the processed take: G3 pause 2.16–2.71 s into the clip)
 SUB_SPLIT = {"G3": ("Каждый раз ты убегаешь из квартиры.", "И каждый раз возвращаешься.", 37.86)}
-SUB_POS = {"A1": 560, "A2": 560, "G1": 560, "G3": 560, "M3": 560, "G4": 560}
+SUB_POS = {"A1": 560, "A2": 420, "G1": 420, "G3": 560, "M3": 420, "G4": 420}   # 420 = above the «048» plate in door shots
 
 
 def _dip(T, t0, depth, dur=0.16):
