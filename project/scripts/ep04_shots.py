@@ -118,8 +118,8 @@ def s01(c, u, T):
                      hand_a=(0.85, -0.45), hand_b=(1.05, -0.42))
     a["blink"] = 0.0
     cafe_world(c, T, z=lerp(1.04, 1.14, glide(u)), cx=500, cy=960, chars_back=[(ARMAN, a)])
-    if T < EV["wake"] + 0.4:   # fade in from black with the inhale (no flash)
-        c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#000"), 1 - ramp(T, EV["wake"] - 0.1, EV["wake"] + 0.4))))
+    if T < EV["wake"] + 0.4:   # slow fade in from black from the first frame (no flash, never static)
+        c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#000"), 0.85 - 0.2 * ramp(T, 0.0, EV["wake"]) - 0.65 * ramp(T, EV["wake"], EV["wake"] + 0.4))))
     grade(c, T, warm=0.6, vig=0.82)
 
 
@@ -256,10 +256,10 @@ def s09(c, u, T):
                   lid=0.35 * order, hand_a=None, hand_b=None), life("operator", T, 11), look=(0.0, 0.1))
     p["glow_k"] = 1.0
     c.drawRect(skia.Rect.MakeWH(W, H), fill(0, shader=radial(540, 700, 1200, [hexc("#0c1838"), hexc("#02040a")])))
-    for i, (x, y) in enumerate([(160, 300), (920, 360), (120, 1100), (960, 1000)]):   # monitor glows behind (defocused)
-        S2.glow(c, x, y, 260, hexc("#3aa0ff" if i != 1 else "#ff2a3a"), 0.18)
+    for i, (x, y) in enumerate([(160, 300), (920, 360), (120, 1100), (960, 1000)]):   # monitor glows behind (defocused, slowly pulsing)
+        S2.glow(c, x + 30 * math.sin(T * 0.8 + i), y, 260, hexc("#3aa0ff" if i != 1 else "#ff2a3a"), 0.18 + 0.06 * math.sin(T * 1.7 + i))
     c.save()
-    cam(c, 540, 1000, lerp(1.0, 1.06, glide(u)), T=T, shake=1.2)
+    cam(c, 540 + 25 * math.sin(T * 0.6), 1000, lerp(1.0, 1.16, glide(u)), T=T, shake=3.0)
     OPERATOR.draw(c, p)
     E.light_multiply(c, "#7080c0", [(540, 600, 900, "#bfe3ff", 0.6)])
     c.restore()
@@ -401,10 +401,10 @@ def s18(c, u, T):
     wv = TL.whiteness(T)
     if wv > 0:
         if T < EV["white_peak"]:
-            c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#f4f6fb"), wv)))
+            c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#e9edf5"), 0.92 * wv)))
         else:   # after the peak the white sinks into darkness (a fade, not a cut)
             c.drawRect(skia.Rect.MakeWH(W, H), fill(hexc("#05060a")))
-            c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#f4f6fb"), wv)))
+            c.drawRect(skia.Rect.MakeWH(W, H), fill(with_alpha(hexc("#e9edf5"), 0.92 * wv)))
     grade(c, T, cold=0.5, vig=0.85)
 
 

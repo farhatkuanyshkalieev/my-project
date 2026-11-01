@@ -61,13 +61,13 @@ SHOTS = [
 
 EV = dict(
     wake=0.55, clink=6.05, msg1=17.2, typing=19.3, send=21.1, alert=22.0, erase=28.8, stand=35.3, door=36.6,
-    grab=37.55, sys_witness=51.2, white_start=55.0, white_peak=56.6, cut_black=57.4, end_card=57.7, title2=59.2,
+    grab=37.55, sys_witness=51.2, white_start=54.8, white_peak=56.0, cut_black=57.4, end_card=57.7, title2=59.2,
 )
 MSG1 = "ТЫ ПОМНИШЬ?"
 TYPED = "ПОМНЮ."
 ERASE_ORDER = [28.9, 29.3, 29.7]              # café customers vanish (smooth 0.4 s fades)
 
-SUB_POS = {}
+SUB_POS = {"G1": 560, "A2": 560}   # above the heads (street close shots)
 SUB_SPLIT = {}
 
 

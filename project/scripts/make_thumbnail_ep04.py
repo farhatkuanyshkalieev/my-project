@@ -1,5 +1,5 @@
-"""Episode 4 cover 1080x1920: the barista frozen mid-smile while the café is erased into a white grid (frame drawn by the
-production renderer at T=33.3) + the «ТЫ ПОМНИШЬ?» notification + series title. Same layout as the ep. 1 cover."""
+"""Episode 4 cover 1080x1920: Arman and the frozen barista while the café is erased into a white grid (frame drawn by the
+production renderer at T=31.2) + the «ТЫ ПОМНИШЬ?» notification + series title. Same layout as the ep. 1 cover."""
 import os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 import skia, numpy as np
@@ -11,7 +11,7 @@ from ep04_shots import render_frame
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 s = new_surface()
 c = s.getCanvas()
-bg = render_frame(33.3)
+bg = render_frame(31.2)
 c.save(); c.translate(W / 2, H / 2); c.scale(1.12, 1.12); c.translate(-W / 2, -H / 2 + 80)
 c.drawImage(skia.Image.fromarray(np.ascontiguousarray(bg)), 0, 0)
 c.restore()
