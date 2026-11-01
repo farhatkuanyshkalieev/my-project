@@ -1,0 +1,421 @@
+{
+ "project": "ТЕБЯ ЗДЕСЬ НЕ БЫЛО",
+ "episode": 4,
+ "episode_title": "КАК ОБЫЧНО?",
+ "language": "ru",
+ "duration_s": 61.4,
+ "format": {
+  "resolution": "1080x1920",
+  "aspect": "9:16",
+  "fps": "60/1 CFR (every frame drawn at its own time)",
+  "video": "H.264 High 4.2, 12 Mb/s 2-pass, yuv420p",
+  "audio": "AAC 256k, 48 kHz stereo, -14 LUFS"
+ },
+ "style_standard": {
+  "source": "final/episode_01_final.mp4 (approved ep. 1 v2)",
+  "bible": "references/standard/series_standard_bible.png",
+  "doc": "references/standard/SERIES_STANDARD.md",
+  "sheets": [
+   "characters/standard/arman_standard_sheet.png",
+   "characters/standard/barista_standard_sheet.png",
+   "characters/standard/double_standard_sheet.png",
+   "characters/standard/girl_standard_sheet.png",
+   "characters/standard/mom_standard_sheet.png",
+   "characters/standard/operator_standard_sheet.png"
+  ],
+  "identity_test": "renders/ep04/ep04_corridor_test.mp4 + references/standard/identity_check_corridor_test.png",
+  "new_in_ep4": [
+   "Barista v3 (rig2 CONCEPT['barista'], port of characters/barista_reference_sheet.png v1)",
+   "Operator v3 on screen (rig2 CONCEPT['operator'], port of characters/operator_reference_sheet.png v1)",
+   "Café / street / observation room (engine/sets4.py, geography of backgrounds/cafe.png, street_night.png, observation_room.png v1)",
+   "White-grid erasure of the world (smooth, photosensitivity-safe)"
+  ],
+  "changes_vs_ep1": [
+   "Arman's rim locked to blue #8fb8ff in every location (ep. 1 used the scene light colour in the kitchen)",
+   "Mom redrawn to standard v3 geometry with the same rig (CONCEPT['mom']); ep. 1 design kept as CONCEPT['mom_ep1']"
+  ]
+ },
+ "dialogue": [
+  {
+   "id": "B1",
+   "who": "barista",
+   "voice": "Maxim 6YjFofyVXU1ASguf2hTJ (room)",
+   "take": "9j5vKxoRExdlVutDP23j",
+   "take_from": "ep04",
+   "start_s": 6.3,
+   "text": "Как обычно? Двойной, без сахара.",
+   "spoken": "Как обычно? Двойной, без сахара.",
+   "fx": "cafe",
+   "whisper_heard": "Как обычно, двойной без сахара.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 28.4
+  },
+  {
+   "id": "A1",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "Tz3MqnMqs38ENZKwwNcy",
+   "take_from": "ep04",
+   "start_s": 9.9,
+   "text": "Я… давно здесь сижу?",
+   "spoken": "Я… давно здесь сижу?",
+   "fx": "cafe",
+   "whisper_heard": "Я давно здесь сижу?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 22.9
+  },
+  {
+   "id": "B2",
+   "who": "barista",
+   "voice": "Maxim 6YjFofyVXU1ASguf2hTJ (room)",
+   "take": "ExHU0UUU64UDzSKqAZYu",
+   "take_from": "ep04",
+   "start_s": 12.7,
+   "text": "Каждый вечер. Ровно в 23:17.",
+   "spoken": "Каждый вечер. Ровно в одиннадцать семнадцать.",
+   "fx": "cafe",
+   "whisper_heard": "каждый вечер, ровно в 11.17.",
+   "whisper_similarity": 0.635,
+   "speech_band_snr_db": 27.7
+  },
+  {
+   "id": "O1",
+   "who": "operator",
+   "voice": "Sofia ziugImoL1hGpJBhONQzw (band 160–6500 Hz + short echo)",
+   "take": "oqfuyt58a66kjiiOUbs8",
+   "take_from": "ep04",
+   "start_s": 22.6,
+   "text": "Объект 048. Память сохранена.",
+   "spoken": "Объект ноль сорок восемь. Память сохранена.",
+   "fx": "operator_room",
+   "whisper_heard": "Объект 048.  Память сохранена.",
+   "whisper_similarity": 0.738,
+   "speech_band_snr_db": 32.4
+  },
+  {
+   "id": "O2",
+   "who": "operator",
+   "voice": "Sofia ziugImoL1hGpJBhONQzw (band 160–6500 Hz + short echo)",
+   "take": "ON0zrO7f4stggyGFCNSo",
+   "take_from": "ep04",
+   "start_s": 26.0,
+   "text": "Удалите кафе. Немедленно.",
+   "spoken": "Удалите кафе. Немедленно.",
+   "fx": "operator_room",
+   "whisper_heard": "Удалите кафе. Немедленно.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 28.7
+  },
+  {
+   "id": "B3",
+   "who": "barista",
+   "voice": "Maxim 6YjFofyVXU1ASguf2hTJ (room)",
+   "take": "8WZ1cSGoYTeI34EK33zM",
+   "take_from": "ep04",
+   "start_s": 31.9,
+   "text": "Тебе лучше уйти. Прямо сейчас.",
+   "spoken": "Тебе лучше уйти. Прямо сейчас.",
+   "fx": "cafe_dry",
+   "whisper_heard": "Тебе лучше уйти прямо сейчас.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 21.9
+  },
+  {
+   "id": "G1",
+   "who": "girl",
+   "voice": "Mila Svetlova RxivyypsDodFBfmDDOZF (pitch ×1.07, formant kept)",
+   "take": "cMrxckQFEMHEKnMWgAh2",
+   "take_from": "ep04",
+   "start_s": 37.8,
+   "text": "Бежим! Пока они не стёрли улицу.",
+   "spoken": "Бежим! Пока они не стёрли улицу.",
+   "fx": "street",
+   "whisper_heard": "Бежим, пока они не стерли улицу!",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 49.6
+  },
+  {
+   "id": "A2",
+   "who": "arman",
+   "voice": "Egor g1G73EpCIdK4HUyDiLYF",
+   "take": "SUK6cGyE0gKBWy7uf4kp",
+   "take_from": "ep04",
+   "start_s": 44.2,
+   "text": "Кто «они»? Кто ты вообще такая?",
+   "spoken": "Кто «они»? Кто ты вообще такая?",
+   "fx": "street",
+   "whisper_heard": "Кто они? Кто ты вообще такая?",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 28.0
+  },
+  {
+   "id": "G2",
+   "who": "girl",
+   "voice": "Mila Svetlova RxivyypsDodFBfmDDOZF (pitch ×1.07, formant kept)",
+   "take": "EJiTFDeHtdgqTNA1UD36",
+   "take_from": "ep04",
+   "start_s": 47.3,
+   "text": "Я — свидетель. Я помню все твои круги.",
+   "spoken": "Я — свидетель. Я помню все твои круги.",
+   "fx": "street",
+   "whisper_heard": "Я свидетель.  Я помню все твои круги.",
+   "whisper_similarity": 0.986,
+   "speech_band_snr_db": 16.9
+  },
+  {
+   "id": "O3",
+   "who": "operator",
+   "voice": "Sofia ziugImoL1hGpJBhONQzw (band 160–6500 Hz + short echo)",
+   "take": "uCGsguniIRX9EHQx5xDZ",
+   "take_from": "ep04",
+   "start_s": 51.4,
+   "text": "Свидетель найден. Начинаю сбор.",
+   "spoken": "Свидетель найден. Начинаю сбор.",
+   "fx": "operator_room",
+   "whisper_heard": "Свидетель найден. Начинаю сбор.",
+   "whisper_similarity": 1.0,
+   "speech_band_snr_db": 24.5
+  }
+ ],
+ "shots": [
+  {
+   "id": "S01",
+   "start": 0.0,
+   "end": 3.0,
+   "description": "Чёрный → резкий вдох: Арман просыпается за столиком кафе у окна; дождь, неон; часы 23:17"
+  },
+  {
+   "id": "S02",
+   "start": 3.0,
+   "end": 5.6,
+   "description": "КП Армана: озирается, не понимает, где он"
+  },
+  {
+   "id": "S03",
+   "start": 5.6,
+   "end": 9.6,
+   "description": "Бариста ставит чашку: «Как обычно? Двойной, без сахара.»"
+  },
+  {
+   "id": "S04",
+   "start": 9.6,
+   "end": 12.4,
+   "description": "КП Армана: «Я… давно здесь сижу?»"
+  },
+  {
+   "id": "S05",
+   "start": 12.4,
+   "end": 16.4,
+   "description": "СКП баристы: «Каждый вечер. Ровно в одиннадцать семнадцать.» — улыбка держится слишком долго"
+  },
+  {
+   "id": "S06",
+   "start": 16.4,
+   "end": 19.0,
+   "description": "Инсерт: чат пуст («Сообщений нет») → новое: «ТЫ ПОМНИШЬ?»"
+  },
+  {
+   "id": "S07",
+   "start": 19.0,
+   "end": 21.6,
+   "description": "Инсерт: Арман печатает «ПОМНЮ.» и отправляет"
+  },
+  {
+   "id": "S08",
+   "start": 21.6,
+   "end": 25.6,
+   "description": "Комната наблюдения: стена мониторов, на одном — Арман в кафе; «ПАМЯТЬ СОХРАНЕНА»"
+  },
+  {
+   "id": "S09",
+   "start": 25.6,
+   "end": 28.6,
+   "description": "КП оператора: «Удалите кафе.»"
+  },
+  {
+   "id": "S10",
+   "start": 28.6,
+   "end": 31.6,
+   "description": "Кафе стирается: посетители исчезают, окно белеет, бариста замирает"
+  },
+  {
+   "id": "S11",
+   "start": 31.6,
+   "end": 35.0,
+   "description": "КП баристы, тихо: «Тебе лучше уйти. Прямо сейчас.»"
+  },
+  {
+   "id": "S12",
+   "start": 35.0,
+   "end": 37.4,
+   "description": "Арман вскакивает и бежит к двери"
+  },
+  {
+   "id": "S13",
+   "start": 37.4,
+   "end": 40.6,
+   "description": "Улица: девочка под фонарём хватает его за руку: «Бежим! Пока они не стёрли улицу.»"
+  },
+  {
+   "id": "S14",
+   "start": 40.6,
+   "end": 44.0,
+   "description": "Общий улицы: они бегут, за спиной дома рассыпаются в белую сетку"
+  },
+  {
+   "id": "S15",
+   "start": 44.0,
+   "end": 47.0,
+   "description": "КП Армана на бегу: «Кто «они»? Кто ты вообще такая?»"
+  },
+  {
+   "id": "S16",
+   "start": 47.0,
+   "end": 51.0,
+   "description": "КП девочки под фонарём: «Я — свидетель. Я помню все твои круги.»"
+  },
+  {
+   "id": "S17",
+   "start": 51.0,
+   "end": 54.0,
+   "description": "Комната наблюдения: на мониторе девочка — «СВИДЕТЕЛЬ ОБНАРУЖЕН»: «Свидетель найден. Начинаю сбор.»"
+  },
+  {
+   "id": "S18",
+   "start": 54.0,
+   "end": 57.4,
+   "description": "Улица: белая пустота доходит до них; Арман тянет девочку — всё уходит в белое и гаснет"
+  },
+  {
+   "id": "S19",
+   "start": 57.4,
+   "end": 57.7,
+   "description": "Чёрный"
+  },
+  {
+   "id": "S20",
+   "start": 57.7,
+   "end": 61.4,
+   "description": "Титр «ЧТО ПОМНИШЬ ТЫ?»"
+  }
+ ],
+ "events": {
+  "wake": 0.55,
+  "clink": 6.05,
+  "msg1": 17.2,
+  "typing": 19.3,
+  "send": 21.1,
+  "alert": 22.0,
+  "erase": 28.8,
+  "stand": 35.3,
+  "door": 36.6,
+  "grab": 37.55,
+  "sys_witness": 51.2,
+  "white_start": 54.8,
+  "white_peak": 56.0,
+  "cut_black": 57.4,
+  "end_card": 57.7,
+  "title2": 59.2
+ },
+ "rebuild": [
+  "python3 scripts/ep04_voice_qc.py <whisper_model_dir>",
+  "python3 scripts/ep04_audio.py",
+  "python3 scripts/ep04_snr.py",
+  "EP=02 python3 scripts/render.py renders/ep04/ep04_picture_master.mp4",
+  "EP=02 python3 scripts/subtitles.py",
+  "EP=02 python3 scripts/finalize.py",
+  "EP=02 python3 scripts/qc.py",
+  "python3 scripts/make_thumbnail_ep04.py",
+  "python3 scripts/make_storyboard_ep04.py",
+  "python3 scripts/make_standard_refs.py",
+  "python3 scripts/make_manifest_ep04.py"
+ ],
+ "outputs": {
+  "final": "final/episode_04_final.mp4",
+  "no_subtitles": "final/episode_04_no_subtitles.mp4",
+  "subtitles": "final/episode_04_subtitles.srt",
+  "thumbnail": "final/episode_04_thumbnail.png",
+  "storyboard": "ep04/storyboard/storyboard.md",
+  "storyboard_sheet": "ep04/storyboard/storyboard_sheet.png",
+  "score": "music/ep04_score.wav",
+  "mix_premaster": "renders/ep04/ep04_mix_premaster.wav",
+  "stems": "renders/ep04/stems/",
+  "voices_raw": "ep04/voices/raw/",
+  "voices_processed": "ep04/voices/processed/",
+  "lipsync": "ep04/compositions/lipsync.json"
+ },
+ "qc": {
+  "episode_04_final.mp4": {
+   "size_mb": 94.3,
+   "duration": 61.4,
+   "bitrate_mbps": 12.29,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3684,
+    "bitrate_mbps": 12.01
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 261
+   },
+   "loudness_lufs": -14.3,
+   "true_peak_dbfs": -2.3,
+   "motion": {
+    "transitions_checked": 3442,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.586
+   },
+   "edge_luma": {
+    "left": 36.02491545647847,
+    "right": 41.29799923090843,
+    "top": 43.476186311175454,
+    "bottom": 18.889514215627138
+   }
+  },
+  "episode_04_no_subtitles.mp4": {
+   "size_mb": 94.2,
+   "duration": 61.4,
+   "bitrate_mbps": 12.27,
+   "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "60/1",
+    "avg_frame_rate": "60/1",
+    "frames": 3684,
+    "bitrate_mbps": 12.0
+   },
+   "audio": {
+    "codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bitrate_kbps": 261
+   },
+   "loudness_lufs": -14.3,
+   "true_peak_dbfs": -2.3,
+   "motion": {
+    "transitions_checked": 3442,
+    "duplicated_frames": 0,
+    "duplicated_pct": 0.0,
+    "median_frame_diff": 0.586
+   },
+   "edge_luma": {
+    "left": 36.02413137893594,
+    "right": 41.29656057727108,
+    "top": 43.47538002171552,
+    "bottom": 18.887788535006234
+   }
+  }
+ }
+}

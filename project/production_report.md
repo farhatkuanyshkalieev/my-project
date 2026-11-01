@@ -97,3 +97,8 @@
 ## Серия 3
 Серия 03 «ДВЕРЬ 048»: `final/episode_03_final.mp4`, отчёт `ep03/episode_03_report.md`, манифест `ep03/episode_03_manifest.json`.
 Новое в стандарте: девочка v3 (`characters/standard/girl_standard_sheet.png`), подъезд (`scripts/engine/sets3.py`), голос оператора.
+
+## Серия 4
+Серия 04 «КАК ОБЫЧНО?»: `final/episode_04_final.mp4`, отчёт `ep04/episode_04_report.md`, манифест `ep04/episode_04_manifest.json`.
+Новое в стандарте: бариста и оператор (`characters/standard/barista_standard_sheet.png`, `operator_standard_sheet.png`),
+кафе / улица / комната наблюдения (`scripts/engine/sets4.py`), голос бариста — Maxim.
