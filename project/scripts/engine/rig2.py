@@ -59,6 +59,23 @@ CONCEPT = {
         scrunchie="#e05a6a", apron=None, zipper="#8a8478",
         shirt="#cfc6b8", shirt_hi="#e8e1d6", pants="#3e4c68", shoes="#e0545a", shoe_sole="#f2ebe4",
         hand="#d4bba3", height=0.72, child=True, glow=None),
+    "barista": dict(  # SERIES STANDARD (v3) port of characters/barista_reference_sheet.png (v1): white cap with a bill,
+        #              heavy calm lids («как обычно?»), dark grey top + brown apron, white shoes
+        kind="mom", head=("#e6cdb3", "#d1b293", "#93704f"), rim="#ffd29a", rim_k=0.7,
+        eye="#fbf8f2", eye_rx=0.28, eye_ry=0.23, eye_dx=0.36, eye_y=0.17, lid_base=0.3, lid_angle=2.0,
+        iris="#3b2a1e", iris_r=0.12, pupil="#0c0806", lashes=None, lid_line="#2a1c14", lid_flick=False,
+        brow="#2a1c14", brow_w=0.06, mouth="#7a4434", mouth_in="#4a1a1a", blush=None,
+        hair="#2a1c14", hair_hi="#4a3424", ear=None, hair_strands=False, cap="#efefef", cap_dark="#c8c8c8",
+        shirt="#3a3a40", shirt_hi="#55555c", apron="#5a4030", apron_hi="#765640",
+        pants="#2a2a2e", shoes="#ececec", shoe_sole="#aaaaaa", hand="#d1b293", height=1.0, glow=None),
+    "operator": dict(  # SERIES STANDARD (v3) port of characters/operator_reference_sheet.png (v1): dark hooded silhouette,
+        #               glowing blue pill eyes, headphones, no mouth/brows
+        kind="stick", head=("#18203a", "#0b0f1a", "#03050a"), rim="#3d7bff", rim_k=1.2,
+        eye="#e6f4ff", eye_glow=1.0, eye_glow_col="#3aa0ff", eye_rx=0.3, eye_ry=0.13, eye_dx=0.35, eye_y=0.05,
+        lid_base=0.0, lid_angle=0.0, pupil=None, pupil_r=0.0, iris=None,
+        brow=None, brow_w=0.05, brow_edge=None, mouth=None, mouth_in=None, hair_lines=None, tuft=False,
+        hood="#0e1322", headphones="#1c2236", tie=None, collar=None,
+        shirt="#0e1322", shirt_hi="#1a2236", pants="#0e1322", shoes="#1a2030", hand="#0b0f1a", height=1.0, glow="#2a6aff"),
 }
 
 
@@ -191,7 +208,7 @@ class ConceptRig(Rig):
                            cx + sgn * sw * 0.55, -th + 0.02 * R, stroke(ap, 0.06 * R))
         # collar + tie
         nx, ny = g["neck"]
-        if cs["kind"] == "stick" and not P["back"]:
+        if cs["kind"] == "stick" and not P["back"] and cs.get("tie", "x"):
             fc = cx + bt * 0.22 * R
             ct = -th - 0.02 * R
             if abs(bt) < 0.85:
@@ -309,6 +326,9 @@ class ConceptRig(Rig):
                                                                            with_alpha(hexc(cs["glow"]), 0.0)])))
         if cs["kind"] == "mom":
             self._mom_back_hair(c, P, R, ht)
+        if cs.get("hood"):   # raised hood framing the head
+            c.drawCircle(-ht * 0.05 * R, 0.06 * R, R * 1.2, fill(hexc(cs["hood"])))
+            c.drawCircle(-ht * 0.05 * R, 0.06 * R, R * 1.2, self._rim_paint(P, R, 0.03 * R, 0.8, blur=0.01 * R))
         hi, base, edge = (hexc(x) for x in cs["head"])
         if P["warm"] > 0 and cs["kind"] == "mom":
             hi = mix(hi, hexc("#ffc896"), 0.25 * P["warm"])
@@ -328,7 +348,7 @@ class ConceptRig(Rig):
         if cs["kind"] == "stick":
             # very soft specular sheen (matte)
             c.drawCircle(-0.3 * R, -0.42 * R, 0.5 * R, fill(with_alpha(hexc("#ffffff"), 0.035), blur=0.25 * R))
-            if not P["back"]:
+            if not P["back"] and cs.get("hair_lines"):
                 self._hair_lines(c, P, R, ht)
         # uplight from the phone screen
         if P["uplight"] > 0:
@@ -347,6 +367,15 @@ class ConceptRig(Rig):
             self._mom_front_hair(c, P, R, ht)
         if not P["back"]:
             self._face(c, P, R, ht)
+        if cs.get("headphones"):
+            for sgn in (-1, 1):
+                far = (sgn < 0 and ht > 0) or (sgn > 0 and ht < 0)
+                if far and abs(ht) > 0.5:
+                    continue
+                hx = sgn * (1.02 - 0.3 * max(0, sgn * ht)) * R - ht * 0.15 * R
+                c.drawRRect(skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(hx - 0.13 * R, -0.18 * R, 0.26 * R, 0.42 * R), 0.1 * R, 0.1 * R),
+                            fill(hexc(cs["headphones"])))
+                c.drawCircle(hx, 0.03 * R, 0.05 * R, fill(with_alpha(hexc(cs["rim"]), 0.9)))
         c.restore()
 
     def _hair_lines(self, c, P, R, ht):
@@ -486,6 +515,8 @@ class ConceptRig(Rig):
                     if cs.get("lid_flick", True):
                         c.drawLine(ex + side * rx * 0.9, yo + 0.01 * R, ex + side * rx * 1.16, yo - 0.06 * R, stroke(lc, 0.035 * R))
             # brows
+            if not cs.get("brow"):
+                continue
             raise_ = P["brow_raise"] + (P["brow_asym"] * 0.5 if side > 0 else -P["brow_asym"] * 0.15)
             by = ey - ry - 0.09 * R - raise_ * 0.13 * R + cs["lid_base"] * 0.45 * ry
             inner = -side
@@ -512,6 +543,8 @@ class ConceptRig(Rig):
 
     def _mouth2(self, c, P, R, fx, fy):
         cs = self.cs
+        if not cs.get("mouth"):
+            return
         mo = clamp(P["mouth_open"], 0, 1)
         sm = clamp(P["smile"] - (0.25 if cs["kind"] == "stick" else 0.0), -1, 1)
         w = 0.085 * R * P["mouth_w"] * (1 + 0.3 * abs(sm)) * (1 - 0.2 * mo) * (1.25 if cs["kind"] == "mom" else 1.0)
@@ -537,6 +570,8 @@ class ConceptRig(Rig):
     def _mom_back_hair(self, c, P, R, ht):
         cs = self.cs
         hair = hexc(cs["hair"])
+        if cs.get("cap"):
+            return
         if cs.get("ponytail"):
             self._ponytail(c, P, R, ht)
         else:
@@ -605,6 +640,11 @@ class ConceptRig(Rig):
     def _mom_front_hair(self, c, P, R, ht):
         cs = self.cs
         hair = hexc(cs["hair"])
+        if cs.get("cap"):
+            if P["back"]:
+                c.drawCircle(0, 0.1 * R, R * 0.98, fill(hair))
+            self._cap(c, P, R, ht)
+            return
         if P["back"]:
             c.drawCircle(0, 0, R * 1.01, fill(hair))
             return
@@ -689,6 +729,35 @@ class ConceptRig(Rig):
         c.clipPath(cp2, doAntiAlias=True)
         c.drawPath(hp, self._rim_paint(P, R, 0.03 * R, 0.6, blur=0.01 * R))
         c.restore()
+
+
+    def _cap(self, c, P, R, ht):
+        """Barista: white cap — dome over the top of the head + a bill that turns with the head; short dark sideburns."""
+        cs = self.cs
+        hair = hexc(cs["hair"])
+        for sgn in (-1, 1):
+            far = (sgn < 0 and ht > 0) or (sgn > 0 and ht < 0)
+            if far and abs(ht) > 0.6:
+                continue
+            x0 = sgn * 0.9 * R - ht * 0.3 * R
+            c.drawPath(path_poly([(x0 - sgn * 0.06 * R, -0.42 * R), (x0 + sgn * 0.1 * R, -0.42 * R), (x0 + sgn * 0.08 * R, -0.02 * R),
+                                  (x0 - sgn * 0.04 * R, 0.0)]), fill(hair))
+        cap, dark = hexc(cs["cap"]), hexc(cs["cap_dark"])
+        dome = skia.Path()
+        dome.addArc(skia.Rect.MakeXYWH(-1.04 * R, -1.08 * R, 2.08 * R, 1.7 * R), 180, 180)
+        dome.close()
+        c.drawPath(dome, fill(cap, shader=linear(0, -1.08 * R, 0, -0.2 * R, [shade(cap, 1.0), dark])))
+        c.drawLine(-1.02 * R, -0.24 * R, 1.02 * R, -0.24 * R, stroke(dark, 0.05 * R))
+        c.drawCircle(ht * 0.2 * R, -1.04 * R, 0.07 * R, fill(dark))
+        c.drawPath(dome, self._rim_paint(P, R, 0.025 * R, 0.6, blur=0.01 * R))
+        if P["back"]:
+            return
+        # bill: an ellipse in front, sliding sideways and foreshortening with the head turn
+        bx = ht * 0.85 * R
+        bw = 0.95 * R * (1 - 0.45 * abs(ht)) + 0.25 * R * abs(ht)
+        c.drawOval(skia.Rect.MakeXYWH(bx - bw, -0.36 * R, 2 * bw, 0.26 * R), fill(dark))
+        c.drawOval(skia.Rect.MakeXYWH(bx - bw, -0.38 * R, 2 * bw, 0.2 * R), fill(cap))
+        c.drawOval(skia.Rect.MakeXYWH(bx - bw, -0.4 * R, 2 * bw, 0.22 * R), stroke(with_alpha(hexc("#000"), 0.25), 0.012 * R))
 
 
 RIGS2 = {k: ConceptRig(k) for k in CONCEPT}

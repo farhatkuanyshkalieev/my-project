@@ -1,0 +1,17 @@
+flow iCmWCGUW6RqXfDYXwtxk
+barista voice: Maxim 6YjFofyVXU1ASguf2hTJ
+B1 Y9qjMA76xwSOMZcyQDBx FAILED (free tier: unusual activity)
+A1 HtZWdohsV9QQIMLwHlkc -> Tz3MqnMqs38ENZKwwNcy
+B2 IceNcGDbqYyFr9e9AEj6 -> ExHU0UUU64UDzSKqAZYu
+B1 1UaivjSQajgtmndKKiwc -> 9j5vKxoRExdlVutDP23j
+O1 Jz5gbb751btGjIrXJfC6 FAILED (free tier unusual activity)
+O2 hhY4g7glYdu0mk9ThL7N -> geUuD6c1nXRSk3hrGJ5j
+B3 y1IHlvycF6QwrbWNxMEU FAILED (free tier unusual activity)
+O1 HwxP7yglPVI5BQSfqQLA FAILED again (free tier unusual activity)
+B3 WjRuf8oQOyOaMZDpdHJD -> 8WZ1cSGoYTeI34EK33zM
+G1 0HoRbxmer69EOEdLlwgP -> cMrxckQFEMHEKnMWgAh2
+A2 IJHsSS6Br0g6YiNeqGsj -> SUK6cGyE0gKBWy7uf4kp
+G2 j78m2dZRN7bhxgpVLSAk -> EJiTFDeHtdgqTNA1UD36
+O3 SBMZin1Ckqlsc1wG6HcL -> uCGsguniIRX9EHQx5xDZ
+O1 (rephrased «Объект ноль сорок восемь. Память сохранена.») 9gEfAtXcrkPOEIBeuROg -> oqfuyt58a66kjiiOUbs8
+O2 retake «Удалите кафе. Немедленно.» Bbeu6cmuNU1VaUSpR1cj -> ON0zrO7f4stggyGFCNSo (first take geUuD6c1nXRSk3hrGJ5j misheard as «Убелите»)

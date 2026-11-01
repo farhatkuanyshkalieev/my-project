@@ -1,0 +1,102 @@
+{
+ "B1": {
+  "take": "9j5vKxoRExdlVutDP23j",
+  "expected": "Как обычно? Двойной, без сахара.",
+  "heard": "Как обычно, двойной без сахара.",
+  "similarity": 1.0,
+  "dur": 2.64,
+  "onset": 0.071,
+  "offset": 2.293,
+  "peak_db": -4.5
+ },
+ "A1": {
+  "take": "Tz3MqnMqs38ENZKwwNcy",
+  "expected": "Я… давно здесь сижу?",
+  "heard": "Я давно здесь сижу?",
+  "similarity": 1.0,
+  "dur": 2.32,
+  "onset": 0.106,
+  "offset": 2.056,
+  "peak_db": -17.0
+ },
+ "B2": {
+  "take": "ExHU0UUU64UDzSKqAZYu",
+  "expected": "Каждый вечер. Ровно в одиннадцать семнадцать.",
+  "heard": "каждый вечер, ровно в 11.17.",
+  "similarity": 0.635,
+  "dur": 3.28,
+  "onset": 0.013,
+  "offset": 3.069,
+  "peak_db": -6.6
+ },
+ "O1": {
+  "take": "oqfuyt58a66kjiiOUbs8",
+  "expected": "Объект ноль сорок восемь. Память сохранена.",
+  "heard": "Объект 048.  Память сохранена.",
+  "similarity": 0.738,
+  "dur": 3.04,
+  "onset": 0.057,
+  "offset": 2.851,
+  "peak_db": -5.7
+ },
+ "O2": {
+  "take": "ON0zrO7f4stggyGFCNSo",
+  "expected": "Удалите кафе. Немедленно.",
+  "heard": "Удалите кафе. Немедленно.",
+  "similarity": 1.0,
+  "dur": 2.08,
+  "onset": 0.124,
+  "offset": 1.891,
+  "peak_db": -3.4
+ },
+ "B3": {
+  "take": "8WZ1cSGoYTeI34EK33zM",
+  "expected": "Тебе лучше уйти. Прямо сейчас.",
+  "heard": "Тебе лучше уйти прямо сейчас.",
+  "similarity": 1.0,
+  "dur": 2.56,
+  "onset": 0.11,
+  "offset": 2.406,
+  "peak_db": -10.8
+ },
+ "G1": {
+  "take": "cMrxckQFEMHEKnMWgAh2",
+  "expected": "Бежим! Пока они не стёрли улицу.",
+  "heard": "Бежим, пока они не стерли улицу!",
+  "similarity": 1.0,
+  "dur": 2.72,
+  "onset": 0.027,
+  "offset": 2.394,
+  "peak_db": -7.0
+ },
+ "A2": {
+  "take": "SUK6cGyE0gKBWy7uf4kp",
+  "expected": "Кто «они»? Кто ты вообще такая?",
+  "heard": "Кто они? Кто ты вообще такая?",
+  "similarity": 1.0,
+  "dur": 2.64,
+  "onset": 0.108,
+  "offset": 2.346,
+  "peak_db": -4.9
+ },
+ "G2": {
+  "take": "EJiTFDeHtdgqTNA1UD36",
+  "expected": "Я — свидетель. Я помню все твои круги.",
+  "heard": "Я свидетель.  Я помню все твои круги.",
+  "similarity": 0.986,
+  "dur": 4.08,
+  "onset": 0.192,
+  "offset": 3.84,
+  "peak_db": -16.1
+ },
+ "O3": {
+  "take": "uCGsguniIRX9EHQx5xDZ",
+  "expected": "Свидетель найден. Начинаю сбор.",
+  "heard": "Свидетель найден. Начинаю сбор.",
+  "similarity": 1.0,
+  "dur": 2.48,
+  "onset": 0.167,
+  "offset": 2.12,
+  "peak_db": -4.9
+ }
+}
