@@ -21,9 +21,13 @@ from render_trial_ad import (BG_MINT, BG_TEAL, CORAL, MINT, MINT_L, SKIN, TEAL, 
                              ease, ease_out, font, text, with_alpha)
 
 W, H, FPS = 1080, 1920, 30
-DUR = 14.5
+DUR = 19.0
 N = int(FPS * DUR)
-T_ME2, T_PROD, T_CTA = 3.6, 6.8, 10.6
+# scene times are aligned to the voiceover (lazy-sport-vo.mp3)
+T_ME2, T_PROD, T_CTA = 4.7, 8.8, 14.8
+VO_FILE = Path(__file__).with_name("lazy-sport-vo.mp3")
+# (start in source, end in source, start in video)
+VO_PLACEMENTS = [(0.0, 4.45, 0.15), (5.6, 9.45, 4.85), (10.38, 16.12, 8.95), (17.03, 20.4, 14.95)]
 GREY_BG = (226, 228, 232)
 MONTHS = ["СЕНТЯБРЬ", "ОКТЯБРЬ", "НОЯБРЬ"]
 
@@ -42,7 +46,7 @@ def scene_me1(t):
     text(d, (W / 2, 430), "собираюсь в зал", font("InterDisplay-Bold.otf", 84), (60, 64, 72))
     text(d, (W / 2, 530), "третий месяц", font("InterDisplay-Bold.otf", 84), (60, 64, 72))
     # tear-off calendar flipping through Mondays
-    period = 1.0
+    period = 1.5
     k = min(int(t / period), 2)
     lt = t - k * period
     flip = 1.0
@@ -147,7 +151,7 @@ def scene_prod(t):
     text(d, (W / 2, 430 + dy), "Ленивый спорт", font("InterDisplay-Black.otf", 120), TEAL)
     # 30-minute ring
     cx, cy, r = W / 2, 820, 210
-    p = ease(lt / 2.5)
+    p = ease(lt / 4.0)
     d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=WHITE)
     d.arc((cx - r + 18, cy - r + 18, cx + r - 18, cy + r - 18), 0, 360, fill=MINT_L, width=26)
     if p > 0.005:
@@ -156,11 +160,11 @@ def scene_prod(t):
     d.text((cx, cy - 10), str(mins), font=font("InterDisplay-Black.otf", 150), fill=TEAL, anchor="mm")
     d.text((cx, cy + 85), "минут", font=font("InterDisplay-Light.otf", 46), fill=TEAL, anchor="mm")
     for i, b in enumerate(BENEFITS):
-        a = ease((lt - 0.5 - i * 0.45) / 0.3)
+        a = ease((lt - 1.4 - i * 1.0) / 0.3)
         if not a:
             continue
         lay, ld = layer()
-        y = 1170 + i * 110 + (1 - ease_out((lt - 0.5 - i * 0.45) / 0.35)) * 30
+        y = 1170 + i * 110 + (1 - ease_out((lt - 1.4 - i * 1.0) / 0.35)) * 30
         ld.ellipse((230, y - 30, 290, y + 30), fill=TEAL)
         ld.line((245, y, 257, y + 13, 277, y - 13), fill=WHITE, width=7, joint="curve")
         ld.text((320, y), b, font=font("InterDisplay-Medium.otf", 56), fill=TEAL, anchor="lm")
@@ -179,12 +183,12 @@ def scene_cta(t):
     text(ld, (W / 2, 900), "Абонемент на месяц", font("InterDisplay-Bold.otf", 84), WHITE)
     text(ld, (W / 2, 1000), "можно заморозить на неделю", font("InterDisplay-Light.otf", 48), MINT)
     frame.alpha_composite(with_alpha(lay, a))
-    a2 = ease((lt - 0.6) / 0.35)
+    a2 = ease((lt - 1.3) / 0.35)
     if a2:
         lay, ld = layer()
         pulse = 1 + 0.03 * math.sin(lt * 6)
         bw, bh = 860 * pulse, 150 * pulse
-        y = 1260 + (1 - ease_out((lt - 0.6) / 0.4)) * 40
+        y = 1260 + (1 - ease_out((lt - 1.3) / 0.4)) * 40
         ld.rounded_rectangle((W / 2 - bw / 2, y - bh / 2, W / 2 + bw / 2, y + bh / 2), radius=bh / 2, fill=MINT)
         ld.text((W / 2, y - 18), "Напишите «ЛЕНЬ»", font=font("InterDisplay-Black.otf", 58), fill=TEAL_D, anchor="mm")
         ld.text((W / 2, y + 38), "в директ", font=font("InterDisplay-Medium.otf", 40), fill=TEAL_D, anchor="mm")
@@ -229,11 +233,11 @@ def render_audio(path):
         return x * np.exp(-tt * decay) * np.clip(tt / 0.01, 0, 1)
 
     # scene 1: slow, slightly sad keys
-    for st, f in ((0.0, 220.0), (0.5, 261.63), (1.0, 196.0), (1.5, 233.08), (2.0, 174.61), (2.5, 207.65)):
+    for st, f in ((0.0, 220.0), (0.65, 261.63), (1.3, 196.0), (1.95, 233.08), (2.6, 174.61), (3.25, 207.65)):
         add(tone(f, 0.9, 2.5), st, 0.25)
         add(tone(f * 1.5, 0.9, 3.0), st + 0.02, 0.1)
     # "wah wah" sad trombone
-    for k, (f0, st) in enumerate(((233.08, 2.75), (220.0, 3.0), (207.65, 3.25))):
+    for k, (f0, st) in enumerate(((233.08, T_ME2 - 0.85), (220.0, T_ME2 - 0.6), (207.65, T_ME2 - 0.35))):
         tt = np.arange(int(0.25 * sr)) / sr
         vib = np.sin(2 * np.pi * 6 * tt) * 3
         x = np.sin(2 * np.pi * np.cumsum(f0 + vib) / sr)
@@ -279,6 +283,8 @@ def render_audio(path):
         k += 1
     out[-int(0.5 * sr):] *= np.linspace(1, 0, int(0.5 * sr))
     out /= np.abs(out).max() / 0.85
+    if VO_FILE.exists():
+        out = mix_voiceover(out, sr)
     st = np.stack([out, out], axis=1)
     with wave.open(str(path), "wb") as w:
         w.setnchannels(2)
@@ -287,7 +293,31 @@ def render_audio(path):
         w.writeframes((st * 32767).astype(np.int16).tobytes())
 
 
-SECS = (1.5, 2.9, 4.6, 8.8, 12.4)
+def mix_voiceover(music, sr):
+    """Place voiceover pieces at their scene times and duck the music under them."""
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(VO_FILE), "-ac", "1", "-ar", str(sr),
+                                   "-f", "f32le", "-"])
+    src = np.frombuffer(raw, np.float32)
+    vo = np.zeros_like(music)
+    for s0, s1, v0 in VO_PLACEMENTS:
+        piece = src[int(s0 * sr):int(s1 * sr)].copy()
+        fade = int(0.02 * sr)
+        piece[:fade] *= np.linspace(0, 1, fade)
+        piece[-fade:] *= np.linspace(1, 0, fade)
+        a = int(v0 * sr)
+        b = min(len(vo), a + len(piece))
+        vo[a:b] += piece[:b - a]
+    env = np.sqrt(np.convolve(vo ** 2, np.ones(int(0.05 * sr)) / int(0.05 * sr), mode="same"))
+    active = (env > 0.01).astype(np.float32)
+    k = int(0.25 * sr)
+    active = np.convolve(active, np.ones(k) / k, mode="same")
+    duck = 1 - 0.65 * np.clip(active * 1.5, 0, 1)
+    vo *= 0.9 / (np.abs(vo).max() + 1e-6)
+    out = music * 0.55 * duck + vo
+    return out / max(1.0, np.abs(out).max() / 0.95)
+
+
+SECS = (1.5, 3.5, 6.0, 12.0, 17.0)
 
 
 def main():
