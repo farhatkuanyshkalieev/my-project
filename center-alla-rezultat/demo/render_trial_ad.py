@@ -15,7 +15,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 W, H, FPS = 1080, 1920, 30
-DUR = 27.5
+DUR = 34.0
 N = int(FPS * DUR)
 FONT_DIR = "/usr/share/fonts/opentype/inter/"
 
@@ -28,8 +28,14 @@ SKIN = (238, 190, 168)
 CORAL = (242, 120, 110)
 FAT = (250, 226, 160)
 
-T_DIAG, T_TAPE, T_DEV, T_RES, T_CTA = 2.5, 5.5, 7.5, 19.5, 23.0
-CARD = 1.5
+# scene times are aligned to the voiceover (trial-visit-vo.mp3)
+T_DIAG, T_TAPE, T_INTRO, T_RES, T_CTA = 2.5, 7.1, 9.2, 23.0, 28.1
+CARD_STARTS = [13.25, 14.06, 15.19, 16.16, 17.64, 18.9, 19.94, 20.92]
+T_DEV = CARD_STARTS[0]
+# voiceover pieces: (start in source, end in source, start in video)
+VO_FILE = Path(__file__).with_name("trial-visit-vo.mp3")
+VO_PLACEMENTS = [(0.0, 2.25, 0.15), (3.72, 8.2, 2.6), (9.42, 11.4, 7.2), (12.55, 26.15, 9.3),
+                 (27.33, 32.17, 23.1), (33.28, 38.19, 28.25)]
 
 METHODS = [
     ("Вакуумный массаж", "кровоток и лимфоток"),
@@ -319,7 +325,7 @@ def scene_diag(t):
     d.rounded_rectangle((cx0 + 60, cy0 + 70, cx0 + 320, cy0 + 100), radius=15, fill=MINT_L)
     for i, item in enumerate(DIAG_ITEMS):
         y = cy0 + 210 + i * 175
-        p = ease_out((lt - 0.35 - i * 0.42) / 0.3)
+        p = ease_out((lt - 0.5 - i * 0.8) / 0.3)
         box = (cx0 + 70, y - 45, cx0 + 160, y + 45)
         d.rounded_rectangle(box, radius=24, fill=TEAL if p > 0.5 else MINT_L)
         if p > 0.5:
@@ -362,10 +368,36 @@ def scene_tape(t):
     return frame
 
 
+def scene_intro(t):
+    frame = BG_MINT.copy()
+    d = ImageDraw.Draw(frame)
+    lt = t - T_INTRO
+    a = ease(lt / 0.3)
+    dy = (1 - ease_out(lt / 0.4)) * 60
+    n = max(1, min(8, int((lt - 0.2) / 0.32) + 1))
+    text(d, (W / 2, 360 + dy), "до", font("InterDisplay-Light.otf", 80), TEAL)
+    text(d, (W / 2, 560 + dy), str(n), font("InterDisplay-Black.otf", 300), TEAL)
+    text(d, (W / 2, 770 + dy), "аппаратных методик", font("InterDisplay-Bold.otf", 78), TEAL)
+    text(d, (W / 2, 860 + dy), "на всё тело", font("InterDisplay-Light.otf", 60), TEAL)
+    for k in range(8):
+        p = ease_out((lt - 0.2 - k * 0.32) / 0.3)
+        if p <= 0:
+            continue
+        cx = W / 2 + ((k % 4) - 1.5) * 200
+        cy = 1130 + (k // 4) * 210
+        r = 78 * p
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=WHITE, outline=MINT, width=6)
+        if p > 0.6:
+            d.text((cx, cy), str(k + 1), font=font("InterDisplay-Bold.otf", 64), fill=TEAL, anchor="mm")
+    if a < 1:
+        frame = Image.blend(BG_MINT, frame, a)
+    return frame
+
+
 def scene_device(t):
     frame = BG_MINT.copy()
-    idx = min(int((t - T_DEV) / CARD), 7)
-    lt = t - T_DEV - idx * CARD
+    idx = max(k for k, st in enumerate(CARD_STARTS) if st <= t)
+    lt = t - CARD_STARTS[idx]
     name, desc = METHODS[idx]
     slide = (1 - ease_out(lt / 0.28)) * W * 0.7
     lay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -403,20 +435,20 @@ def scene_result(t):
     s = 1 + 0.08 * max(0.0, 1 - lt / 0.3)
     f = font("InterDisplay-Black.otf", int(250 * s))
     d.text((W / 2, 820), f"−{n} см", font=f, fill=WHITE, anchor="mm")
-    a = ease((lt - 0.5) / 0.4)
+    a = ease((lt - 1.2) / 0.4)
     if a > 0:
         lay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         ld = ImageDraw.Draw(lay)
         text(ld, (W / 2, 1010), "в объёме за 1 визит", font("InterDisplay-Medium.otf", 64), WHITE)
         frame.alpha_composite(with_alpha(lay, a))
-    a = ease((lt - 1.1) / 0.4)
+    a = ease((lt - 3.0) / 0.4)
     if a > 0:
         lay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         ld = ImageDraw.Draw(lay)
         f2 = font("InterDisplay-Bold.otf", 58)
         label = "или вернём деньги"
         tw = ld.textlength(label, font=f2)
-        y = 1190 + (1 - ease_out((lt - 1.1) / 0.4)) * 40
+        y = 1190 + (1 - ease_out((lt - 3.0) / 0.4)) * 40
         ld.rounded_rectangle((W / 2 - tw / 2 - 60, y - 60, W / 2 + tw / 2 + 60, y + 60), radius=60, fill=MINT)
         ld.text((W / 2, y), label, font=f2, fill=TEAL_D, anchor="mm")
         text(ld, (W / 2, 1330), "гарантия центра", font("Inter-Regular.otf", 36), MINT)
@@ -468,7 +500,7 @@ def scene_cta(t):
             d2.line((230, y, 242, y + 13, 262, y - 13), fill=WHITE, width=7, joint="curve")
             d2.text((305, y), c, font=font("InterDisplay-Medium.otf", 54), fill=TEAL, anchor="lm")
             lay.alpha_composite(with_alpha(l2, a))
-    a, dy = step(1.5)
+    a, dy = step(2.3)
     if a:
         l2 = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         d2 = ImageDraw.Draw(l2)
@@ -490,8 +522,10 @@ def render_frame(i):
         frame = scene_hook(t)
     elif t < T_TAPE:
         frame = scene_diag(t)
-    elif t < T_DEV:
+    elif t < T_INTRO:
         frame = scene_tape(t)
+    elif t < T_DEV:
+        frame = scene_intro(t)
     elif t < T_RES:
         frame = scene_device(t)
     elif t < T_CTA:
@@ -560,11 +594,11 @@ def render_audio(path):
             add(bass(roots[(k // 3) % 4]), bt)
         bt += beat
         k += 1
-    for j in range(8):
-        add(whoosh(0.22, 0.3), T_DEV + j * CARD - 0.08)
+    for st in [T_INTRO] + CARD_STARTS:
+        add(whoosh(0.22, 0.3), st - 0.08)
     add(whoosh(0.3, 0.3), T_TAPE - 0.1)
     # riser
-    rs, re_ = 17.6, T_RES
+    rs, re_ = T_RES - 1.9, T_RES
     ln = int((re_ - rs) * sr)
     tt = np.arange(ln) / sr
     sweep = np.sin(2 * np.pi * np.cumsum(200 + 900 * (tt / tt[-1]) ** 2) / sr)
@@ -587,6 +621,8 @@ def render_audio(path):
         out += np.sin(2 * np.pi * f0 * t) * e * 0.12
 
     out /= np.abs(out).max() / 0.85
+    if VO_FILE.exists():
+        out = mix_voiceover(out, sr)
     st = np.stack([out, out], axis=1)
     with wave.open(str(path), "wb") as w:
         w.setnchannels(2)
@@ -595,7 +631,31 @@ def render_audio(path):
         w.writeframes((st * 32767).astype(np.int16).tobytes())
 
 
-SECS = (1.6, 4.4, 6.6, 8.4, 11.6, 14.3, 17.3, 18.9, 21.2, 25.5)
+SECS = (1.6, 5.0, 8.0, 11.5, 13.8, 16.6, 21.5, 24.5, 27.0, 31.0)
+
+
+def mix_voiceover(music, sr):
+    """Place voiceover pieces at their scene times and duck the music under them."""
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(VO_FILE), "-ac", "1", "-ar", str(sr),
+                                   "-f", "f32le", "-"])
+    src = np.frombuffer(raw, np.float32)
+    vo = np.zeros_like(music)
+    for s0, s1, v0 in VO_PLACEMENTS:
+        piece = src[int(s0 * sr):int(s1 * sr)].copy()
+        fade = int(0.02 * sr)
+        piece[:fade] *= np.linspace(0, 1, fade)
+        piece[-fade:] *= np.linspace(1, 0, fade)
+        a = int(v0 * sr)
+        b = min(len(vo), a + len(piece))
+        vo[a:b] += piece[:b - a]
+    env = np.sqrt(np.convolve(vo ** 2, np.ones(int(0.05 * sr)) / int(0.05 * sr), mode="same"))
+    active = (env > 0.01).astype(np.float32)
+    k = int(0.25 * sr)
+    active = np.convolve(active, np.ones(k) / k, mode="same")
+    duck = 1 - 0.68 * np.clip(active * 1.5, 0, 1)
+    vo *= 0.9 / (np.abs(vo).max() + 1e-6)
+    out = music * 0.55 * duck + vo
+    return out / max(1.0, np.abs(out).max() / 0.95)
 
 
 def main():
