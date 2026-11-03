@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ленивый спорт v3</title>
+<link rel="stylesheet" href="fonts/montserrat.css">
+<style>
+  :root {
+    --turq: #3CE0D7; --turq-d: #1EBBB0; --turq-dd: #128C84; --aqua: #DEF9F6;
+    --graphite: #373435; --grey: #5A5E66; --coral: #F2786E; --white: #fff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #fff; }
+  body { font-family: 'Montserrat', sans-serif; color: var(--graphite); }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .abs { position: absolute; }
+  .center { left: 0; right: 0; text-align: center; }
+  .card {
+    position: absolute; background: rgba(255,255,255,.92); border-radius: 36px;
+    box-shadow: 0 24px 60px rgba(18,140,132,.14), 0 4px 14px rgba(18,140,132,.08);
+  }
+  .grey .card { box-shadow: 0 24px 60px rgba(40,44,52,.12), 0 4px 14px rgba(40,44,52,.06); }
+  .eyebrow { font-weight: 700; font-size: 30px; letter-spacing: .22em; text-transform: uppercase; }
+  #logo { position: absolute; left: 34px; top: 34px; width: 470px; z-index: 10; }
+
+  /* scene 1 */
+  #s1 { background: linear-gradient(#F3F4F7, #DADDE3); }
+  #s1 h1 { font-weight: 900; font-size: 120px; line-height: 1; color: #4A4E57; }
+  #s1 h2 { font-weight: 700; font-size: 76px; line-height: 1.12; color: #4A4E57; }
+  .cal-head { height: 118px; border-radius: 36px 36px 0 0; background: var(--coral); color: #fff;
+              display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 46px; letter-spacing: .12em; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; padding: 24px 34px; }
+  .cal-grid .wd { text-align: center; font-weight: 700; font-size: 26px; color: #9AA0AA; padding-bottom: 6px; }
+  .cal-grid .d { height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+                 font-weight: 600; font-size: 30px; color: #6B7079; position: relative; }
+  .cal-grid .mon { background: #FDE7E4; color: var(--coral); font-weight: 800; }
+  .cross { position: absolute; left: 8px; right: 8px; top: 50%; height: 6px; border-radius: 3px; background: var(--coral);
+           transform-origin: left center; transform: rotate(-18deg) scaleX(0); }
+
+  /* scene 2-4 brand background */
+  .brand { background: linear-gradient(#FFFFFF 0%, #F3FCFB 45%, var(--aqua) 100%); }
+  .brand h1 { font-weight: 900; font-size: 124px; line-height: 1; }
+  .sub { font-weight: 500; font-size: 52px; line-height: 1.25; }
+  .meter { height: 26px; border-radius: 13px; background: #EEF3F3; overflow: hidden; }
+  .meter > div { height: 100%; border-radius: 13px; }
+  .stat-label { font-weight: 600; font-size: 34px; color: var(--grey); }
+  .stat-val { font-weight: 900; font-size: 64px; }
+  .benefit { display: flex; align-items: center; gap: 24px; padding: 0 30px; height: 140px; }
+  .benefit .ic { width: 84px; height: 84px; border-radius: 26px; background: var(--aqua); display: flex; align-items: center; justify-content: center; flex: none; }
+  .benefit span { font-weight: 700; font-size: 38px; line-height: 1.15; }
+  .btn { position: absolute; left: 110px; right: 110px; height: 164px; border-radius: 82px;
+         background: linear-gradient(90deg, var(--turq), var(--turq-d)); color: #fff;
+         display: flex; flex-direction: column; align-items: center; justify-content: center;
+         box-shadow: 0 24px 50px rgba(30,187,176,.35); }
+  .btn b { font-weight: 900; font-size: 58px; letter-spacing: .01em; }
+  .btn small { font-weight: 600; font-size: 34px; opacity: .95; }
+  .pill { display: inline-flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 40px; background: #fff;
+          font-weight: 700; font-size: 34px; box-shadow: 0 12px 30px rgba(18,140,132,.12); }
+  .demo { font-weight: 500; font-size: 24px; color: #8FB3B0; }
+</style>
+</head>
+<body>
+<img id="logo" src="../../brand/logo.png" alt="">
+
+<!-- ===================== SCENE 1: Я ===================== -->
+<div class="scene grey" id="s1">
+  <svg class="abs" width="1080" height="1920" style="left:0;top:0">
+    <circle cx="1080" cy="1560" r="600" fill="#C9CDD4" opacity=".35"/>
+    <circle cx="-120" cy="520" r="360" fill="#C9CDD4" opacity=".3"/>
+  </svg>
+  <div class="abs center" style="top:300px"><h1>Я:</h1></div>
+  <div class="abs center" style="top:430px"><h2>собираюсь в зал<br>третий месяц</h2></div>
+  <div class="card" id="cal" style="left:110px; top:680px; width:860px; height:640px">
+    <div class="cal-head" id="calMonth">СЕНТЯБРЬ</div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+  <div class="card" style="left:110px; top:1370px; width:860px; height:420px">
+    <div class="abs" style="left:44px; top:36px">
+      <div class="eyebrow" style="color:#9AA0AA">Мотивация</div>
+    </div>
+    <div class="abs" style="right:44px; top:26px; text-align:right">
+      <div class="stat-val" id="motiv" style="color:var(--coral)">100%</div>
+    </div>
+    <svg class="abs" style="left:44px; top:120px" width="772" height="260" viewBox="0 0 772 260">
+      <defs>
+        <linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F2786E" stop-opacity=".28"/><stop offset="1" stop-color="#F2786E" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g stroke="#E6E8EC" stroke-width="2">
+        <line x1="0" y1="20" x2="772" y2="20"/><line x1="0" y1="120" x2="772" y2="120"/><line x1="0" y1="220" x2="772" y2="220"/>
+      </g>
+      <path id="mArea" fill="url(#gArea)"/>
+      <path id="mLine" fill="none" stroke="#F2786E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle id="mDot" r="13" fill="#fff" stroke="#F2786E" stroke-width="7"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ===================== SCENE 2: Тоже я ===================== -->
+<div class="scene brand" id="s2">
+  <svg class="abs" width="1080" height="1920" style="left:0;top:0">
+    <circle cx="1100" cy="1560" r="620" fill="#3CE0D7" opacity=".13"/>
+    <circle cx="1100" cy="1560" r="470" fill="#3CE0D7" opacity=".12"/>
+    <circle cx="880" cy="320" r="92" fill="#3CE0D7" opacity=".16"/>
+  </svg>
+  <div class="abs center" style="top:300px"><h1 id="s2title">Тоже я:</h1></div>
+  <div class="abs center sub" id="s2sub" style="top:450px">лежу 30 минут —<br><b style="color:var(--turq-d);font-weight:800">а мышцы работают</b></div>
+
+  <svg class="abs" id="bodyS2" style="left:40px; top:640px" width="520" height="900" viewBox="0 0 520 900">
+    <defs>
+      <linearGradient id="gBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E9FBF9"/>
+      </linearGradient>
+      <radialGradient id="gZone"><stop offset="0" stop-color="#3CE0D7" stop-opacity=".95"/><stop offset="1" stop-color="#3CE0D7" stop-opacity="0"/></radialGradient>
+      <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter>
+      <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#128C84" flood-opacity=".18"/></filter>
+    </defs>
+    <g id="waves2" fill="none" stroke="#3CE0D7" stroke-linecap="round"></g>
+    <g filter="url(#shadow)"><g id="fig2"></g></g>
+    <g id="zones2"></g>
+  </svg>
+
+  <div class="card" style="left:560px; top:700px; width:460px; height:250px; padding:36px 38px">
+    <div class="stat-label">Мои усилия</div>
+    <div class="stat-val" id="effort" style="color:var(--grey)">0%</div>
+    <div class="meter" style="margin-top:14px"><div id="effortBar" style="width:2%; background:#C5CAD2"></div></div>
+  </div>
+  <div class="card" style="left:560px; top:990px; width:460px; height:250px; padding:36px 38px">
+    <div class="stat-label">Работа мышц</div>
+    <div class="stat-val" id="muscle" style="color:var(--turq-d)">0%</div>
+    <div class="meter" style="margin-top:14px"><div id="muscleBar" style="width:0%; background:linear-gradient(90deg,#3CE0D7,#1EBBB0)"></div></div>
+  </div>
+  <div class="card" style="left:560px; top:1280px; width:460px; height:230px; padding:30px 38px; display:flex; align-items:center; gap:28px">
+    <svg width="150" height="150" viewBox="0 0 150 150">
+      <circle cx="75" cy="75" r="62" fill="none" stroke="#EEF3F3" stroke-width="16"/>
+      <circle id="ring2" cx="75" cy="75" r="62" fill="none" stroke="#1EBBB0" stroke-width="16" stroke-linecap="round"
+              transform="rotate(-90 75 75)" stroke-dasharray="389.6" stroke-dashoffset="389.6"/>
+      <text id="ring2t" x="75" y="88" text-anchor="middle" font-family="Montserrat" font-weight="900" font-size="44" fill="#373435">0</text>
+    </svg>
+    <div><div class="stat-label">минут</div><div style="font-weight:800;font-size:36px">на кушетке</div></div>
+  </div>
+
+  <div class="card" style="left:60px; top:1600px; width:960px; height:200px; padding:30px 40px">
+    <div class="eyebrow" style="color:var(--turq-d); font-size:26px">Миостимуляция · сигнал</div>
+    <svg class="abs" style="left:40px; top:80px" width="880" height="100" viewBox="0 0 880 100">
+      <polyline id="ems" fill="none" stroke="#1EBBB0" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ===================== SCENE 3: Ленивый спорт ===================== -->
+<div class="scene brand" id="s3">
+  <svg class="abs" width="1080" height="1920" style="left:0;top:0">
+    <circle cx="-80" cy="1400" r="520" fill="#3CE0D7" opacity=".1"/>
+    <circle cx="1100" cy="430" r="300" fill="#3CE0D7" opacity=".1"/>
+  </svg>
+  <div class="abs center" id="s3head" style="top:290px">
+    <h1 style="font-size:112px">Ленивый спорт</h1>
+    <div class="sub" style="margin-top:22px; color:var(--turq-d); font-weight:700">30 минут · без нагрузки</div>
+  </div>
+  <svg class="abs" style="left:0; top:560px" width="1080" height="860" viewBox="0 0 1080 860">
+    <defs>
+      <linearGradient id="gBefore" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9D3D6"/><stop offset="1" stop-color="#AEBBBF"/></linearGradient>
+      <linearGradient id="gAfter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5BE8E0"/><stop offset="1" stop-color="#1EBBB0"/></linearGradient>
+      <filter id="shadow3" x="-20%" y="-10%" width="140%" height="130%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#128C84" flood-opacity=".22"/></filter>
+    </defs>
+    <ellipse cx="290" cy="800" rx="170" ry="22" fill="#128C84" opacity=".08"/>
+    <ellipse cx="790" cy="800" rx="170" ry="22" fill="#128C84" opacity=".1"/>
+    <g id="before3" filter="url(#shadow3)"></g>
+    <g id="after3" filter="url(#shadow3)"></g>
+    <g id="tape3"></g>
+    <g id="arrow3" fill="none" stroke="#1EBBB0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M480 360 l40 40 l-40 40"/><path d="M540 360 l40 40 l-40 40" opacity=".55"/>
+    </g>
+    <g id="sparks3" fill="#1EBBB0"></g>
+  </svg>
+  <div class="abs" id="lblBefore" style="left:190px; width:200px; top:1395px; text-align:center">
+    <span class="pill" style="color:#7C878B">ДО</span></div>
+  <div class="abs" id="lblAfter" style="left:670px; width:240px; top:1395px; text-align:center">
+    <span class="pill" style="color:#fff; background:linear-gradient(90deg,#3CE0D7,#1EBBB0)">ПОСЛЕ</span></div>
+
+  <div class="card benefit" id="b0" style="left:60px; top:1530px; width:470px"><div class="ic">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="#1EBBB0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M40 8C22 10 12 22 10 42"/><path d="M40 8c2 14-6 26-22 28"/><path d="M10 42l6-6"/></svg>
+  </div><span>Без нагрузки</span></div>
+  <div class="card benefit" id="b1" style="left:550px; top:1530px; width:470px"><div class="ic">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="#1EBBB0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M29 4L12 29h13l-3 19 18-26H27z"/></svg>
+  </div><span>Тонус мышц</span></div>
+  <div class="card benefit" id="b2" style="left:60px; top:1690px; width:470px"><div class="ic">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="#1EBBB0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M26 6c8 11 13 18 13 25a13 13 0 01-26 0c0-7 5-14 13-25z"/><path d="M20 33a6 6 0 006 6"/></svg>
+  </div><span>Лимфодренаж</span></div>
+  <div class="card benefit" id="b3" style="left:550px; top:1690px; width:470px"><div class="ic">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="#1EBBB0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/><path d="M40 32l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+  </div><span>Подтянутая кожа</span></div>
+</div>
+
+<!-- ===================== SCENE 4: CTA ===================== -->
+<div class="scene brand" id="s4">
+  <svg class="abs" width="1080" height="1920" style="left:0;top:0">
+    <circle cx="1100" cy="1560" r="620" fill="#3CE0D7" opacity=".13"/>
+    <circle cx="1100" cy="1560" r="470" fill="#3CE0D7" opacity=".12"/>
+    <circle cx="-60" cy="640" r="260" fill="#3CE0D7" opacity=".1"/>
+  </svg>
+  <div class="abs center" id="s4a" style="top:380px">
+    <div class="eyebrow" style="color:var(--turq-d)">Ленивый спорт</div>
+    <h1 style="font-size:104px; margin-top:26px; line-height:1.05">Абонемент<br>на месяц</h1>
+    <div class="sub" style="margin-top:26px; color:var(--grey)">можно заморозить на неделю</div>
+  </div>
+  <div class="card" id="s4chips" style="left:90px; top:960px; width:900px; height:250px; display:flex; align-items:center; justify-content:space-around; padding:0 20px">
+    <div style="text-align:center"><div class="stat-val" style="color:var(--turq-d)">30</div><div class="stat-label">минут за визит</div></div>
+    <div style="width:2px; height:130px; background:#E3F4F2"></div>
+    <div style="text-align:center"><div class="stat-val" style="color:var(--turq-d)">0</div><div class="stat-label">нагрузки</div></div>
+    <div style="width:2px; height:130px; background:#E3F4F2"></div>
+    <div style="text-align:center"><div class="stat-val" style="color:var(--turq-d)">1</div><div class="stat-label">месяц</div></div>
+  </div>
+  <div class="btn" id="cta" style="top:1300px"><b>Напишите «ЛЕНЬ»</b><small>в директ @center.alla.rezultat</small></div>
+  <div class="abs center" style="top:1700px; font-weight:600; font-size:32px; color:var(--grey)">Алматы · Аксай-1, 10/3 · аль-Фараби, 83</div>
+  <div class="abs center demo" style="top:1830px">демо-концепт ролика</div>
+</div>
+
+<script>
+const T_ME2 = 4.7, T_PROD = 8.8, T_CTA = 14.8, DUR = 19.0;
+const clamp = x => Math.min(Math.max(x, 0), 1);
+const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const eo = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+const $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+
+/* ---------- smooth closed path through points (Catmull-Rom -> Bezier) ---------- */
+function smooth(pts, closed = true) {
+  const n = pts.length; let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  const P = i => pts[closed ? (i + n) % n : Math.min(Math.max(i, 0), n - 1)];
+  for (let i = 0; i < (closed ? n : n - 1); i++) {
+    const p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d + (closed ? 'Z' : '');
+}
+
+/* ---------- female figure, front view; p=0 before (fuller), p=1 after ---------- */
+function figure(cx, top, h, p) {
+  const b = 1 - p;
+  const outer = [[0, .042], [.035, .058], [.075, .170 + .015 * b], [.13, .165 + .02 * b], [.19, .155 + .05 * b],
+    [.27, .112 + .075 * b], [.33, .106 + .092 * b], [.42, .180 + .068 * b], [.50, .186 + .06 * b],
+    [.60, .150 + .05 * b], [.74, .092 + .03 * b], [.80, .082 + .02 * b], [.95, .052], [.99, .058]];
+  const inner = [[.995, .016], [.80, .02], [.66, .006 + .012 * p], [.55, 0]];
+  const right = outer.concat(inner).map(([y, w]) => [cx + w * h, top + y * h]);
+  const left = right.slice().reverse().map(([x, y]) => [2 * cx - x, y]).slice(1, -1);
+  const body = smooth(right.concat(left));
+  const arms = [1, -1].map(s => smooth([
+    [cx + s * (.150 + .012 * b) * h, top + .075 * h], [cx + s * (.195 + .02 * b) * h, top + .10 * h],
+    [cx + s * (.215 + .045 * b) * h, top + .28 * h], [cx + s * (.232 + .055 * b) * h, top + .46 * h],
+    [cx + s * (.205 + .05 * b) * h, top + .47 * h], [cx + s * (.180 + .04 * b) * h, top + .30 * h],
+    [cx + s * (.150 + .03 * b) * h, top + .15 * h]]));
+  return { body, arms, head: [cx, top - .052 * h, .060 * h, .072 * h] };
+}
+
+function drawFigure(g, cx, top, h, p, fill, hair, stroke = 'none') {
+  const f = figure(cx, top, h, p);
+  const st = `stroke="${stroke}" stroke-width="4"`;
+  g.innerHTML = `
+    ${f.arms.map(a => `<path d="${a}" fill="${fill}" ${st}/>`).join('')}
+    <path d="${f.body}" fill="${fill}" ${st}/>
+    <ellipse cx="${f.head[0]}" cy="${f.head[1]}" rx="${f.head[2]}" ry="${f.head[3]}" fill="${fill}" ${st}/>
+    <circle cx="${f.head[0]}" cy="${f.head[1] - f.head[3] * 1.12}" r="${f.head[2] * .6}" fill="${hair}"/>`;
+}
+
+/* ---------- scene 1: calendar + motivation chart ---------- */
+const MONTHS = [['СЕНТЯБРЬ', 2026, 8], ['ОКТЯБРЬ', 2026, 9], ['НОЯБРЬ', 2026, 10]];
+function buildCalendar(k) {
+  const [name, y, m] = MONTHS[k];
+  $('calMonth').textContent = name;
+  const g = $('calGrid'); g.innerHTML = '';
+  ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].forEach(w => g.insertAdjacentHTML('beforeend', `<div class="wd">${w}</div>`));
+  const first = (new Date(y, m, 1).getDay() + 6) % 7;
+  const days = new Date(y, m + 1, 0).getDate();
+  for (let i = 0; i < first; i++) g.insertAdjacentHTML('beforeend', '<div class="d"></div>');
+  let mi = 0;
+  for (let d = 1; d <= days && g.children.length < 7 + 35; d++) {
+    const mon = (first + d - 1) % 7 === 0;
+    g.insertAdjacentHTML('beforeend', `<div class="d${mon ? ' mon' : ''}" ${mon ? `data-mi="${mi++}"` : ''}>${d}${mon ? '<i class="cross"></i>' : ''}</div>`);
+  }
+  g.dataset.k = k;
+}
+const MOT = [100, 93, 96, 82, 85, 66, 70, 50, 54, 32, 20, 4];
+function motivationPath(n) {
+  const pts = MOT.slice(0, n).map((v, i) => [i * 772 / 11, 20 + (100 - v) * 2]);
+  return pts;
+}
+
+/* ---------- render ---------- */
+let calK = -1;
+function show(id, a) { $(id).style.opacity = a; }
+
+window.render = function (t) {
+  // scene visibility with short crossfades
+  const fade = (t0) => ease((t - t0) / 0.25);
+  show('s1', t < T_ME2 ? 1 : 0);
+  show('s2', t >= T_ME2 && t < T_PROD + 0.25 ? (t < T_PROD ? fade(T_ME2) : 1 - fade(T_PROD)) : 0);
+  show('s3', t >= T_PROD && t < T_CTA + 0.25 ? (t < T_CTA ? fade(T_PROD) : 1 - fade(T_CTA)) : 0);
+  show('s4', t >= T_CTA ? fade(T_CTA) : 0);
+
+  /* scene 1 */
+  if (t < T_ME2) {
+    const k = Math.min(Math.floor(t / 1.5), 2), lt = t - k * 1.5;
+    if (k !== calK) { buildCalendar(k); calK = k; }
+    const flip = (k < 2 && lt > 1.32) ? (1.5 - lt) / 0.18 : (k > 0 && lt < 0.18 ? lt / 0.18 : 1);
+    $('cal').style.transform = `perspective(1400px) rotateX(${(1 - Math.max(flip, 0)) * 80}deg)`;
+    $('cal').style.transformOrigin = 'top center';
+    document.querySelectorAll('#calGrid .cross').forEach(c => {
+      const mi = +c.parentElement.dataset.mi;
+      c.style.transform = `rotate(-18deg) scaleX(${eo((lt - 0.15 - mi * 0.25) / 0.2)})`;
+    });
+    const total = Math.min(12, Math.floor(k * 4 + Math.min(4, Math.max(0, (lt - 0.15) / 0.25 + 1))));
+    const n = Math.max(2, total);
+    const pts = motivationPath(n);
+    $('mLine').setAttribute('d', smooth(pts, false));
+    $('mArea').setAttribute('d', smooth(pts, false) + ` L${pts[pts.length - 1][0]} 240 L0 240Z`);
+    const last = pts[pts.length - 1];
+    $('mDot').setAttribute('cx', last[0]); $('mDot').setAttribute('cy', last[1]);
+    $('motiv').textContent = MOT[n - 1] + '%';
+    const ia = ease(t / 0.3);
+    $('cal').style.opacity = ia;
+  }
+
+  /* scene 2 */
+  if (t >= T_ME2 - 0.01 && t < T_PROD + 0.3) {
+    const lt = t - T_ME2;
+    const s = 1 + 0.18 * Math.max(0, 1 - lt / 0.22);
+    $('s2title').style.transform = `scale(${s})`;
+    $('s2sub').style.opacity = ease((lt - 0.5) / 0.35);
+    drawFigure($('fig2'), 260, 120, 700, 0.75, 'url(#gBody)', '#5C3A2C', '#9FE7E1');
+    const pulse = Math.pow(Math.abs(Math.sin(lt * Math.PI * 2.4)), 2);
+    const zones = [[260 - 26, 300, 30, 36], [260 + 26, 300, 30, 36], [260 - 26, 352, 30, 36], [260 + 26, 352, 30, 36],
+                   [260 - 70, 520, 46, 80], [260 + 70, 520, 46, 80], [260 - 120, 250, 26, 60], [260 + 120, 250, 26, 60]];
+    $('zones2').innerHTML = zones.map(([x, y, rx, ry]) =>
+      `<ellipse cx="${x}" cy="${y}" rx="${rx * 1.6}" ry="${ry * 1.4}" fill="url(#gZone)" opacity="${(0.25 + 0.55 * pulse) * ease(lt / 0.6)}" filter="url(#soft)"/>
+       <ellipse cx="${x}" cy="${y}" rx="${rx * .55}" ry="${ry * .6}" fill="#3CE0D7" opacity="${0.18 + 0.35 * pulse}"/>`).join('');
+    let w = '';
+    for (let i = 0; i < 3; i++) {
+      const ph = (lt * 0.9 + i / 3) % 1, r = 60 + ph * 220;
+      w += `<circle cx="260" cy="340" r="${r}" stroke-width="${8 * (1 - ph)}" opacity="${0.5 * (1 - ph)}"/>`;
+    }
+    $('waves2').innerHTML = w;
+    const mp = eo((lt - 0.6) / 2.8);
+    $('effort').textContent = '0%';
+    $('muscle').textContent = Math.round(mp * 100) + '%';
+    $('muscleBar').style.width = (mp * 100) + '%';
+    const rp = eo((lt - 0.4) / 3.2);
+    $('ring2').setAttribute('stroke-dashoffset', 389.6 * (1 - rp));
+    $('ring2t').textContent = Math.round(rp * 30);
+    let pts = [];
+    for (let x = 0; x <= 880; x += 6) {
+      const tt = x / 880 * 4 - lt * 1.6;
+      const burst = (((tt % 1) + 1) % 1) < 0.45 ? 1 : 0;
+      const y = 50 - burst * 38 * Math.sign(Math.sin(tt * 2 * Math.PI * 9)) * (0.6 + 0.4 * pulse);
+      pts.push(`${x},${y.toFixed(1)}`);
+    }
+    $('ems').setAttribute('points', pts.join(' '));
+  }
+
+  /* scene 3 */
+  if (t >= T_PROD - 0.01 && t < T_CTA + 0.3) {
+    const lt = t - T_PROD;
+    $('s3head').style.opacity = ease(lt / 0.35);
+    $('s3head').style.transform = `translateY(${(1 - eo(lt / 0.45)) * 40}px)`;
+    const a1 = ease((lt - 0.2) / 0.4);
+    $('before3').style.opacity = a1; $('lblBefore').style.opacity = a1;
+    drawFigure($('before3'), 290, 150, 620, 0, 'url(#gBefore)', '#8E9A9E');
+    $('arrow3').style.opacity = ease((lt - 0.6) / 0.3);
+    const a2 = ease((lt - 0.6) / 0.4);
+    const p = ease((lt - 0.9) / 1.9);
+    $('after3').style.opacity = a2; $('lblAfter').style.opacity = ease((lt - 2.6) / 0.3);
+    drawFigure($('after3'), 790, 150, 620, p, p < 0.02 ? 'url(#gBefore)' : 'url(#gAfter)', p < 0.5 ? '#8E9A9E' : '#5C3A2C');
+    // measuring tape at the waist of the «after» figure
+    const tw = (0.106 + 0.092 * (1 - p)) * 620 + 10, ty = 150 + 0.33 * 620;
+    $('tape3').innerHTML = p > 0.05 ? `<path d="M${790 - tw} ${ty} Q790 ${ty + 26} ${790 + tw} ${ty}" fill="none" stroke="#F2C94C" stroke-width="14" stroke-linecap="round" opacity="${a2}"/>
+      <path d="M${790 - tw} ${ty} Q790 ${ty + 26} ${790 + tw} ${ty}" fill="none" stroke="#B88A1B" stroke-width="3" stroke-dasharray="2 10" opacity="${a2}"/>` : '';
+    const sp = ease((lt - 2.7) / 0.3);
+    $('sparks3').innerHTML = [[680, 210], [920, 300], [905, 560], [650, 470]].map(([x, y], k) => {
+      const s = (14 + 6 * Math.sin(lt * 7 + k)) * sp;
+      return `<path d="M${x} ${y - s}L${x + s * .28} ${y - s * .28}L${x + s} ${y}L${x + s * .28} ${y + s * .28}L${x} ${y + s}L${x - s * .28} ${y + s * .28}L${x - s} ${y}L${x - s * .28} ${y - s * .28}Z"/>`;
+    }).join('');
+    for (let i = 0; i < 4; i++) {
+      const a = ease((lt - 1.4 - i * 1.0) / 0.35);
+      $('b' + i).style.opacity = a;
+      $('b' + i).style.transform = `translateY(${(1 - eo((lt - 1.4 - i * 1.0) / 0.45)) * 30}px)`;
+    }
+  }
+
+  /* scene 4 */
+  if (t >= T_CTA - 0.01) {
+    const lt = t - T_CTA;
+    $('s4a').style.opacity = ease(lt / 0.35);
+    $('s4a').style.transform = `translateY(${(1 - eo(lt / 0.45)) * 40}px)`;
+    $('s4chips').style.opacity = ease((lt - 0.6) / 0.35);
+    const a = ease((lt - 1.3) / 0.35);
+    $('cta').style.opacity = a;
+    $('cta').style.transform = `translateY(${(1 - eo((lt - 1.3) / 0.45)) * 40}px) scale(${1 + 0.025 * Math.sin(lt * 6)})`;
+  }
+};
+window.render(0);
+</script>
+</body>
+</html>
