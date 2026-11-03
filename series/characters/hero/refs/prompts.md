@@ -22,11 +22,37 @@ Use the attached reference image as the exact character design: identical round 
 
 ## 1. Front view — мастер-референс
 
-Режим: **text2image** · 3:4 · 2K · 4 варианта на выбор
+Статус: ✅ **окончательная версия для Dreamina (Seedream 5.0 Lite).** Стопы направлены вперёд, как в паспорте (таблица 2.1); мягкая серая тень под ногами сохранена, как разрешает библия (§2).
+
+Режим: **text2image** · 3:4 · максимальное бесплатное разрешение · 4 варианта на выбор
 
 ```text
-Full-body front view character reference of a single character, standing upright, facing the viewer directly, centered, the figure filling about three quarters of the image height. One minimalist 2D cartoon stickman protagonist with a white filled circular head outlined in a clean black line, two small solid black oval eyes, two short expressive black eyebrow strokes and a simple black mouth. The torso is a slim closed tapered shape with solid white fill inside its black outline. Both arms and both legs are black single-line strokes with constant medium weight; hands are small black rounded shapes and feet are short black rounded strokes. No hair, no clothing, no accessories. The eyes always sit at the same height and spacing on the face. Keep the same head shape, head-to-body proportions, white head and torso fill, and outline weight in every shot. Exactly two arms and two legs exist; a moving limb replaces its previous pose rather than leaving another limb behind. Only the facial expression and the pose of the head, body and limbs change; the character design never changes. Head turns, head tilts and torso bends only animate the existing shape: the head keeps the same round shape and size from every angle, the torso bends as one piece without stretching, shrinking or changing its proportions, and the silhouette stays instantly recognizable while the motion stays fluid and natural. The full standing figure is about four head-heights tall, and the head is slightly wider than the top of the torso. Both eyes sit side by side on the horizontal middle line of the head, separated by about one eye width; the eyebrows sit just above them; the mouth is a short straight line below the eyes. Calm neutral expression. Arms hang relaxed slightly away from the torso, legs straight and about torso-width apart, feet pointing outward. Clean flat 2D cartoon line art, consistent black line weight, plain soft warm off-white background, a small soft gray shadow under the feet, even soft lighting. No text, no labels, no numbers, no watermark, no grid lines, no extra characters, no nose, no ears, no pupils, no lips, no 3D, no photorealism, no paper texture, no distorted or stretched head or torso.
+Full-body front view character reference of a single character, standing upright, facing the viewer directly, centered, the figure filling about three quarters of the image height. One minimalist 2D cartoon stickman protagonist with a white filled circular head outlined in a clean black line, two small solid black oval eyes, two short expressive black eyebrow strokes and a simple black mouth. The torso is a slim closed tapered shape with solid white fill inside its black outline. Both arms and both legs are black single-line strokes with constant medium weight; hands are small black rounded shapes and feet are short black rounded strokes. No hair, no clothing, no accessories. The eyes always sit at the same height and spacing on the face. Keep the same head shape, head-to-body proportions, white head and torso fill, and outline weight in every shot. Exactly two arms and two legs exist; a moving limb replaces its previous pose rather than leaving another limb behind. Only the facial expression and the pose of the head, body and limbs change; the character design never changes. Head turns, head tilts and torso bends only animate the existing shape: the head keeps the same round shape and size from every angle, the torso bends as one piece without stretching, shrinking or changing its proportions, and the silhouette stays instantly recognizable while the motion stays fluid and natural. The full standing figure is about four head-heights tall, and the head is slightly wider than the top of the torso. Both eyes sit side by side on the horizontal middle line of the head, separated by about one eye width; the eyebrows sit just above them; the mouth is a short straight line below the eyes. Calm neutral expression. Arms hang relaxed slightly away from the torso, legs straight and about torso-width apart, short rounded feet pointing forward toward the viewer. Clean flat 2D cartoon line art, consistent black line weight, plain soft warm off-white background, a small soft gray shadow under the feet, even soft lighting. No text, no labels, no numbers, no watermark, no grid lines, no extra characters, no nose, no ears, no pupils, no lips, no 3D, no photorealism, no paper texture, no distorted or stretched head or torso.
 ```
+
+### 1a. Negative prompt (Dreamina, отдельное поле)
+
+Вставляется в поле Negative prompt, если оно есть. Если поля нет, ничего не добавляется: основные запреты уже стоят в конце промпта. Блок дополнительно защищает от поворота корпуса и линий движения, которые могут подсказать фразы об анимации в описании персонажа.
+
+```text
+text, letters, numbers, labels, watermark, logo, signature, grid lines, frame, border, extra characters, multiple figures, props, objects, accessories, hat, hair, clothing, nose, ears, pupils, irises, lips, teeth, fingers, extra limbs, extra arms, extra legs, motion lines, speed lines, turned body, side view, three-quarter view, tilted head, squash and stretch, stretched or flattened head, oval head, distorted torso, uneven line weight, sketchy lines, shading gradients, 3D, CGI, photorealism, realistic skin, paper texture, colored background, busy background
+```
+
+### 1b. Настройки Dreamina
+
+| Настройка | Значение |
+|---|---|
+| Раздел | Генерация изображений, текст → картинка |
+| Модель | Seedream 5.0 Lite |
+| Формат | 3:4 |
+| Разрешение | Максимальное из бесплатно доступных |
+| Количество | 4 |
+| Улучшение промпта (Auto Enhance / Prompt optimization / ✨) | Выключено |
+| Референс / режим Character | Не используется |
+| Стиль / пресет | Нет (None / Default) |
+| Seed | Случайный; seed выбранного варианта записать в журнал `README.md` |
+
+Перед запуском: проверить стоимость и дневной баланс, а также что промпт не обрезан лимитом символов. Если обрезан, промпт самим не сокращать, а сообщить точный лимит.
 
 ## 2. Three-quarter view
 
