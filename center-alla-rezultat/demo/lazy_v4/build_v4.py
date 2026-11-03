@@ -15,7 +15,7 @@ EXTRA_CSS = """
   .shine { position: absolute; top: 0; bottom: 0; width: 160px; border-radius: 82px;
            background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0)); }
   .big-num { font-weight: 900; font-size: 104px; line-height: 1.05; }
-  .benefit span { white-space: nowrap; font-size: 36px; }
+  .benefit span { white-space: nowrap; font-size: 33px; }
 """
 
 SCENES_2_4 = """<!-- ===================== SCENE 2: Тоже я (simplified) ===================== -->
