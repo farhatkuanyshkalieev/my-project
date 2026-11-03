@@ -34,6 +34,14 @@ faces.push(
   loadFont({ family: SCRIPT, url: staticFile("fonts/great-vibes-cyrillic-400-normal.woff2"), unicodeRange: CYR }),
   loadFont({ family: SCRIPT, url: staticFile("fonts/great-vibes-latin-400-normal.woff2"), unicodeRange: LAT }),
 );
+// Стиль №2 (инфографика): Montserrat
+export const MONT = "Montserrat";
+for (const w of ["500", "600", "700", "800", "900"]) {
+  faces.push(
+    loadFont({ family: MONT, weight: w, url: staticFile(`fonts/montserrat-cyrillic-${w}-normal.woff2`), unicodeRange: CYR }),
+    loadFont({ family: MONT, weight: w, url: staticFile(`fonts/montserrat-latin-${w}-normal.woff2`), unicodeRange: LAT }),
+  );
+}
 export const fontsLoaded = Promise.all(faces);
 
 // Базовая типографика: строчные, жирный гротеск, очень плотный трекинг

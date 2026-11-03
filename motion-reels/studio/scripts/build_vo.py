@@ -1,7 +1,8 @@
 """
 Собирает дорожку голоса по плану и считает приглушение музыки под голосом.
   python3 scripts/build_vo.py src/reels/lishniy-ves.vo.json
-План: { "clips": {"15": старт_сек, ...}, "cut": {"23": обрезать_после_сек}, "duration": сек }
+План: { "clips": {"15": старт_сек, ...}, "cut": {"23": обрезать_после_сек}, "duration": сек,
+        "segments": {"15": [[от_сек, до_сек|null, старт_на_таймлайне], ...]} }   # необязательно: разрезать клип на куски
 Клипы: public/vo/clips/<id>.wav (после process_voice.sh)
 Выход: public/vo/<name>.wav и src/reels/<name>.duck.json (громкость музыки по кадрам, 0..1)
 """
@@ -14,15 +15,26 @@ name = os.path.basename(plan_path).replace(".vo.json", "")
 SR, FPS = 48000, 30
 total = int(plan["duration"] * SR)
 track = np.zeros(total)
+def place(y, start):
+    a = int(start * SR)
+    b = min(total, a + len(y))
+    track[a:b] += y[: b - a]
+
 for cid, start in plan["clips"].items():
     y, sr = sf.read(f"public/vo/clips/{cid}.wav")
     assert sr == SR, sr
     if y.ndim > 1: y = y.mean(1)
     if cid in plan.get("cut", {}):
         y = y[: int(plan["cut"][cid] * SR)]  # обрыв на полуслове — без фейда
-    a = int(start * SR)
-    b = min(total, a + len(y))
-    track[a:b] += y[: b - a]
+    segs = plan.get("segments", {}).get(cid)
+    if not segs:
+        place(y, start)
+        continue
+    fade = int(0.012 * SR)
+    for frm, to, at in segs:
+        part = y[int(frm * SR): (int(to * SR) if to is not None else len(y))].copy()
+        part[:fade] *= np.linspace(0, 1, fade); part[-fade:] *= np.linspace(1, 0, fade)
+        place(part, at)
 raw_path = f"public/vo/{name}.raw.wav"
 sf.write(raw_path, track, SR, subtype="PCM_24")
 # голос — к −16 LUFS с потолком −1.5 dBTP (музыка под ним будет ~ −30 LUFS)

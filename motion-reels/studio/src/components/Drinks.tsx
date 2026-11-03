@@ -123,16 +123,17 @@ export const Juice: React.FC = () => (
   </svg>
 );
 
-export const ColaCan: React.FC = () => (
+const CAN = {
+  wine: ["#4E1220", "#8E2A40", "#C2586E", "#9E3349", "#7A1F2E", "#3E0D18"],
+  coral: ["#9C3328", "#D85C4E", "#F7A096", "#E46A5C", "#C9493C", "#7E2219"],
+};
+export const ColaCan: React.FC<{ tint?: keyof typeof CAN }> = ({ tint = "wine" }) => (
   <svg viewBox="0 0 300 480" width="100%" height="100%">
     <defs>
       <linearGradient id="cc-body" x1="0" x2="1">
-        <stop offset="0" stopColor="#4E1220" />
-        <stop offset="0.16" stopColor="#8E2A40" />
-        <stop offset="0.32" stopColor="#C2586E" />
-        <stop offset="0.42" stopColor="#9E3349" />
-        <stop offset="0.78" stopColor="#7A1F2E" />
-        <stop offset="1" stopColor="#3E0D18" />
+        {[0, 0.16, 0.32, 0.42, 0.78, 1].map((o, i) => (
+          <stop key={o} offset={o} stopColor={CAN[tint][i]} />
+        ))}
       </linearGradient>
       <linearGradient id="cc-metal" x1="0" x2="1">
         <stop offset="0" stopColor="#8D8A90" />
@@ -185,7 +186,7 @@ export const ColaCan: React.FC = () => (
   </svg>
 );
 
-const ART = { latte: Latte, juice: Juice, cola: ColaCan };
+const ART = { latte: Latte, juice: Juice, cola: ColaCan, colaCoral: () => <ColaCan tint="coral" /> };
 
 /** Напиток: выпрыгивает с поворотом, мягко «плавает», под ним тень и подпись калорий */
 export const DrinkItem: React.FC<{
@@ -197,7 +198,10 @@ export const DrinkItem: React.FC<{
   kcal: string;
   label: string;
   w?: number;
-}> = ({ kind, at, end, x, y, kcal, label, w = 270 }) => {
+  /** Переопределить шрифт/цвета подписей (для стиля №2) */
+  labelStyle?: React.CSSProperties;
+  kcalStyle?: React.CSSProperties;
+}> = ({ kind, at, end, x, y, kcal, label, w = 270, labelStyle, kcalStyle }) => {
   const frame = useCurrentFrame();
   const f0 = s2f(at);
   if (frame < f0 - 1 || frame > s2f(end) + 8) return null;
@@ -251,8 +255,8 @@ export const DrinkItem: React.FC<{
           filter: `blur(${(1 - cap) * 10}px)`,
         }}
       >
-        <div style={{ fontSize: 40, color: C.ink }}>{label}</div>
-        <div style={{ fontSize: 46, color: C.wineText, marginTop: 4 }}>{kcal}</div>
+        <div style={{ fontSize: 40, color: C.ink, ...labelStyle }}>{label}</div>
+        <div style={{ fontSize: 46, color: C.wineText, marginTop: 4, ...kcalStyle }}>{kcal}</div>
       </div>
     </div>
   );

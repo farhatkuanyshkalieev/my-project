@@ -24,6 +24,9 @@ const SFX = {
   rise: { file: "rise.wav", lead: 0.29, vol: 0.4 },
   riser: { file: "riser.wav", lead: 1.72, vol: 0.45 },
   object: { file: "object.wav", lead: 0.17, vol: 0.35 },
+  page_flip: { file: "page_flip.wav", lead: 0.03, vol: 0.5 },
+  whoosh_down: { file: "whoosh_down.wav", lead: 0.13, vol: 0.45 },
+  sparkle: { file: "sparkle.wav", lead: 0.43, vol: 0.3 },
 } as const;
 
 export type SfxName = keyof typeof SFX;

@@ -1,5 +1,6 @@
 import { Composition } from "remotion";
 import { DURATION_S, LishniyVes } from "./reels/LishniyVes";
+import { FLAT_DURATION_S, LishniyVesFlat } from "./reels/LishniyVesFlat";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -8,6 +9,14 @@ export const RemotionRoot: React.FC = () => {
         id="LishniyVes"
         component={LishniyVes}
         durationInFrames={Math.round(DURATION_S * 30)}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="LishniyVesFlat"
+        component={LishniyVesFlat}
+        durationInFrames={Math.round(FLAT_DURATION_S * 30)}
         fps={30}
         width={1080}
         height={1920}
