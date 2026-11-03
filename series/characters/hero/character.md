@@ -1,6 +1,6 @@
 # Паспорт персонажа — `hero` (главный герой)
 
-Статус: 🔒 **направление утверждено (ред. 2).** Референсы генерируются на этапе 2 после вашего «да» и при наличии кредитов.
+Статус: ✅ **этап 1 завершён (ред. 3).** Референсы генерируются на этапе 2 после вашего «да» и при наличии кредитов.
 
 Рабочее имя: ⏳ (предложите или оставим `hero`).
 
@@ -9,13 +9,15 @@
 Этот блок вставляется **дословно в каждый промпт**, где появляется герой. Действия, камера, предметы и актёрская игра описываются отдельными блоками и сюда не попадают.
 
 ```text
-One minimalist 2D cartoon stickman protagonist with a white filled circular head outlined in a clean black line, two small solid black oval eyes, two short expressive black eyebrow strokes and a simple black mouth. The torso is a slim closed tapered shape with solid white fill inside its black outline. Both arms and both legs are black single-line strokes with constant medium weight; hands are small black rounded shapes and feet are short black rounded strokes. No hair, no clothing, no accessories. The eyes always sit at the same height and spacing on the face. Keep the same head shape, head-to-body proportions, white head and torso fill, and outline weight in every shot. Exactly two arms and two legs exist; a moving limb replaces its previous pose rather than leaving another limb behind. Only the facial expression and the pose of the head, body and limbs change; the character design never changes.
+One minimalist 2D cartoon stickman protagonist with a white filled circular head outlined in a clean black line, two small solid black oval eyes, two short expressive black eyebrow strokes and a simple black mouth. The torso is a slim closed tapered shape with solid white fill inside its black outline. Both arms and both legs are black single-line strokes with constant medium weight; hands are small black rounded shapes and feet are short black rounded strokes. No hair, no clothing, no accessories. The eyes always sit at the same height and spacing on the face. Keep the same head shape, head-to-body proportions, white head and torso fill, and outline weight in every shot. Exactly two arms and two legs exist; a moving limb replaces its previous pose rather than leaving another limb behind. Only the facial expression and the pose of the head, body and limbs change; the character design never changes. Head turns, head tilts and torso bends only animate the existing shape: the head keeps the same round shape and size from every angle, the torso bends as one piece without stretching, shrinking or changing its proportions, and the silhouette stays instantly recognizable while the motion stays fluid and natural.
 ```
 
 Основа — проверенное описание персонажа Style 4. Изменения в ред. 2:
 - рот описан просто как «simple black mouth», чтобы разрешить несколько форм;
 - добавлено фиксированное положение глаз на лице;
 - последняя фраза переписана под Consistency System.
+
+Изменение в ред. 3: добавлена фраза о правиле «анимация существующей формы» (раздел 2.3).
 
 Отличительная деталь ⏳ не добавлена.
 
@@ -48,9 +50,20 @@ One minimalist 2D cartoon stickman protagonist with a white filled circular head
 | **Голова** | Наклоны, кивки, повороты (анфас ↔ ¾ ↔ профиль ↔ затылок) | Повороты строго по листу ракурсов (раздел 5); форма и размер головы не меняются |
 | **Тело** | Наклон, приседание, прыжок, дыхание, перенос веса | Туловище изгибается как целое, его длина и ширина не меняются |
 
-*Примечание:* в ТЗ было «менять только мимику и положение конечностей». Наклоны и повороты головы и движения туловища я тоже отнёс к позе — без них не получится «живость» из пункта 3 ваших правок. Если хотите строже, скажите.
+### 2.3 Правило «анимация существующей формы» 🔒
 
-### 2.3 Как система применяется
+Наклоны и повороты головы и движения туловища разрешены **только как анимация уже существующей формы героя**. Движение не создаёт новую геометрию.
+
+- **Геометрия, пропорции и силуэт не меняются ни в одном кадре.** Героя узнают по силуэту в любой позе и с любого ракурса.
+- **Голова** поворачивается и наклоняется, но остаётся тем же кругом того же размера. Меняется только расположение черт лица по листу ракурсов (анфас → ¾ → профиль → затылок).
+- **Туловище** наклоняется, приседает, поворачивается и «дышит» как единое целое. Его длина, ширина и отношение к голове и ногам не меняются, оно не растягивается и не сжимается.
+- **Конечности** сгибаются и двигаются, но их длина и толщина постоянны.
+- **Не механично:** движения плавные, с замахом, доводкой, перекрытием по времени (голова чуть запаздывает за корпусом, руки — за плечами) и мягким ускорением и замедлением. Постоянство формы достигается неизменным рисунком, а не скованностью движений.
+- **Недопустимо** (на любой скорости, даже на 1–2 кадра): сплющивание или растяжение головы и туловища, «резиновые» конечности, смена толщины линии в движении, деформации ради эффекта (squash & stretch).
+
+Это правило дословно отражено в последнем предложении описания персонажа (раздел 1) и проверяется в [чек-листе](../../qa-checklist.md).
+
+### 2.4 Как система применяется
 
 1. **Текст:** описание из раздела 1 — дословно в каждом промпте.
 2. **Актёрская игра:** блок CHARACTER PERFORMANCE из библии (§6) — отдельно от описания, тоже в каждом промпте.

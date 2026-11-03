@@ -1,6 +1,6 @@
 # Библия сериала — Stickman Animation (YouTube Shorts)
 
-Статус: **этап 1 — направление утверждено (ред. 2: камера, мимика, живость, Consistency System, голос).** Блоки помечены статусом:
+Статус: ✅ **этап 1 завершён (ред. 3: камера, мимика, живость, Consistency System, правило «анимация существующей формы», голос — направление).** Открытые решения ⏳ (палитра-акценты, имя героя, отличительная деталь, язык и тембр голоса) переносятся на этап 2 и эпизод 1. Блоки помечены статусом:
 🔒 зафиксировано · 📝 черновик, ждёт утверждения · ⏳ решение не принято.
 
 Блоки в `text`-рамках — это готовые английские фрагменты промптов. В промпты их вставляют **дословно**, без сокращений вроде «same character» или «as before».
@@ -84,6 +84,7 @@ rapid scene changes, kinetic motion-graphic transformations, and frequent visual
 ```text
 CHARACTER PERFORMANCE: The character feels alive in every frame. Natural blinks every few seconds; the eyes follow moving objects and glance toward what the character is thinking about; the eyebrows rise, furrow and tilt with each emotional beat; the mouth switches between a few simple shapes (short line, smile curve, frown curve, small open oval, wide open grin) to express emotion only, and the character never speaks or lip-syncs the narration. Small head tilts, nods and turns follow the emotion. During pauses and reactions the character never freezes: subtle breathing in the torso, slight weight shifts between the feet, small arm and hand adjustments, blinks and quick eye glances. All motion is smooth, with natural anticipation, follow-through and easing.
 ```
+- **Анимация существующей формы:** повороты и наклоны головы и движения туловища не меняют геометрию, пропорции и силуэт героя. Голова остаётся тем же кругом того же размера, туловище наклоняется без изменения длины и пропорций. Никакого squash & stretch. Живость — за счёт плавности и тайминга, а не деформации ([паспорт, 2.3](characters/hero/character.md#23-правило-анимация-существующей-формы-)).
 - В кадре по-прежнему 2 руки и 2 ноги: двигающаяся конечность заменяет прежнюю позу, а не дублирует её.
 - Эффекты (линии скорости, искры, значки) рисуются на предметах или отдельно от тела, а не шлейфом от конечностей.
 - Никакого текста в кадре: пузыри сообщений, экраны и часы — только значками. Надписи добавляются на монтаже.
@@ -119,7 +120,7 @@ CHARACTER PERFORMANCE: The character feels alive in every frame. Natural blinks 
 ## 8. Общие запреты (negative) 📝
 
 ```text
-No photorealism, no 3D CGI or 3D humanoid rendering, no realistic skin, no detailed irises or pupils, no lips, no nose, no hair, no clothing or accessories on the character, no extra or duplicated limbs, no retained previous limb poses, no changing head or body proportions, no broken or changing line weight, no unintended extra characters or clones, no paper texture, no sketchbook border, no white card frame, no visible words, letters, numbers, captions, subtitles, logos or watermarks, no speech bubbles or dialogue boxes, no abstract liquid morphing of objects, no static image with only a zoom, no frozen or unblinking face, no lip-sync or talking mouth; the character must be fully animated.
+No photorealism, no 3D CGI or 3D humanoid rendering, no realistic skin, no detailed irises or pupils, no lips, no nose, no hair, no clothing or accessories on the character, no extra or duplicated limbs, no retained previous limb poses, no changing head or body proportions, no broken or changing line weight, no unintended extra characters or clones, no paper texture, no sketchbook border, no white card frame, no visible words, letters, numbers, captions, subtitles, logos or watermarks, no speech bubbles or dialogue boxes, no abstract liquid morphing of objects, no static image with only a zoom, no squash and stretch, no stretching or flattening of the head or torso during motion, no rubbery limbs, no frozen or unblinking face, no lip-sync or talking mouth; the character must be fully animated.
 ```
 
 ## 9. Конвейер эпизода
