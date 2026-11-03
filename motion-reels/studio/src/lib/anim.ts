@@ -44,3 +44,31 @@ export const fmt = (n: number, decimals = 0) => {
   const spaced = int.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   return dec ? `${spaced},${dec}` : spaced;
 };
+
+/** Кривая счётчиков: быстро набирает, долго «докручивает» последние значения */
+export const countEase = Easing.bezier(0.25, 0.8, 0.3, 1);
+export const ringEase = Easing.bezier(0.3, 0.6, 0.3, 1);
+
+/**
+ * Моменты тиков для счётчика: тик на каждой 1/n шкалы по той же кривой, что и цифры.
+ * Пока число летит — тики частые, к концу редеют (как барабан слот-машины).
+ */
+export const countTicks = (at: number, dur: number, n: number, ease: (t: number) => number, minGap = 0.06) => {
+  const out: number[] = [];
+  let last = -1;
+  for (let k = 1; k <= n; k++) {
+    let lo = 0;
+    let hi = 1;
+    for (let it = 0; it < 30; it++) {
+      const mid = (lo + hi) / 2;
+      if (ease(mid) < k / n) lo = mid;
+      else hi = mid;
+    }
+    const t = at + hi * dur;
+    if (t - last >= minGap) {
+      out.push(t);
+      last = t;
+    }
+  }
+  return out;
+};

@@ -1,6 +1,6 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
-import { evolvePath } from "@remotion/paths";
+import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { getLength } from "@remotion/paths";
 import { inOut, prog, s2f } from "../lib/anim";
 import { C } from "../lib/theme";
 
@@ -80,6 +80,17 @@ const ARC_PATHS = [
   "M -80 1640 C 340 1590, 720 1700, 900 2000",
 ];
 
+const ARC_LEN = ARC_PATHS.map((d) => getLength(d));
+const DRAW = 30; // кадров на прорисовку одной дуги (~1 с)
+const STAGGER = 6;
+const EXIT = 20;
+const smooth = Easing.bezier(0.45, 0, 0.15, 1); // мягкий разгон и долгое торможение
+
+/**
+ * Бордовые дуги через весь кадр, как в референсе.
+ * Вход: линия плавно «рисуется» с ease-in-out и проявляется из лёгкого блюра.
+ * Выход: линия стягивается к концу и растворяется — без резких обрезов.
+ */
 export const Arcs: React.FC<{ at: number; end: number; color?: string; variant?: 0 | 1 }> = ({
   at,
   end,
@@ -87,19 +98,19 @@ export const Arcs: React.FC<{ at: number; end: number; color?: string; variant?:
   variant = 0,
 }) => {
   const frame = useCurrentFrame();
-  const f0 = s2f(at);
+  const f0 = s2f(at) - 4; // стартуем чуть раньше акцента, чтобы к нему линия уже «летела»
   const f1 = s2f(end);
-  if (frame < f0 || frame > f1 + 10) return null;
-  const outP = prog(frame, f1, 9);
+  if (frame < f0 || frame > f1 + EXIT + STAGGER * 2) return null;
   return (
-    <svg
-      width={1080}
-      height={1920}
-      style={{ position: "absolute", inset: 0, opacity: 1 - outP, scale: variant ? "-1 1" : undefined }}
-    >
+    <svg width={1080} height={1920} style={{ position: "absolute", inset: 0, scale: variant ? "-1 1" : undefined }}>
       {ARC_PATHS.map((d, i) => {
-        const p = prog(frame, f0 + i * 3, 13);
-        const drift = (frame - f0) * 0.25;
+        const len = ARC_LEN[i];
+        const draw = prog(frame, f0 + i * STAGGER, DRAW, smooth);
+        const retract = prog(frame, f1 + i * (STAGGER / 2), EXIT, smooth);
+        const fadeIn = prog(frame, f0 + i * STAGGER, 10);
+        const visibleLen = len * draw;
+        const cut = len * retract; // сколько «съедено» с начала линии
+        const drift = (frame - f0) * 0.18;
         return (
           <path
             key={i}
@@ -108,8 +119,12 @@ export const Arcs: React.FC<{ at: number; end: number; color?: string; variant?:
             strokeWidth={7}
             strokeLinecap="round"
             fill="none"
-            {...evolvePath(p, d)}
-            style={{ translate: `0 ${drift}px` }}
+            strokeDasharray={`0 ${cut} ${Math.max(0, visibleLen - cut)} ${len * 2}`}
+            style={{
+              translate: `0 ${drift}px`,
+              opacity: fadeIn * (1 - retract * 0.6),
+              filter: `blur(${(1 - fadeIn) * 4 + retract * 3}px)`,
+            }}
           />
         );
       })}

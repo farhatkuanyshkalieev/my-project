@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { AbsoluteFill, continueRender, delayRender, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { Audio } from "@remotion/media";
-import { s2f } from "../lib/anim";
+import { countEase, countTicks, ringEase, s2f } from "../lib/anim";
 import { C, fontsLoaded } from "../lib/theme";
 import { Phrase } from "../components/Phrase";
 import { Arcs, Blob, DarkBg, LightBg } from "../components/Graphics";
 import { Chocolate, Counter, Folder, Notification, Phone, ResearchCard, StepRing, Tree } from "../components/Widgets";
+import { DrinkItem } from "../components/Drinks";
 import { Cue, SfxTrack } from "../components/Sfx";
 
 /**
@@ -19,6 +20,17 @@ const MUSIC_START = 22.41;
 const DARK_FROM = 36.0; // клякса закрыла кадр
 const DARK_TO = 46.9; // светлая клякса закрыла кадр
 
+/** Звук начисления: «вычисляющий» цифровой фон + тики по кривой счётчика + «готово» в конце */
+const countSfx = (at: number, dur: number, n: number, ease: (t: number) => number = countEase): Cue[] => {
+  const ticks = countTicks(at, dur, n, ease);
+  const names = ["tick", "tick2", "tick3"] as const;
+  return [
+    [at, "compute", 0.2, dur + 0.15],
+    ...ticks.map((t, i): Cue => [t, names[i % 3], 0.3 + 0.12 * (i / ticks.length)]),
+    [at + dur, "done", 0.32],
+  ];
+};
+
 const cues: Cue[] = [
   // 1. хук
   [0.15, "whoosh_fast"],
@@ -28,17 +40,21 @@ const cues: Cue[] = [
   [2.05, "notify"],
   [3.4, "soft_wipe"],
   // 2. цифра
+  ...countSfx(5.75, 0.9, 18),
   [6.65, "boom"],
-  [6.65, "tick", 0.12],
   ...[0, 1, 2, 3, 4, 5, 6].map((i): Cue => [7.9 + i * 0.1, "pop", 0.28]),
   [12.4, "swoosh"],
   // 3. напитки
   [13.15, "whoosh_line"],
   [16.7, "bass_hit"],
-  [17.5, "pop"],
-  [17.85, "pop"],
-  [18.2, "pop"],
+  [17.5, "whoosh_fast", 0.35],
+  [17.55, "pop", 0.4],
+  [17.85, "whoosh_fast", 0.3],
+  [17.9, "pop", 0.4],
+  [18.2, "whoosh_fast", 0.3],
+  [18.25, "pop", 0.4],
   [22.0, "rise"],
+  ...countSfx(22.15, 0.9, 16),
   [23.05, "boom"],
   // 4. сон
   [24.6, "whoosh_line"],
@@ -46,14 +62,15 @@ const cues: Cue[] = [
   [28.7, "whoosh_line"],
   [29.1, "pop", 0.35],
   [29.3, "pop", 0.35],
+  ...countSfx(31.9, 0.7, 14),
   [32.6, "boom"],
   [32.8, "object"],
   // 5. движение (тёмная сцена)
   [35.75, "deep_whoosh"],
   [36.0, "boom"],
   [36.75, "whoosh_line", 0.3],
-  ...Array.from({ length: 14 }, (_, i): Cue => [41.3 + i * 0.1, "tick"]),
-  [42.6, "pop"],
+  ...countSfx(41.1 + 0.2, 1.4, 22, ringEase),
+  [42.6, "pop", 0.3],
   [44.67, "boom"],
   [45.0, "object"],
   [46.65, "deep_whoosh", 0.6],
@@ -90,7 +107,7 @@ const Scene: React.FC = () => {
       {/* ── 1. ХУК ── */}
       <Phrase text="ты ешь меньше" at={0.15} end={1.2} gap={0.28} />
       <Phrase text="а вес *стоит*" at={1.25} times={[1.25, 1.45, 1.65]} end={2.75} size={92} />
-      <Arcs at={1.65} end={4.0} />
+      <Arcs at={1.65} end={4.2} />
       <Notification at={2.0} end={3.7} title="мама" body="опять на диете? 😅" avatar="👩" />
       <Phrase text="разбор за ~1 минуту~" times={[2.85, 3.1, 3.4]} at={2.85} end={4.1} />
 
@@ -105,12 +122,12 @@ const Scene: React.FC = () => {
 
       {/* ── 3. ПРИЧИНА №1: НАПИТКИ ── */}
       <Phrase text="причина №1 ~напитки~" at={12.55} times={[12.55, 12.8, 13.15]} end={14.2} />
-      <Arcs at={13.15} end={14.4} variant={1} />
+      <Arcs at={13.15} end={15.3} variant={1} />
       <Phrase text="мозг не считает|их едой" at={14.3} end={15.75} />
       <Phrase text="сытости *нет*|калории *есть*" at={15.85} times={[15.85, 16.1, 16.45, 16.7]} end={17.4} />
-      <Folder at={17.5} end={19.9} x={200} y={840} label="латте" caption="~250" captionAccent="ккал" />
-      <Folder at={17.85} end={19.9} x={540} y={840} label="сок" caption="~220" captionAccent="ккал" />
-      <Folder at={18.2} end={19.9} x={880} y={840} label="кола" caption="~210" captionAccent="ккал" />
+      <DrinkItem kind="latte" at={17.5} end={19.9} x={200} y={780} w={300} label="латте" kcal="~250 ккал" />
+      <DrinkItem kind="juice" at={17.85} end={19.9} x={540} y={780} w={300} label="сок 0,5 л" kcal="~220 ккал" />
+      <DrinkItem kind="cola" at={18.2} end={19.9} x={880} y={780} w={300} label="кола 0,5 л" kcal="~210 ккал" />
       <Phrase text="всего *+100 ккал* в день" at={20.0} end={21.5} />
       <Phrase text="× 365 дней" at={21.6} end={23.9} y={650} />
       <Counter at={22.15} countDur={0.9} end={23.9} to={4.7} decimals={1} prefix="≈ " unit="кг" y={900} color={C.wineText} />
@@ -118,7 +135,7 @@ const Scene: React.FC = () => {
 
       {/* ── 4. ПРИЧИНА №2: СОН ── */}
       <Phrase text="причина №2 ~сон~" at={24.05} times={[24.05, 24.3, 24.6]} end={25.6} />
-      <Arcs at={24.6} end={25.8} />
+      <Arcs at={24.6} end={26.7} />
       <Phrase text="меньше 6 часов сна" at={25.7} end={26.95} />
       <Phrase text="и гормоны голода|*ломаются*" at={27.05} end={28.4} />
       <Tree at={28.5} end={31.3} y={640} title="недосып" left={["грелин ↑", "больше голода"]} right={["лептин ↓", "меньше сытости"]} />

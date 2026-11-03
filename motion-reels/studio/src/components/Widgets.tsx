@@ -1,7 +1,7 @@
 import React from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
 import { evolvePath } from "@remotion/paths";
-import { blurIn, blurOut, fmt, pop, prog, s2f } from "../lib/anim";
+import { blurIn, blurOut, countEase, fmt, pop, prog, ringEase, s2f } from "../lib/anim";
 import { C, FONT, textStyle } from "../lib/theme";
 
 const visible = (frame: number, at: number, end: number) => frame >= s2f(at) - 1 && frame <= s2f(end) + 8;
@@ -104,7 +104,7 @@ export const Counter: React.FC<{
   color?: string;
 }> = ({ at, countDur, end, from = 0, to, decimals = 0, prefix = "", unit, y, size = 200, color = C.ink }) => {
   const frame = useCurrentFrame();
-  const p = prog(frame, s2f(at), s2f(countDur), Easing.bezier(0.25, 0.8, 0.3, 1));
+  const p = prog(frame, s2f(at), s2f(countDur), countEase);
   const v = from + (to - from) * p;
   return (
     <Shell at={at} end={end} style={{ left: 0, right: 0, top: y, translate: "0 -50%", textAlign: "center" }}>
@@ -372,7 +372,7 @@ export const ResearchCard: React.FC<{ at: number; end: number; y: number; title:
 /* ───────────────────────── Кольцо шагов ───────────────────────── */
 export const StepRing: React.FC<{ at: number; fillDur: number; end: number; y: number }> = ({ at, fillDur, end, y }) => {
   const frame = useCurrentFrame();
-  const p = prog(frame, s2f(at) + 6, s2f(fillDur), Easing.bezier(0.3, 0.6, 0.3, 1));
+  const p = prog(frame, s2f(at) + 6, s2f(fillDur), ringEase);
   const steps = 3000 + 7000 * p;
   const r = 230;
   const circ = 2 * Math.PI * r;
