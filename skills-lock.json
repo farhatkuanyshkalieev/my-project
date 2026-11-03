@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "directing-stickman-videos": {
+      "source": "kaomei/stickman-video-director",
+      "sourceType": "github",
+      "skillPath": "skills/directing-stickman-videos/SKILL.md",
+      "computedHash": "1a559220ba2622880e1eb24eb303ce5af0b8fd63327e7ed62e0182c55b525407"
+    }
+  }
+}
