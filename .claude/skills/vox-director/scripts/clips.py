@@ -11,7 +11,9 @@ import json
 import os
 import sys
 
-from provider import get_provider, run_jobs
+from atlas_cloud import AtlasAuthError
+from project_io import atomic_write_json, check_media, sig
+from provider import get_provider, PaidItem, run_paid_items, print_summary
 from styles import resolve_theme, resolve_video_aspect
 
 VIDEO_MODEL = "google/gemini-omni-flash/image-to-video"
@@ -100,9 +102,14 @@ def painterly_prompt(motion):
 
 
 def run(project_dir, only=None):
+    """Animate the shots that have no valid clip yet. Safe to re-run: a clip whose
+    file passes the integrity check and whose inputs (keyframe, prompt, model,
+    duration) are unchanged is reused, recorded jobs are resumed instead of
+    resubmitted, and beats.json is saved atomically after every single clip."""
     bpath = os.path.join(project_dir, "beats.json")
     with open(bpath) as f:
         doc = json.load(f)
+    save = lambda: atomic_write_json(bpath, doc)
     aspect = doc.get("aspect", "16:9")
     style = doc.get("style", "painterly")
     _theme = resolve_theme(doc.get("theme")) or {}
@@ -131,7 +138,7 @@ def run(project_dir, only=None):
         aspect = resolved_aspect   # every shot below shares this one resolved aspect
 
     prov = get_provider(doc.get("provider"))
-    specs, by_key = {}, {}
+    items, skipped = [], []
     for beat in doc["beats"]:
         for shot, key in shots_of(beat):
             if only and key not in only:
@@ -141,8 +148,9 @@ def run(project_dir, only=None):
             url = shot.get("keyframe_url")
             if not url and shot.get("keyframe_path") and os.path.exists(shot["keyframe_path"]):
                 # user-provided keyframe (e.g. hand-made collage card) -> upload it
-                url = prov.upload(shot["keyframe_path"])
+                url = prov.upload(shot["keyframe_path"])     # upload is free
                 shot["keyframe_url"] = url
+                save()
                 print(f"[{key}] uploaded provided keyframe -> {url}")
             if not url:
                 print(f"[{key}] no keyframe — provide keyframe_path or run keyframes.py")
@@ -167,29 +175,44 @@ def run(project_dir, only=None):
                 params = dict(image=url, duration=dur, sound=False)
             else:                                    # gemini omni flash
                 params = dict(image=url, duration=dur, aspect_ratio=aspect, resolution="720p")
-            specs[key] = (lambda m=model, p=prompt, pr=params: prov.submit_video(m, p, **pr))
-            by_key[key] = shot
+            signature = sig(model, prompt, params)
+            job = shot.get("clip_job")
+            ok, why = check_media(shot.get("clip_path"), "video")
+            if ok and (not job or job.get("sig") == signature):
+                skipped.append(key)                 # verified clip for these exact inputs
+                print(f"[{key}] reuse existing clip {shot['clip_path']}")
+                continue
+            if shot.get("clip_path") and not ok:
+                print(f"[{key}] existing clip unusable ({why}) -> needs a new clip")
+            elif ok:
+                print(f"[{key}] inputs changed since the existing clip -> new clip")
+            items.append(PaidItem(
+                key, shot, "clip_job", signature,
+                submit=(lambda m=model, p=prompt, pr=params: prov.submit_video(m, p, **pr)),
+                dest=os.path.join(clip_dir, f"clip_{key}.mp4"),
+                apply=(lambda url, dest, sh=shot: sh.update(clip_url=url, clip_path=dest))))
             print(f"[{key}] queued ({dur}s, {model.split('/')[1]})")
 
-    done = run_jobs(prov, specs, poll_s=5, stall_s=240, max_retries=2, deadline_s=1200)
-
-    for key, url in done.items():
-        if not url:
-            continue
-        dest = os.path.join(clip_dir, f"clip_{key}.mp4")
-        prov.download(url, dest)
-        shot = by_key[key]
-        shot["clip_url"] = url
-        shot["clip_path"] = dest
-        print(f"[{key}] saved {dest}")
-
-    with open(bpath, "w") as f:
-        json.dump(doc, f, ensure_ascii=False, indent=2)
+    save()
+    try:
+        summary = run_paid_items(prov, items, save, poll_s=5, stall_s=240, deadline_s=1200)
+    except AtlasAuthError as e:
+        save()
+        print(f"STOPPED: {e}\nProgress so far is saved in {bpath}.")
+        raise
+    save()
+    print_summary("clips", summary, skipped)
     print("updated", bpath)
+    return summary
 
 
 if __name__ == "__main__":
     proj = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
         os.path.dirname(__file__), "..", "out", "tang-30s")
     only = set(sys.argv[2].split(",")) if len(sys.argv) > 2 else None
-    run(os.path.abspath(proj), only=only)
+    try:
+        res = run(os.path.abspath(proj), only=only)
+    except AtlasAuthError:
+        sys.exit(1)                       # message printed, progress saved
+    if res and (res["failed"] or res["pending"] or res["blocked"]):
+        sys.exit(3)                       # partial: re-run to continue

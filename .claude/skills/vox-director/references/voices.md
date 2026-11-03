@@ -8,6 +8,13 @@ to the topic** — don't just leave the default.
   `language` field.
 - Skill default: **`leo`** (male, multilingual, documentary-ish). Override per film.
 
+> **Language support (checked 2026-11-03, Atlas Cloud model page for `xai/tts-v1`):** the
+> `language` parameter accepts `auto` + `en zh ar-EG ar-SA ar-AE bn fr de hi id it ja ko pt-BR
+> pt-PT ru es-MX es-ES tr vi`. **Kazakh (`kk`) is not listed**, and the "multilingual voices speak
+> ANY language" claim below is the vendor's, not verified here. `audio.py` refuses undocumented
+> languages until `voice.language_unverified_ok: true` is set after a 1-beat listening test.
+> Russian (`ru`) is documented and has native voices.
+
 ## Multilingual (any language)
 | id | name | gender |
 |---|---|---|

@@ -15,6 +15,7 @@ import subprocess
 import sys
 
 import text_overlay
+from project_io import check_media
 
 FPS, TAIL = 24, 0.5
 WATERMARK = "Made with Atlas Cloud · vox-director"
@@ -42,9 +43,66 @@ def shots_of(beat):
         yield beat
 
 
+class MissingInputs(RuntimeError):
+    """Raised (after a readable report is printed) when inputs are missing/broken."""
+
+
+_FIX = {"clip": "run clips.py", "narration": "run audio.py", "bgm": "run audio.py"}
+
+
+def _job_note(job):
+    if not job:
+        return ""
+    st = job.get("status")
+    if st in ("rejected", "submit_unknown"):
+        return (f" [job {st}: {str(job.get('error', ''))[:90]} -> change the inputs or delete "
+                f"the job record to retry]")
+    if st in ("submitted", "timeout", "poll_error"):
+        return " [job still running -> re-run the stage to collect it]"
+    if st == "download_failed":
+        return " [generated but download failed -> re-run the stage (free re-download)]"
+    if st == "failed":
+        return f" [job failed: {str(job.get('error', ''))[:90]}]"
+    return ""
+
+
+def preflight(doc):
+    """List every missing/unusable input of the final assembly (no exceptions)."""
+    problems = []
+    beats = doc.get("beats") or []
+    if not beats:
+        return ["beats.json has no beats"]
+    for bi, beat in enumerate(beats, 1):
+        bid = beat.get("id", bi)
+        if not str(beat.get("narration", "")).strip():
+            problems.append(f"beat {bid}: no narration text (needed for the caption)")
+        ok, why = check_media(beat.get("narration_audio"), "audio")
+        if not ok:
+            problems.append(f"beat {bid}: narration audio - {why} -> {_FIX['narration']}"
+                            + _job_note(beat.get("narration_job")))
+        for shot in shots_of(beat):
+            key = f"{bid}{shot.get('id', '') if shot is not beat else ''}"
+            ok, why = check_media(shot.get("clip_path"), "video")
+            if not ok:
+                problems.append(f"beat {bid}, shot {key}: video clip - {why} -> {_FIX['clip']}"
+                                + _job_note(shot.get("clip_job")))
+    ok, why = check_media(doc.get("bgm_path"), "audio")
+    if not ok:
+        problems.append(f"background music - {why} -> {_FIX['bgm']}" + _job_note(doc.get("bgm_job")))
+    return problems
+
+
 def run(project_dir):
     with open(os.path.join(project_dir, "beats.json")) as f:
         doc = json.load(f)
+    problems = preflight(doc)
+    if problems:
+        print(f"CANNOT ASSEMBLE YET - {len(problems)} missing or unusable input(s):")
+        for p in problems:
+            print(f"  - {p}")
+        print("Nothing was rendered and beats.json was not changed. Fix the items above "
+              "(re-running a stage reuses everything already made), then run assemble.py again.")
+        raise MissingInputs(f"{len(problems)} missing/unusable input(s)")
     beats = doc["beats"]
     W, H = RES.get(doc.get("aspect", "16:9"), (1920, 1080))
     wm_text = doc.get("watermark", WATERMARK)
@@ -166,4 +224,7 @@ def run(project_dir):
 if __name__ == "__main__":
     proj = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
         os.path.dirname(__file__), "..", "out", "tang-30s")
-    run(os.path.abspath(proj))
+    try:
+        run(os.path.abspath(proj))
+    except MissingInputs:
+        sys.exit(2)

@@ -11,7 +11,18 @@ Hard-won gotchas baked in:
   2. Generated assets live on OSS behind the user's local proxy; python's
      urlretrieve dies with "Remote end closed connection". Download via curl.
   3. POST generation calls are NOT retried (they create billable tasks).
-     GET polls are safe to retry.
+     GET polls are safe to retry. A failed POST raises a typed error so callers
+     know whether resending is safe:
+       AtlasAuthError       401/403            -> fix auth; nothing was created
+       AtlasRejected        other 4xx          -> the API refused the request (bad
+                                                 params / moderation); do not resend
+       AtlasTransient       429/503, DNS/refused connect -> request not accepted;
+                                                 one resend is safe
+       AtlasUnknownOutcome  timeout / reset / 5xx after sending -> a billable task
+                                                 MAY exist; never resend automatically
+  4. download() checks the HTTP status, size and file signature, writes to a
+     temp file and only then renames it into place -- an error page is never
+     saved as .jpg/.mp4/.mp3.
 
 Auth (either one works):
   * ATLASCLOUD_API_KEY in the environment -> sent as "Authorization: Bearer <key>".
@@ -35,6 +46,22 @@ UA = "vox-director/0.1 (+https://atlascloud.ai)"
 
 class AtlasCloudError(RuntimeError):
     pass
+
+
+class AtlasRejected(AtlasCloudError):
+    """The API answered and refused the request (4xx). Not retriable as-is."""
+
+
+class AtlasAuthError(AtlasRejected):
+    """401/403: not authenticated. Nothing was created."""
+
+
+class AtlasTransient(AtlasCloudError):
+    """The request was not accepted (429/503 or the connection never opened). Safe to resend once."""
+
+
+class AtlasUnknownOutcome(AtlasCloudError):
+    """Sent, but no usable answer (timeout/reset/5xx). A billable task may exist: never resend."""
 
 
 AUTH_HINT = ("Atlas Cloud rejected the request as unauthenticated (401). Either export "
@@ -64,16 +91,37 @@ def _headers(json_body: bool = True) -> dict:
     return h
 
 
+def _not_connected(reason) -> bool:
+    """True if the connection was never established (so the request was never sent)."""
+    import socket
+    return isinstance(reason, (socket.gaierror, ConnectionRefusedError))
+
+
 def _post(path: str, payload: dict, base: str = MEDIA_BASE, timeout: int = 60) -> dict:
     req = urllib.request.Request(base + path, data=json.dumps(payload).encode(),
                                  headers=_headers(), method="POST")
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            return json.load(r)
+            body = r.read()
     except urllib.error.HTTPError as e:
-        hint = f" {AUTH_HINT}" if e.code == 401 else ""
-        raise AtlasCloudError(
-            f"POST {path} -> {e.code}: {e.read().decode(errors='replace')[:400]}{hint}") from e
+        msg = f"POST {path} -> {e.code}: {e.read().decode(errors='replace')[:400]}"
+        if e.code in (401, 403):
+            raise AtlasAuthError(f"{msg} {AUTH_HINT}") from e
+        if e.code in (429, 503):
+            raise AtlasTransient(msg) from e
+        if 400 <= e.code < 500:
+            raise AtlasRejected(msg) from e
+        raise AtlasUnknownOutcome(msg) from e               # 5xx: may or may not exist
+    except urllib.error.URLError as e:
+        if _not_connected(e.reason):
+            raise AtlasTransient(f"POST {path}: could not connect ({e.reason})") from e
+        raise AtlasUnknownOutcome(f"POST {path}: no answer ({e.reason})") from e
+    except (TimeoutError, ConnectionError, OSError) as e:
+        raise AtlasUnknownOutcome(f"POST {path}: no answer ({e})") from e
+    try:
+        return json.loads(body)
+    except ValueError as e:
+        raise AtlasUnknownOutcome(f"POST {path}: unreadable answer {body[:200]!r}") from e
 
 
 def _get(path: str, base: str = MEDIA_BASE, timeout: int = 60, retries: int = 3) -> dict:
@@ -91,9 +139,8 @@ def _get(path: str, base: str = MEDIA_BASE, timeout: int = 60, retries: int = 3)
             # "HTTP Error 400: Bad Request" and throws the diagnosis away. Parse it and
             # hand it back like any other response so callers see the real status.
             body = e.read().decode(errors="replace")
-            if e.code == 401:
-                last = AtlasCloudError(f"GET {path} -> 401: {body[:200]} {AUTH_HINT}")
-                break
+            if e.code in (401, 403):
+                raise AtlasAuthError(f"GET {path} -> {e.code}: {body[:200]} {AUTH_HINT}") from e
             try:
                 return json.loads(body)
             except ValueError:
@@ -107,10 +154,25 @@ def _get(path: str, base: str = MEDIA_BASE, timeout: int = 60, retries: int = 3)
 
 # ---------------------------------------------------------------- generation
 
+def _task_id(resp: dict, path: str) -> str:
+    """Prediction id from a submit answer. A 200 answer without an id is either an
+    in-band refusal (JSON code 4xx -> AtlasRejected) or unreadable (-> unknown outcome)."""
+    data = resp.get("data") if isinstance(resp, dict) else None
+    if isinstance(data, dict) and data.get("id"):
+        return data["id"]
+    code = resp.get("code") if isinstance(resp, dict) else None
+    msg = f"POST {path}: no task id in answer {json.dumps(resp, ensure_ascii=False)[:300]}"
+    if isinstance(code, int) and (400 <= code < 500 or 40000 <= code < 50000):
+        if code in (401, 403):
+            raise AtlasAuthError(f"{msg} {AUTH_HINT}")
+        raise AtlasRejected(msg)
+    raise AtlasUnknownOutcome(msg)
+
+
 def submit_image(model: str, prompt: str, **params) -> str:
     """Submit an image generation task; return prediction id."""
     body = {"model": model, "prompt": prompt, **params}
-    return _post("/model/generateImage", body)["data"]["id"]
+    return _task_id(_post("/model/generateImage", body), "/model/generateImage")
 
 
 def submit_video(model: str, prompt: str, **params) -> str:
@@ -121,14 +183,14 @@ def submit_video(model: str, prompt: str, **params) -> str:
     reference_images=[...] and reference_audios=[...] (see references/host-mode.md).
     """
     body = {"model": model, "prompt": prompt, **params}
-    return _post("/model/generateVideo", body)["data"]["id"]
+    return _task_id(_post("/model/generateVideo", body), "/model/generateVideo")
 
 
 def submit_media(model: str, **params) -> str:
     """Submit any media task that runs through the generateVideo endpoint
     (audio/TTS, music, etc.); return prediction id."""
     body = {"model": model, **params}
-    return _post("/model/generateVideo", body)["data"]["id"]
+    return _task_id(_post("/model/generateVideo", body), "/model/generateVideo")
 
 
 def transcribe(audio_url: str, interval: int = 3, timeout_s: int = 300, **params) -> dict:
@@ -220,12 +282,42 @@ def upload(file_path: str) -> str:
     return url
 
 
-def download(url: str, dest: str) -> str:
-    """Proxy-safe download via curl (urllib breaks on the OSS host)."""
-    subprocess.run(["/usr/bin/curl", "-s", "--retry", "3", "-o", dest, url], check=True)
-    if not os.path.exists(dest) or os.path.getsize(dest) == 0:
-        raise AtlasCloudError(f"download produced empty file: {url}")
-    return dest
+def download(url: str, dest: str, kind: str = None) -> str:
+    """Download `url` to `dest` safely (curl: proxy-safe, urllib breaks on the OSS host).
+
+    The body goes to a temp file next to `dest`; it is moved into place only if the
+    HTTP status is 2xx and the content really is the expected media (kind from the
+    extension unless given). Otherwise the temp file is deleted, any earlier good
+    `dest` is left untouched, and AtlasCloudError explains what came back.
+    """
+    from project_io import check_media, media_kind
+    kind = kind or media_kind(dest)
+    os.makedirs(os.path.dirname(os.path.abspath(dest)) or ".", exist_ok=True)
+    tmp = f"{dest}.part"
+    try:
+        r = subprocess.run(["/usr/bin/curl", "-sS", "-L", "--retry", "3", "--retry-delay", "2",
+                            "-o", tmp, "-w", "%{http_code}", url],
+                           capture_output=True, text=True)
+        code = r.stdout.strip()[-3:]
+        if r.returncode != 0:
+            raise AtlasCloudError(f"download failed (curl exit {r.returncode}: "
+                                  f"{r.stderr.strip()[:200]}): {url}")
+        if not code.startswith("2"):
+            body = ""
+            if os.path.exists(tmp):
+                with open(tmp, "rb") as f:
+                    body = f.read(300).decode("utf-8", "replace").replace("\n", " ")
+            raise AtlasCloudError(f"download failed: HTTP {code} for {url} "
+                                  f"(expired or missing output?) {body[:160]!r}")
+        ok, why = check_media(tmp, kind)
+        if not ok:
+            raise AtlasCloudError(f"download rejected, not a valid {kind or 'file'}: "
+                                  f"{why.replace(tmp, dest)} (from {url})")
+        os.replace(tmp, dest)
+        return dest
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
 
 
 # ---------------------------------------------------------------- llm

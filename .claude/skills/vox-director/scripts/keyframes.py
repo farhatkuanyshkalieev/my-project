@@ -13,8 +13,11 @@ import json
 import os
 import sys
 
-from provider import get_provider, run_jobs
-from styles import compose_keyframe_prompt, compose_collage_prompt, resolve_theme, image_params
+from atlas_cloud import AtlasAuthError
+from project_io import atomic_write_json, check_media, sig
+from provider import get_provider, PaidItem, run_paid_items, print_summary
+from styles import (compose_keyframe_prompt, compose_collage_prompt, resolve_theme, image_params,
+                    STYLE_BASES)
 
 IMAGE_MODEL = "google/nano-banana-2/text-to-image"
 
@@ -29,9 +32,14 @@ def shots_of(beat):
 
 
 def run(project_dir):
+    """Generate the missing keyframes. Safe to re-run: shots that already have a
+    keyframe (keyframe_url, or a valid user-provided keyframe_path) are skipped,
+    jobs recorded in beats.json are resumed instead of resubmitted, and beats.json
+    is saved atomically after every single keyframe."""
     bpath = os.path.join(project_dir, "beats.json")
     with open(bpath) as f:
         doc = json.load(f)
+    save = lambda: atomic_write_json(bpath, doc)
     aspect = doc.get("aspect", "16:9")
     img_model = doc.get("image_model", IMAGE_MODEL)   # default nano-banana-2; e.g. openai/gpt-image-2/text-to-image
     img_res = doc.get("image_resolution", "1k")       # 1k (default) | 2k | 4k
@@ -43,50 +51,67 @@ def run(project_dir):
     t_type = theme.get("type_style") or doc.get("type_style")
     t_finish = theme.get("finish") or doc.get("finish")
     era = doc.get("era")            # only needed for the painterly (per-dynasty) style
+    if style != "collage" and era not in STYLE_BASES:
+        print(f"beats.json: style is \"{style}\" (painterly) but era \"{era}\" is not one of "
+              f"{sorted(STYLE_BASES)}. For a paper-collage film set \"style\": \"collage\". "
+              f"Nothing was generated.")
+        return
     kf_dir = os.path.join(project_dir, "keyframes")
     os.makedirs(kf_dir, exist_ok=True)
 
     prov = get_provider(doc.get("provider"))
-    specs, by_key = {}, {}
+    items, skipped = [], []
+    params = image_params(img_model, aspect, img_res)
     for beat in doc["beats"]:
         for shot, key in shots_of(beat):
             if shot.get("kind") == "host":      # presenter shots use host_plates.py
                 continue
             if shot.get("keyframe_url"):        # already generated (e.g. reused wide) -> skip
+                ok, why = check_media(shot.get("keyframe_path"), "image")
+                if shot.get("keyframe_path") and not ok:
+                    print(f"[{key}] note: keyframe_url set but local file unusable ({why}); "
+                          f"clips use the URL")
+                skipped.append(key)
+                continue
+            if shot.get("keyframe_path") and check_media(shot["keyframe_path"], "image")[0]:
+                skipped.append(key)             # user-provided card: clips.py uploads it
+                print(f"[{key}] using provided keyframe {shot['keyframe_path']}")
                 continue
             scene = shot["scene"]
+            title_cn, title_en = beat.get("title_cn", ""), beat.get("title_en", "")
             if style == "collage":
-                prompt = compose_collage_prompt(scene, beat["title_cn"], beat["title_en"],
+                prompt = compose_collage_prompt(scene, title_cn, title_en,
                                                 beat.get("bg", "warm ochre"), aspect,
                                                 with_title=shot.get("title", True),
                                                 style=collage_style, palette=t_palette,
                                                 type_style=t_type, finish=t_finish)
             else:
-                prompt = compose_keyframe_prompt(era, scene, beat["title_cn"],
-                                                 beat["title_en"], aspect)
+                prompt = compose_keyframe_prompt(era, scene, title_cn, title_en, aspect)
             shot["keyframe_prompt"] = prompt
-            specs[key] = (lambda p=prompt: prov.submit_image(img_model, p,
-                                                             **image_params(img_model, aspect, img_res)))
-            by_key[key] = shot
-
-    done = run_jobs(prov, specs, poll_s=3, stall_s=75, max_retries=2, deadline_s=300)
-
-    for key, url in done.items():
-        if not url:
-            continue
-        dest = os.path.join(kf_dir, f"kf_{key}.jpg")
-        prov.download(url, dest)
-        shot = by_key[key]
-        shot["keyframe_url"] = url
-        shot["keyframe_path"] = dest
-        print(f"[{key}] saved {dest}")
-
-    with open(bpath, "w") as f:
-        json.dump(doc, f, ensure_ascii=False, indent=2)
+            items.append(PaidItem(
+                key, shot, "keyframe_job", sig(img_model, prompt, params),
+                submit=(lambda p=prompt: prov.submit_image(img_model, p, **params)),
+                dest=os.path.join(kf_dir, f"kf_{key}.jpg"),
+                apply=(lambda url, dest, sh=shot: sh.update(keyframe_url=url, keyframe_path=dest))))
+    save()
+    try:
+        summary = run_paid_items(prov, items, save, poll_s=3, stall_s=75, deadline_s=300)
+    except AtlasAuthError as e:
+        save()
+        print(f"STOPPED: {e}\nProgress so far is saved in {bpath}.")
+        raise
+    save()
+    print_summary("keyframes", summary, skipped)
     print("updated", bpath)
+    return summary
 
 
 if __name__ == "__main__":
     proj = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
         os.path.dirname(__file__), "..", "out", "tang-30s")
-    run(os.path.abspath(proj))
+    try:
+        res = run(os.path.abspath(proj))
+    except AtlasAuthError:
+        sys.exit(1)                       # message printed, progress saved
+    if res and (res["failed"] or res["pending"] or res["blocked"]):
+        sys.exit(3)                       # partial: re-run to continue

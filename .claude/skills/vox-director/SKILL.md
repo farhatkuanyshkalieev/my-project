@@ -130,10 +130,37 @@ This is the default, most-automated path. Every stage is one script, all driven 
    sample — narration switches to seed-audio voice cloning with a pinned-speaker,
    studio-clean template that keeps timing beat-stable (see gotchas: never hand seed-audio
    bare narration without that pin).
+   **Language gate:** `audio.py` only narrates in a language the model documents (xai/tts-v1:
+   `auto en zh ar-EG ar-SA ar-AE bn fr de hi id it ja ko pt-BR pt-PT ru es-MX es-ES tr vi`).
+   **Kazakh (`kk`) is not documented** — the stage stops before spending anything. Either use a
+   documented language (e.g. `ru`), or, after a 1-beat test the user has listened to, set
+   `"voice": {"language_unverified_ok": true}`. Never claim a language works untested.
+   **Always set `"music"`** to fit the film's culture and mood; without it a neutral documentary
+   underscore is used (there is no culture-specific default).
 
 6. **Assemble.** `python3 scripts/assemble.py out/<project>`
    ffmpeg: normalize + concat all shots, lay the single narration ducked under the music,
    burn captions timed per beat, add the watermark. Output `out/<project>/final.mp4`.
+   It first checks every input; if anything is missing or broken it prints the list (beat /
+   shot / file / what to re-run), renders nothing and exits with code 2.
+
+### Re-running stages safely (never pay twice)
+
+Every paid item (keyframe, clip, narration, BGM) gets a job record in beats.json
+(`keyframe_job` / `clip_job` / `narration_job` / `bgm_job`: id, status, input signature)
+**the moment it is submitted**, and beats.json is rewritten atomically after **each** item.
+So after a crash, timeout or API error just **re-run the same stage**:
+- finished files that pass the integrity check (real image/video/audio, not an error page)
+  and whose inputs are unchanged are **reused**, not regenerated;
+- jobs still running are **resumed by id**, never resubmitted; a finished job whose download
+  failed is **re-downloaded for free**;
+- an item the API **rejected** (moderation/invalid) or whose **submit outcome is unknown**
+  (timeout after sending) is **never resubmitted automatically** — change its inputs, or
+  delete its `*_job` record to retry on purpose;
+- at most one automatic resubmit, and only for a clearly temporary failure.
+A stage exits with code 3 when something is still failed/pending/blocked (see its summary).
+Changing an input (scene, narration text, voice, duration, keyframe) changes the signature, so
+only that item is regenerated.
 
 7. **Verify.** You can't read an mp4 directly — extract frames to jpg and look:
    `ffmpeg -ss <t> -i final.mp4 -vf "scale=640:-1,format=yuvj420p" -frames:v 1 f.jpg`
