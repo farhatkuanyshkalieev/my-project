@@ -147,17 +147,18 @@ def run_jobs(prov, specs, *, poll_s=3, stall_s=90, max_retries=1, deadline_s=900
     existing: key -> job id already submitted earlier (e.g. recorded in beats.json):
               its status is checked first and it is polled, never resubmitted.
     on_event: callback(key, event, info), called the moment something happens so the
-              caller can persist it: "submitted"(job id), "completed"(output url),
-              "rejected"/"failed"(error), "submit_unknown"(error), "timeout"(job id).
+              caller can persist it: "submitting"(None, BEFORE the paid POST), "submitted"
+              (job id), "completed"(output url), "rejected"/"failed"/"not_accepted"/"lost"
+              (error), "submit_unknown"(error), "timeout"(job id).
 
     Rules: a job that is still running is never resubmitted (`stall_s` only prints a
     notice); a job rejected by the API/moderation is never resubmitted; a submit whose
     outcome is unknown (timeout/reset/5xx) is never resent; at most ONE resubmit
     (max_retries is capped at 1) and only for a clearly temporary failure.
-    401/403 raises AtlasAuthError immediately (state already reported via on_event).
+    401/403/402 raise immediately (STOP_ERRORS; the item is reported "not_accepted").
     Returns key -> output URL (or None), as before.
     """
-    from atlas_cloud import AtlasAuthError, AtlasRejected, AtlasTransient
+    from atlas_cloud import STOP_ERRORS, AtlasRejected, AtlasTransient
     max_retries = min(int(max_retries), 1)
     existing = dict(existing or {})
     emit = on_event or (lambda k, e, i: None)
@@ -166,9 +167,11 @@ def run_jobs(prov, specs, *, poll_s=3, stall_s=90, max_retries=1, deadline_s=900
     def submit(key):
         """Submit once (+1 resend only if the request was provably not accepted)."""
         for attempt in (0, 1):
+            emit(key, "submitting", None)            # persisted BEFORE money can be spent
             try:
                 pid = specs[key]()
-            except AtlasAuthError:
+            except STOP_ERRORS as e:
+                emit(key, "not_accepted", str(e))
                 raise
             except AtlasTransient as e:
                 if attempt == 0 and max_retries:
@@ -176,7 +179,7 @@ def run_jobs(prov, specs, *, poll_s=3, stall_s=90, max_retries=1, deadline_s=900
                     time.sleep(3)
                     continue
                 done[key] = None
-                emit(key, "failed", f"not accepted: {e}")
+                emit(key, "not_accepted", f"not accepted: {e}")
                 print(f"[{key}] FAILED to submit: {e}")
                 return
             except AtlasRejected as e:
@@ -219,9 +222,12 @@ def run_jobs(prov, specs, *, poll_s=3, stall_s=90, max_retries=1, deadline_s=900
                 done[key] = r["output"]
                 emit(key, "completed", r["output"])
                 print(f"[{key}] done")
-            elif status in ("failed", "lost"):
-                cls = "transient" if status == "failed" and classify_failure(r.get("error")) == "transient" \
-                    else ("rejected" if classify_failure(r.get("error")) == "rejected" else "failed")
+            elif status == "lost":                   # id unknown to the server: cannot verify
+                done[key] = None
+                emit(key, "lost", r.get("error") or "prediction not found")
+                print(f"[{key}] LOST: server does not know job {s['pid']} (not resubmitted)")
+            elif status == "failed":
+                cls = classify_failure(r.get("error"))
                 if cls == "transient" and s["tries"] < max_retries and key in specs:
                     s["tries"] += 1
                     print(f"[{key}] temporary failure ({(r.get('error') or '')[:100]}) -> one resubmit")
@@ -230,6 +236,7 @@ def run_jobs(prov, specs, *, poll_s=3, stall_s=90, max_retries=1, deadline_s=900
                     if key in st:
                         st[key]["tries"] = s["tries"]          # the one retry is now used
                     continue
+                cls = "rejected" if cls == "rejected" else "failed"   # failed tasks are not billed
                 done[key] = None
                 emit(key, cls, r.get("error") or status)
                 print(f"[{key}] {cls.upper()} (not retried): {(r.get('error') or status)[:160]}")
@@ -260,48 +267,92 @@ class PaidItem:
         self.submit, self.dest, self.apply = submit, dest, apply
 
 
-def run_paid_items(prov, items, save, *, poll_s=3, stall_s=90, deadline_s=900):
+def run_paid_items(prov, items, save, *, poll_s=3, stall_s=90, deadline_s=900, force=()):
     """Run a stage's paid items so that a crash or API failure never loses or
     re-buys a result. Every event is written to the item's job record and `save()`
     (atomic beats.json write) is called immediately -- i.e. after each single item.
 
-    Returns {"done": [...], "failed": [...], "blocked": [...], "pending": [...]} (keys).
-    401/403 re-raises AtlasAuthError after saving."""
+    `force`: keys to submit anew even if a record exists (explicit --redo).
+    Returns {"done": [...], "failed": [...], "blocked": [...], "pending": [...],
+    "urls": {key: output url}, "status": {key: final status}}.
+    401/403/402 (STOP_ERRORS) re-raise after saving."""
     from datetime import datetime, timezone
     from project_io import plan, blocked_hint
     now = lambda: datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     by_key = {it.key: it for it in items}
     specs, existing, downloads = {}, {}, []
-    summary = {"done": [], "failed": [], "blocked": [], "pending": []}
+    summary = {"done": [], "failed": [], "blocked": [], "pending": [], "urls": {}, "status": {}}
+    force = set(force or ())
 
-    def record(it, **kw):
-        job = dict(it.rec.get(it.field) or {})
-        if job.get("sig") != it.sig:
+    def record(it, fresh=False, **kw):
+        old = dict(it.rec.get(it.field) or {})
+        job = old
+        if fresh or old.get("sig") != it.sig:
             job = {"sig": it.sig}
+            if old.get("id") or old.get("status") in ("submit_unknown", "submitting", "lost"):
+                job["superseded"] = {k: old.get(k) for k in ("id", "status", "sig", "at", "error")
+                                     if old.get(k) is not None}  # evidence of a possibly-paid task
         job.update(kw, at=now())
         it.rec[it.field] = job
+        summary["status"][it.key] = job.get("status")
         save()
 
     def collect(it, url):
-        """Download + verify + apply; on failure keep the output url for a free retry."""
-        try:
-            prov.download(url, it.dest)
-        except Exception as e:
-            record(it, status="download_failed", output=url, error=str(e)[:300])
+        """Download + verify + apply; on failure keep the output url for a free retry.
+        If the stored url is dead, ask the job (free GET) once for a fresh one."""
+        if it.dest is None:                         # caller downloads (helper modes)
+            it.apply(url, None)
+            record(it, status="done", output=url, error=None)
+            summary["done"].append(it.key); summary["urls"][it.key] = url
+            return
+        err = None
+        for attempt in (0, 1):
+            try:
+                prov.download(url, it.dest)
+                err = None
+                break
+            except Exception as e:
+                err = e
+                job_id = (it.rec.get(it.field) or {}).get("id")
+                if attempt or not job_id:
+                    break
+                try:
+                    r = prov.get_status(job_id)
+                except Exception:
+                    break
+                if r.get("status") != "completed" or not r.get("output") or r["output"] == url:
+                    break
+                print(f"[{it.key}] stored output url failed; job {job_id} gave a fresh url")
+                url = r["output"]
+        if err is not None:
+            dead = any(f"HTTP {c}" in str(err) for c in ("403", "404", "410"))
+            st = "output_expired" if dead else "download_failed"
+            record(it, status=st, output=url, error=str(err)[:300])
             summary["failed"].append(it.key)
-            print(f"[{it.key}] DOWNLOAD FAILED (output kept, re-run retries the download "
-                  f"for free): {e}")
+            print(f"[{it.key}] DOWNLOAD FAILED: {err}\n    " + (
+                f"the PAID output is not downloadable now (expired or not yet available). "
+                f"Re-runs retry the free download only; it is never regenerated "
+                f"automatically. To pay for a new one, delete \"{it.field}\" from the record."
+                if dead else "output url kept; re-run retries the download for free"))
             return
         it.apply(url, it.dest)
         record(it, status="done", output=url, error=None)
-        summary["done"].append(it.key)
+        summary["done"].append(it.key); summary["urls"][it.key] = url
         print(f"[{it.key}] saved {it.dest}")
 
     for it in items:
-        action, info = plan(it.rec.get(it.field), it.sig)
+        job = it.rec.get(it.field)
+        action, info = plan(job, it.sig)
+        if it.key in force:
+            if action in ("resume", "blocked"):
+                print(f"[{it.key}] WARNING: forced redo although the previous job is "
+                      f"'{(job or {}).get('status')}' - it may still be billed")
+            action = "submit"
+            record(it, fresh=True, status="forced")
         if action == "blocked":
             summary["blocked"].append(it.key)
-            print(f"[{it.key}] SKIPPED, not resubmitted ({info}); {blocked_hint(it.field)}")
+            summary["status"][it.key] = (job or {}).get("status")
+            print(f"[{it.key}] SKIPPED, not resubmitted ({info}); {blocked_hint(it.field, job)}")
         elif action == "download":
             downloads.append((it, info))
         elif action == "resume":
@@ -316,7 +367,9 @@ def run_paid_items(prov, items, save, *, poll_s=3, stall_s=90, deadline_s=900):
 
     def on_event(key, event, info):
         it = by_key[key]
-        if event == "submitted":
+        if event == "submitting":
+            record(it, status="submitting", id=None, output=None, error=None)
+        elif event == "submitted":
             record(it, id=info, status="submitted", error=None)
         elif event == "completed":
             collect(it, info)
@@ -325,13 +378,33 @@ def run_paid_items(prov, items, save, *, poll_s=3, stall_s=90, deadline_s=900):
             summary["pending"].append(key)
         else:                                       # rejected | failed | submit_unknown
             record(it, status=event, error=str(info)[:300])
-            (summary["blocked"] if event in ("rejected", "submit_unknown")
+            (summary["blocked"] if event in ("rejected", "submit_unknown", "lost")
              else summary["failed"]).append(key)
 
     if specs:
-        run_jobs(prov, specs, poll_s=poll_s, stall_s=stall_s, max_retries=1,
-                 deadline_s=deadline_s, existing=existing, on_event=on_event)
+        try:
+            run_jobs(prov, specs, poll_s=poll_s, stall_s=stall_s, max_retries=1,
+                     deadline_s=deadline_s, existing=existing, on_event=on_event)
+        finally:
+            save()
     return summary
+
+
+def run_jobs_ledger(prov, specs, sigs, ledger, *, force=(), status_out=None,
+                    poll_s=3, stall_s=90, deadline_s=900, **_ignored):
+    """Drop-in for run_jobs() in helper modes: same `specs` and the same return value
+    (key -> output url | None), but every job is recorded in a project_io.Ledger (the
+    "submitting" marker before the POST, then the id) so a crash, a deadline or an
+    unknown submit outcome never leads to a second paid task on the next run, and a
+    finished job's output is returned again without resubmitting. `sigs` (key ->
+    signature of the stable inputs) decides when a record is stale."""
+    items = [PaidItem(k, ledger.rec(k), "job", sigs[k], specs[k], None, lambda u, d: None)
+             for k in specs]
+    summary = run_paid_items(prov, items, ledger.save, poll_s=poll_s, stall_s=stall_s,
+                             deadline_s=deadline_s, force=force)
+    if status_out is not None:
+        status_out.update({k: (ledger.rec(k).get("job") or {}).get("status") for k in specs})
+    return {k: summary["urls"].get(k) for k in specs}
 
 
 def print_summary(stage, summary, skipped):

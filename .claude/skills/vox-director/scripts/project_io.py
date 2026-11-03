@@ -127,28 +127,81 @@ def sig(*parts):
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
 
+def file_sig(path):
+    """Content hash of a local input file (for signatures that must not depend on a
+    per-run upload URL)."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()[:16]
+
+
+# Job-record statuses:
+#   submitting      written BEFORE the paid POST; still there => the process stopped while
+#                   sending: a paid task may exist, its id is unknown  -> blocked
+#   submitted/timeout/poll_error  id known, not finished                -> resume (poll id)
+#   completed/done/download_failed  output url known                    -> download (free)
+#   output_expired  paid output got HTTP 403/404/410 when downloading     -> download again
+#                   (free; never auto-regenerated - delete the record to pay for a new one)
+#   rejected        API/moderation refused this exact request           -> blocked
+#   submit_unknown  sent, no usable answer (timeout/5xx)                -> blocked
+#   lost            server does not know the recorded id                -> blocked
+#   not_accepted    provably not created (429/503 twice, 401/402)       -> submit
+#   failed          the task ran and failed (Atlas releases the hold)   -> submit
+BLOCKED = ("rejected", "submit_unknown", "submitting", "lost")
+
+
 def plan(job, signature):
     """Decide what to do with an item that has no valid output yet, from its job record.
 
     Returns (action, info):
       "submit"   - nothing usable recorded: a new (paid) job may be submitted
       "resume"   - job id still pending/unknown: poll it, do NOT submit a new one
-      "download" - job completed but its output was never saved: re-download only
-      "blocked"  - API rejected this exact request, or the submit outcome is unknown:
-                   never auto-resubmit (change the inputs or delete the job record)
-    Any record for a DIFFERENT signature is stale (inputs changed) -> "submit".
+      "download" - job completed but its output is not on disk: re-download only (free)
+      "blocked"  - rejected, or a paid task may exist that cannot be verified: never
+                   auto-resubmit (Atlas has no task-list/idempotency API to check)
+    A record for a DIFFERENT signature is stale (inputs changed) -> "submit".
     """
     if not job or job.get("sig") != signature:
         return "submit", None
     st = job.get("status")
     if st in ("submitted", "pending", "poll_error", "timeout") and job.get("id"):
         return "resume", job["id"]
-    if st in ("completed", "download_failed") and job.get("output"):
+    if st in ("completed", "done", "download_failed", "output_expired") and job.get("output"):
         return "download", job["output"]
-    if st in ("rejected", "submit_unknown"):
+    if st in BLOCKED:
         return "blocked", f"{st}: {job.get('error', '')}"[:300]
-    return "submit", None          # failed (unclassified) / done-without-file -> user re-ran
+    return "submit", None          # failed (not billed) / not_accepted / forced / no record
 
 
-def blocked_hint(field):
-    return (f"to try again on purpose, change the inputs or delete \"{field}\" from beats.json")
+def is_unverifiable(job):
+    return bool(job) and job.get("status") in ("submit_unknown", "submitting", "lost")
+
+
+class Ledger:
+    """Job records for helper modes that keep none in beats.json: one JSON file per
+    script under <project>/.jobs/, written atomically after every change."""
+    def __init__(self, project_dir, name):
+        self.path = os.path.join(project_dir, ".jobs", f"{name}.json")
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        try:
+            with open(self.path, encoding="utf-8") as f:
+                self.data = json.load(f)
+        except (OSError, ValueError):
+            self.data = {}
+
+    def rec(self, key):
+        return self.data.setdefault(key, {})
+
+    def save(self):
+        atomic_write_json(self.path, self.data)
+
+
+def blocked_hint(field, job=None):
+    if is_unverifiable(job):
+        return (f"a PAID task may already exist and Atlas Cloud offers no way to look it up "
+                f"(no task list / idempotency key). Check your Atlas console / billing for it "
+                f"(X-Request-ID in the error, if any). Only if you accept a possible second "
+                f"charge, delete \"{field}\" from the record to submit again")
+    return (f"to try again on purpose, change the inputs or delete \"{field}\" from the record")

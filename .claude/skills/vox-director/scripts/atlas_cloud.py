@@ -61,7 +61,17 @@ class AtlasTransient(AtlasCloudError):
 
 
 class AtlasUnknownOutcome(AtlasCloudError):
-    """Sent, but no usable answer (timeout/reset/5xx). A billable task may exist: never resend."""
+    """Sent, but no usable answer (timeout/reset/5xx). A billable task may exist: never resend.
+    Atlas Cloud has no task-list/history endpoint and no client idempotency key (docs,
+    2026-11-03), so such a task cannot be looked up automatically; the X-Request-ID (when
+    any answer arrived) is kept in the message for Atlas support."""
+
+
+class AtlasPaymentRequired(AtlasCloudError):
+    """402: insufficient balance / plan allowance. Nothing was created; stop and top up."""
+
+
+STOP_ERRORS = (AtlasAuthError, AtlasPaymentRequired)   # stop the whole stage, retry later
 
 
 AUTH_HINT = ("Atlas Cloud rejected the request as unauthenticated (401). Either export "
@@ -104,9 +114,18 @@ def _post(path: str, payload: dict, base: str = MEDIA_BASE, timeout: int = 60) -
         with urllib.request.urlopen(req, timeout=timeout) as r:
             body = r.read()
     except urllib.error.HTTPError as e:
-        msg = f"POST {path} -> {e.code}: {e.read().decode(errors='replace')[:400]}"
+        body = e.read().decode(errors="replace")
+        rid = (e.headers.get("X-Request-ID") if e.headers else None) or ""
+        if not rid:
+            try:
+                rid = json.loads(body).get("request_id") or ""
+            except (ValueError, AttributeError):
+                rid = ""
+        msg = f"POST {path} -> {e.code}: {body[:400]}" + (f" [X-Request-ID {rid}]" if rid else "")
         if e.code in (401, 403):
             raise AtlasAuthError(f"{msg} {AUTH_HINT}") from e
+        if e.code == 402:
+            raise AtlasPaymentRequired(f"{msg} - insufficient balance; top up, then re-run") from e
         if e.code in (429, 503):
             raise AtlasTransient(msg) from e
         if 400 <= e.code < 500:
@@ -193,7 +212,8 @@ def submit_media(model: str, **params) -> str:
     return _task_id(_post("/model/generateVideo", body), "/model/generateVideo")
 
 
-def transcribe(audio_url: str, interval: int = 3, timeout_s: int = 300, **params) -> dict:
+def transcribe(audio_url: str, interval: int = 3, timeout_s: int = 300, job_id: str = None,
+               on_submitted=None, **params) -> dict:
     """Blocking ASR via xai/stt-v1. Returns the full stt_result: {"text", "language",
     "duration", "words": [{"text","start","end"}, ...]} (word-level timestamps).
 
@@ -203,8 +223,13 @@ def transcribe(audio_url: str, interval: int = 3, timeout_s: int = 300, **params
     surface outputs[0] (the plain transcript string) and would silently drop the
     word timestamps this exists to fetch.
     """
-    body = {"model": "xai/stt-v1", "audio": audio_url, **params}
-    pid = _post("/model/generateAudio", body)["data"]["id"]
+    if job_id:                       # resume an already-submitted task: no new POST
+        pid = job_id
+    else:
+        body = {"model": "xai/stt-v1", "audio": audio_url, **params}
+        pid = _task_id(_post("/model/generateAudio", body), "/model/generateAudio")
+        if on_submitted:
+            on_submitted(pid)            # caller persists the id before polling
     deadline = time.time() + timeout_s
     while time.time() < deadline:
         time.sleep(interval)

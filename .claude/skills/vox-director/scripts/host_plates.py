@@ -20,7 +20,8 @@ import sys
 
 from host import (CHROMA_HEX, PERSON_PLATE_MODEL, PERSON_PLATE_PROMPT, WORLD_PLATE_MODEL,
                   WORLD_PLATE_SUFFIX, host_cfg, resolve_layout, validate)
-from provider import get_provider, run_jobs
+from project_io import Ledger, file_sig, sig
+from provider import get_provider, run_jobs_ledger
 from styles import compose_collage_prompt, image_params, resolve_theme
 
 
@@ -50,14 +51,18 @@ def run(project_dir, only=None, redo=False):
         subject=cfg["subject"], outfit_lock=cfg["outfit_lock"], placement=layout["placement"],
         chroma=CHROMA_HEX, aspect=aspect)
 
-    specs, meta = {}, {}
+    avatar_id = [a if a.startswith("http") else file_sig(os.path.expanduser(a))
+                 for a in cfg["avatars"]]                  # stable across uploads
+    p_params = image_params(PERSON_PLATE_MODEL, aspect, img_res)
+    w_params = image_params(WORLD_PLATE_MODEL, aspect, img_res)
+    specs, meta, sigs = {}, {}, {}
     for beat, shot, key in shots:
         if only and key not in only:
             continue
         if redo or not shot.get("person_plate_url"):
             specs[f"{key}-person"] = (lambda: prov.submit_image(
-                PERSON_PLATE_MODEL, person_prompt, images=avatar_urls,
-                **image_params(PERSON_PLATE_MODEL, aspect, img_res)))
+                PERSON_PLATE_MODEL, person_prompt, images=avatar_urls, **p_params))
+            sigs[f"{key}-person"] = sig(PERSON_PLATE_MODEL, person_prompt, p_params, avatar_id)
             meta[f"{key}-person"] = (shot, "person_plate", person_prompt)
         if redo or not shot.get("world_plate_url"):
             world_prompt = compose_collage_prompt(
@@ -68,12 +73,14 @@ def run(project_dir, only=None, redo=False):
                 finish=theme.get("finish") or doc.get("finish"),
             ) + WORLD_PLATE_SUFFIX.format(world_clear=layout["world_clear"])
             specs[f"{key}-world"] = (lambda p=world_prompt: prov.submit_image(
-                WORLD_PLATE_MODEL, p, **image_params(WORLD_PLATE_MODEL, aspect, img_res)))
+                WORLD_PLATE_MODEL, p, **w_params))
+            sigs[f"{key}-world"] = sig(WORLD_PLATE_MODEL, world_prompt, w_params)
             meta[f"{key}-world"] = (shot, "world_plate", world_prompt)
 
     if not specs:
         print("all plates already exist (use --redo to regenerate)")
-    done = run_jobs(prov, specs, poll_s=3, stall_s=90, max_retries=2, deadline_s=420)
+    done = run_jobs_ledger(prov, specs, sigs, Ledger(project_dir, "host_plates"),
+                           force=set(specs) if redo else (), poll_s=3, stall_s=90, deadline_s=420)
 
     for k, url in done.items():
         if not url:
@@ -82,7 +89,11 @@ def run(project_dir, only=None, redo=False):
         shot, field, prompt = meta[k]
         key = k.rsplit("-", 1)[0]
         dest = os.path.join(kf_dir, f"{field}_{key}.jpg")
-        prov.download(url, dest)
+        try:
+            prov.download(url, dest)
+        except Exception as e:
+            print(f"[{k}] download failed ({e}); re-run to retry the download (free)")
+            continue
         shot[f"{field}_url"] = url
         shot[f"{field}_path"] = dest
         shot[f"{field}_prompt"] = prompt

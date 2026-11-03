@@ -133,34 +133,55 @@ This is the default, most-automated path. Every stage is one script, all driven 
    **Language gate:** `audio.py` only narrates in a language the model documents (xai/tts-v1:
    `auto en zh ar-EG ar-SA ar-AE bn fr de hi id it ja ko pt-BR pt-PT ru es-MX es-ES tr vi`).
    **Kazakh (`kk`) is not documented** — the stage stops before spending anything. Either use a
-   documented language (e.g. `ru`), or, after a 1-beat test the user has listened to, set
-   `"voice": {"language_unverified_ok": true}`. Never claim a language works untested.
-   **Always set `"music"`** to fit the film's culture and mood; without it a neutral documentary
-   underscore is used (there is no culture-specific default).
+   documented language (e.g. `ru` with Russian text), or, after a 1-beat test the USER has
+   listened to, the user sets `"voice": {"language_unverified_ok": true}` — never set it
+   yourself. Narration containing Kazakh-specific letters (ә ғ қ ң ө ұ ү һ і) is gated even
+   when `language` says `auto` or `ru`. Never claim a language works untested.
+   **Music is an explicit choice:** `"music": "<description>"` (fit the film's culture and
+   mood) or `"music": "neutral"` (culture-neutral documentary underscore). With no `"music"`
+   no background music is generated and assemble.py stops with "no music chosen".
 
 6. **Assemble.** `python3 scripts/assemble.py out/<project>`
    ffmpeg: normalize + concat all shots, lay the single narration ducked under the music,
    burn captions timed per beat, add the watermark. Output `out/<project>/final.mp4`.
-   It first checks every input; if anything is missing or broken it prints the list (beat /
-   shot / file / what to re-run), renders nothing and exits with code 2.
+   It first checks every input — present, intact AND made from the current beats.json
+   (same signatures as the stages); if anything is missing, broken or out of date it prints
+   the list (beat / shot / file / what to re-run), renders nothing and exits with code 2.
 
 ### Re-running stages safely (never pay twice)
 
 Every paid item (keyframe, clip, narration, BGM) gets a job record in beats.json
-(`keyframe_job` / `clip_job` / `narration_job` / `bgm_job`: id, status, input signature)
-**the moment it is submitted**, and beats.json is rewritten atomically after **each** item.
+(`keyframe_job` / `clip_job` / `narration_job` / `bgm_job`: id, status, input signature).
+A `submitting` marker is written **before** the paid POST and the job id **right after** it;
+beats.json is rewritten atomically after **each** change. Helper modes (style_bakeoff,
+croll_keyframes, host_plates, host_clips, aroll_clips, extract_elements, asr_beats) keep the
+same records in `<project>/.jobs/<script>.json`.
 So after a crash, timeout or API error just **re-run the same stage**:
 - finished files that pass the integrity check (real image/video/audio, not an error page)
   and whose inputs are unchanged are **reused**, not regenerated;
-- jobs still running are **resumed by id**, never resubmitted; a finished job whose download
-  failed is **re-downloaded for free**;
-- an item the API **rejected** (moderation/invalid) or whose **submit outcome is unknown**
-  (timeout after sending) is **never resubmitted automatically** — change its inputs, or
-  delete its `*_job` record to retry on purpose;
-- at most one automatic resubmit, and only for a clearly temporary failure.
+- jobs still running are **resumed by id**, never resubmitted; a finished job whose file is
+  missing/broken is **re-downloaded for free** (a 403/404 output is retried, never
+  regenerated automatically);
+- an item the API **rejected** (moderation/invalid) is not resubmitted until its inputs change;
+- an item whose paid task **may exist but cannot be verified** — submit timed out / 5xx
+  (`submit_unknown`), the process died during the POST (`submitting`), or the server does not
+  know the id (`lost`) — is **never resubmitted automatically**. Atlas Cloud has no task list,
+  history endpoint or idempotency key, so check the Atlas console/billing (X-Request-ID is in
+  the error when one was returned) and only then, if the user accepts a possible second
+  charge, delete the `*_job` record;
+- 401/403 and 402 (balance) stop the stage; nothing is lost, re-run after fixing;
+- at most one automatic resubmit, and only for a clearly temporary failure (failed tasks are
+  not billed by Atlas Cloud);
+- aroll_clips sends a beat to its fallback model only if the primary task certainly does not
+  exist or certainly failed.
 A stage exits with code 3 when something is still failed/pending/blocked (see its summary).
-Changing an input (scene, narration text, voice, duration, keyframe) changes the signature, so
-only that item is regenerated.
+Changing an input (scene, title, theme, style, aspect, model, narration text, voice, speed,
+duration, music...) changes the signature: only the affected items are regenerated, and an
+out-of-date file is never reused — a retired keyframe moves to `keyframe_previous`, clips are
+not paid for while their keyframe is out of date, and assemble.py refuses stale inputs.
+Files with no recorded inputs (old projects) are neither reused nor replaced silently: set
+`keyframe_locked` / `clip_locked` / `narration_locked` / `bgm_locked`: true to keep one
+deliberately, or delete its path to regenerate.
 
 7. **Verify.** You can't read an mp4 directly — extract frames to jpg and look:
    `ffmpeg -ss <t> -i final.mp4 -vf "scale=640:-1,format=yuvj420p" -frames:v 1 f.jpg`

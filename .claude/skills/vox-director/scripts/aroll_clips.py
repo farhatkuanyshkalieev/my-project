@@ -27,7 +27,8 @@ import os
 import subprocess
 import sys
 
-from provider import get_provider, run_jobs
+from project_io import Ledger, sig
+from provider import get_provider, run_jobs_ledger
 from styles import resolve_theme, resolve_video_aspect
 
 PRIMARY_MODEL = "google/gemini-omni-flash/video-edit"
@@ -126,7 +127,15 @@ def run(project_dir, only=None):
         return
 
     # ---- cut + upload each beat's segment, queue the primary-model submission ----
-    specs, meta = {}, {}
+    st_src = os.stat(src)
+    src_id = (os.path.abspath(src), st_src.st_size, st_src.st_mtime_ns)   # stable across uploads
+    ledger = Ledger(project_dir, "aroll_clips")
+    specs, meta, sigs = {}, {}, {}
+
+    def stable(params, url):              # request params minus the per-run upload url
+        return {k: ([x for x in v if x != url] if isinstance(v, list) else v)
+                for k, v in params.items() if v != url}
+
     for beat in doc["beats"]:
         key = str(beat["id"])
         if only and key not in only:
@@ -137,28 +146,42 @@ def run(project_dir, only=None):
         prompt = build_prompt(theme, beat.get("content_beats", ""))
         params = video_params(primary, url, a_primary, beat["dur"])
         specs[key] = (lambda m=primary, p=prompt, pr=params: prov.submit_video(m, p, **pr))
+        sigs[key] = sig(primary, prompt, stable(params, url), src_id, beat["start"], beat["end"])
         meta[key] = {"beat": beat, "seg_path": seg_path, "url": url}
         print(f"[{key}] queued on {primary.split('/')[-2]} ({beat['dur']}s)")
 
-    done = run_jobs(prov, specs, poll_s=8, stall_s=240, max_retries=1, deadline_s=900)
+    status = {}
+    done = run_jobs_ledger(prov, specs, sigs, ledger, status_out=status,
+                           poll_s=8, stall_s=240, deadline_s=900)
 
-    # ---- fallback pass: only the beats the primary model rejected/failed ----
-    retry_keys = [k for k, u in done.items() if not u]
+    # ---- fallback pass: only beats whose primary task certainly does NOT exist or
+    # certainly failed (failed tasks are not billed). A beat whose primary task may
+    # exist or is still running (submit_unknown / submitting / lost / timeout) is NOT
+    # sent to another model - that could pay twice for the same beat.
+    retry_keys = [k for k, u in done.items() if not u
+                  and status.get(k) in ("rejected", "failed", "not_accepted")]
+    for k, u in done.items():
+        if not u and k not in retry_keys:
+            print(f"[{k}] primary job '{status.get(k)}' - NOT sent to the fallback model "
+                  f"(a paid task may exist or is still running); re-run later")
     if retry_keys:
         a_fallback = gate_aspect(fallback)
         if a_fallback is None:
             print(f"skipping fallback for beats {retry_keys}: aspect gate blocked above")
         else:
             print(f"[{fallback.split('/')[-2]}] retrying beats {retry_keys}")
-            fb_specs = {}
+            fb_specs, fb_sigs = {}, {}
             for key in retry_keys:
                 m = meta[key]
                 prompt = build_prompt(theme, m["beat"].get("content_beats", ""))
                 params = video_params(fallback, m["url"], a_fallback, m["beat"]["dur"])
-                fb_specs[key] = (lambda mo=fallback, p=prompt, pr=params:
-                                 prov.submit_video(mo, p, **pr))
-            fb_done = run_jobs(prov, fb_specs, poll_s=8, stall_s=240, max_retries=1, deadline_s=900)
-            done.update({k: v for k, v in fb_done.items() if v})
+                fb_specs[f"{key}@fallback"] = (lambda mo=fallback, p=prompt, pr=params:
+                                               prov.submit_video(mo, p, **pr))
+                fb_sigs[f"{key}@fallback"] = sig(fallback, prompt, stable(params, m["url"]),
+                                                 src_id, m["beat"]["start"], m["beat"]["end"])
+            fb_done = run_jobs_ledger(prov, fb_specs, fb_sigs, ledger,
+                                      poll_s=8, stall_s=240, deadline_s=900)
+            done.update({k.split("@")[0]: v for k, v in fb_done.items() if v})
 
     for key, url in done.items():
         beat = meta[key]["beat"]
@@ -167,7 +190,11 @@ def run(project_dir, only=None):
                   f"from the assembled film")
             continue
         dest = os.path.join(clip_dir, f"clip_{key}.mp4")
-        prov.download(url, dest)
+        try:
+            prov.download(url, dest)
+        except Exception as e:
+            print(f"[{key}] download failed ({e}); re-run to retry the download (free)")
+            continue
         beat["clip_path"] = dest
         print(f"[{key}] saved {dest}")
 

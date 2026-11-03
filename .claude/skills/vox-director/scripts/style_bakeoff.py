@@ -16,7 +16,8 @@ import json
 import os
 import sys
 
-from provider import get_provider, run_jobs
+from project_io import Ledger, sig
+from provider import get_provider, run_jobs_ledger
 from styles import compose_collage_prompt, STYLE_LIBRARY, THEME_PRESETS, resolve_theme, image_params
 
 IMAGE_MODEL = "google/nano-banana-2/text-to-image"
@@ -42,22 +43,28 @@ def run(project_dir, styles=None, beat_index=0):
     out = os.path.join(project_dir, "style-bakeoff"); os.makedirs(out, exist_ok=True)
 
     prov = get_provider(doc.get("provider"))
-    specs = {}
+    specs, sigs = {}, {}
+    params = image_params(img_model, aspect, img_res)
     for name in styles:
         tp = resolve_theme(name) or {}              # theme name -> full look bundle
         prompt = compose_collage_prompt(scene, tcn, ten, bg, aspect,
                                         style=tp.get("idiom", name), palette=tp.get("palette"),
                                         type_style=tp.get("type_style"), finish=tp.get("finish"))
-        specs[name] = (lambda p=prompt: prov.submit_image(img_model, p,
-                                                          **image_params(img_model, aspect, img_res)))
+        specs[name] = (lambda p=prompt: prov.submit_image(img_model, p, **params))
+        sigs[name] = sig(img_model, prompt, params)
         tag = "library" if name in STYLE_LIBRARY else "custom"
         print(f"[{name}] ({tag}) queued")
 
-    done = run_jobs(prov, specs, poll_s=3, stall_s=75, max_retries=2, deadline_s=240)
+    # job ledger: a crash / deadline / unknown submit never leads to a second paid image
+    done = run_jobs_ledger(prov, specs, sigs, Ledger(project_dir, "style_bakeoff"),
+                           poll_s=3, stall_s=75, deadline_s=240)
 
     for name, url in done.items():
         if url:
-            prov.download(url, os.path.join(out, f"{name}.jpg"))
+            try:
+                prov.download(url, os.path.join(out, f"{name}.jpg"))
+            except Exception as e:
+                print(f"[{name}] download failed ({e}); re-run to retry the download (free)")
     print(f"\nsaved candidates to {out} — review, then set \"collage_style\" in beats.json.")
 
 

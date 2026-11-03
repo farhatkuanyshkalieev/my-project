@@ -27,7 +27,8 @@ import sys
 from host import (CHROMA, DEFAULT_WORLD_MOTION, PERSON_VIDEO_PROMPT, WORLD_VIDEO_PROMPT,
                   estimate, host_cfg, person_model, person_price, probe_dur,
                   reference_audio, resolve_layout, validate, video_seconds, world_model)
-from provider import get_provider, run_jobs
+from project_io import Ledger, file_sig, sig
+from provider import get_provider, run_jobs_ledger
 
 FPS = 24
 RES = {"16:9": (1920, 1080), "9:16": (1080, 1920)}
@@ -116,7 +117,7 @@ def run(project_dir, only=None, confirmed=False, redo=False):
             return
 
     prov = get_provider(doc.get("provider"))
-    specs, meta = {}, {}
+    specs, meta, sigs = {}, {}, {}
     for beat, shot, key in shots:
         vdur = seconds[key]
         shot["plate_dur"] = vdur
@@ -129,6 +130,8 @@ def run(project_dir, only=None, confirmed=False, redo=False):
                 subject=cfg["subject"], region=layout["region"], outfit_clause=cfg["outfit_clause"],
                 feel=feel)
             shot["person_video_prompt"] = prompt
+            sigs[f"{key}-person"] = sig(pmodel, prompt, shot["person_plate_url"],
+                                        file_sig(padded), vdur, aspect)
             specs[f"{key}-person"] = (lambda p=shot["person_plate_url"], a=audio_url, v=vdur,
                                       t=prompt: prov.submit_video(
                 pmodel, t, reference_images=[p], reference_audios=[a], duration=v,
@@ -140,20 +143,27 @@ def run(project_dir, only=None, confirmed=False, redo=False):
                 element_motion=shot.get("element_motion") or DEFAULT_WORLD_MOTION,
                 region=layout["region"], feel=feel)
             shot["world_video_prompt"] = prompt
+            sigs[f"{key}-world"] = sig(wmodel, prompt, shot["world_plate_url"], vdur, aspect)
             specs[f"{key}-world"] = (lambda p=shot["world_plate_url"], v=vdur,
                                      t=prompt: prov.submit_video(
                 wmodel, t, image=p, duration=v, aspect_ratio=aspect,
                 resolution="720p"))
             meta[f"{key}-world"] = (shot, "world_clip")
 
-    done = run_jobs(prov, specs, poll_s=5, stall_s=300, max_retries=2, deadline_s=1500)
+    done = run_jobs_ledger(prov, specs, sigs, Ledger(project_dir, "host_clips"),
+                           force=set(specs) if redo else (), poll_s=5, stall_s=300,
+                           deadline_s=1500)
     for k, url in done.items():
         if not url:
             print(f"[{k}] FAILED")
             continue
         shot, field = meta[k]
         dest = os.path.join(plates_dir, f"{k}.mp4")
-        prov.download(url, dest)
+        try:
+            prov.download(url, dest)
+        except Exception as e:
+            print(f"[{k}] download failed ({e}); re-run to retry the download (free)")
+            continue
         shot[f"{field}_url"], shot[f"{field}_path"] = url, dest
         print(f"[{k}] saved {dest} ({probe_dur(dest):.2f}s)")
 

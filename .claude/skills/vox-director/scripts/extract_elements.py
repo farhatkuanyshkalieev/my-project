@@ -16,7 +16,8 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFilter
 
-from provider import get_provider, run_jobs
+from project_io import Ledger, file_sig, sig
+from provider import get_provider, run_jobs_ledger
 
 RMBG = "youchuan/v8.1/remove-background"
 
@@ -43,6 +44,7 @@ def run(project_dir):
     ed = os.path.join(project_dir, "elements"); os.makedirs(ed, exist_ok=True)
 
     prov = get_provider(spec.get("provider"))
+    ledger = Ledger(project_dir, "extract_elements")
     for el in spec["elements"]:
         name, bbox, mode = el["name"], el["bbox"], el.get("mode", "crop")
         crop = card.crop(tuple(bbox))
@@ -51,10 +53,16 @@ def run(project_dir):
         out = os.path.join(ed, f"{name}.png")
         if mode == "cutout":
             url = prov.upload(raw)
-            res = run_jobs(prov, {name: lambda u=url: prov.remove_bg(RMBG, u)},
-                           poll_s=3, stall_s=60, max_retries=2, deadline_s=180)[name]
-            if res:
+            res = run_jobs_ledger(prov, {name: lambda u=url: prov.remove_bg(RMBG, u)},
+                                  {name: sig(RMBG, file_sig(raw))}, ledger,
+                                  poll_s=3, stall_s=60, deadline_s=180)[name]
+            try:
+                if not res:
+                    raise RuntimeError(f"no cut-out ({(ledger.rec(name).get('job') or {}).get('status')})")
                 prov.download(res, out)
+            except Exception as e:
+                print(f"[{name}] cut-out unavailable ({e}); skipped - re-run to continue")
+                continue
             elem = Image.open(out).convert("RGBA")
         else:
             elem = crop

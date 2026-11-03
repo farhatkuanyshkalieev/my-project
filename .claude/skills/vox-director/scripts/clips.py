@@ -11,7 +11,8 @@ import json
 import os
 import sys
 
-from atlas_cloud import AtlasAuthError
+from atlas_cloud import STOP_ERRORS
+from keyframes import keyframe_state
 from project_io import atomic_write_json, check_media, sig
 from provider import get_provider, PaidItem, run_paid_items, print_summary
 from styles import resolve_theme, resolve_video_aspect
@@ -101,105 +102,150 @@ def painterly_prompt(motion):
             f"Gentle, cinematic, no morphing, no new objects.")
 
 
+def clip_setup(doc):
+    """Film-wide video settings. Returns dict, or raises ValueError at the aspect gate."""
+    aspect = doc.get("aspect", "16:9")
+    model = doc.get("video_model", VIDEO_MODEL)   # Seedance for real people; Omni otherwise
+    _theme = resolve_theme(doc.get("theme")) or {}
+    # Aspect routing: prefer the project's own target aspect; only fall back to an
+    # approximation when this model has no matching enum value, and never apply that
+    # approximation without a human confirming it first (see styles.resolve_video_aspect).
+    resolved, exact = resolve_video_aspect(aspect, model)
+    if not exact and not doc.get("aspect_approx_confirmed"):
+        raise ValueError(
+            f"ASPECT MISMATCH: project aspect \"{aspect}\" has no exact match on {model}; "
+            f"nearest supported is \"{resolved}\". This changes the output framing — confirm "
+            f"with the user before generating, then set \"aspect_approx_confirmed\": true in "
+            f"beats.json to proceed (or pick a different video_model / aspect).")
+    return {"model": model, "aspect": resolved or aspect, "approx": not exact,
+            "style": doc.get("style", "painterly"),
+            "motion_style": doc.get("motion_style") or _theme.get("motion_style", "punchy"),
+            "constraints": doc.get("constraints", "strict"),     # strict | loose
+            "vid_res": doc.get("video_resolution", "720p")}
+
+
+def clip_request(doc, beat, shot, setup, image_url):
+    """(model, prompt, params, signature) of the clip for this shot under the CURRENT
+    beats.json and the given keyframe url."""
+    model, aspect = setup["model"], setup["aspect"]
+    # new schema: camera_move (token) + element_motion (rich). Back-compat: old `motion`.
+    camera = shot.get("camera_move") or shot.get("motion", "push_in")
+    if setup["style"] == "collage":
+        prompt = collage_prompt(camera, element_motion=shot.get("element_motion"),
+                                feel=beat.get("feel"), palette=beat.get("bg"),
+                                amplitude=setup["motion_style"],
+                                anchor_freeze=doc.get("anchor_freeze"),
+                                has_title=shot.get("title", True),
+                                constraints=setup["constraints"])
+    else:
+        prompt = painterly_prompt(shot.get("motion", camera))
+    dur = int(shot.get("dur", 10))
+    if "seedance" in model:                 # ratio (not aspect_ratio); real-person OK
+        params = dict(image=image_url, duration=dur, ratio=aspect,
+                      resolution=setup["vid_res"], generate_audio=False)
+    elif "kling-video-o3-pro/reference-to-video" in model:  # has an aspect_ratio enum
+        params = dict(image=image_url, duration=dur, aspect_ratio=aspect, sound=False)
+    elif "kling" in model:                   # image-to-video / video-edit: follows input
+        params = dict(image=image_url, duration=dur, sound=False)
+    else:                                    # gemini omni flash
+        params = dict(image=image_url, duration=dur, aspect_ratio=aspect, resolution="720p")
+    return model, prompt, params, sig(model, prompt, params)
+
+
+def clip_state(doc, beat, shot, setup):
+    """fresh | locked | stale | unverified | missing | no_keyframe | keyframe_stale."""
+    if shot.get("clip_locked"):
+        return "locked", None
+    kstate, _ = keyframe_state(doc, beat, shot)
+    if kstate in ("stale", "missing") and not shot.get("keyframe_url"):
+        return ("keyframe_stale" if kstate == "stale" else "no_keyframe"), None
+    if kstate == "stale":
+        return "keyframe_stale", None
+    url = shot.get("keyframe_url")
+    if not url:
+        return "no_keyframe", None
+    req = clip_request(doc, beat, shot, setup, url)
+    job = shot.get("clip_job") or {}
+    ok = check_media(shot.get("clip_path"), "video")[0]
+    if job.get("sig"):
+        if job["sig"] != req[3]:
+            return ("stale" if ok else "missing"), req
+        return ("fresh" if ok else "missing"), req
+    return ("unverified" if ok else "missing"), req
+
+
 def run(project_dir, only=None):
-    """Animate the shots that have no valid clip yet. Safe to re-run: a clip whose
-    file passes the integrity check and whose inputs (keyframe, prompt, model,
-    duration) are unchanged is reused, recorded jobs are resumed instead of
-    resubmitted, and beats.json is saved atomically after every single clip."""
+    """Animate shots that have no up-to-date clip. Safe to re-run: a clip whose file
+    passes the integrity check and whose inputs (keyframe, prompt, model, duration,
+    aspect...) are unchanged is reused; a clip made from older inputs is regenerated;
+    a clip whose keyframe is out of date is NOT paid for (run keyframes.py first);
+    recorded jobs are resumed instead of resubmitted; beats.json is saved atomically
+    after every single clip. A clip with no recorded inputs (old project) is never
+    reused or replaced silently: set "clip_locked": true to keep it, or delete
+    clip_path to regenerate it."""
     bpath = os.path.join(project_dir, "beats.json")
     with open(bpath) as f:
         doc = json.load(f)
     save = lambda: atomic_write_json(bpath, doc)
-    aspect = doc.get("aspect", "16:9")
-    style = doc.get("style", "painterly")
-    _theme = resolve_theme(doc.get("theme")) or {}
-    motion_style = doc.get("motion_style") or _theme.get("motion_style", "punchy")  # calm|punchy|max
-    constraints = doc.get("constraints", "strict")   # strict = defect guards on | loose = explore
-    model = doc.get("video_model", VIDEO_MODEL)   # Seedance for real people; Omni otherwise
-    vid_res = doc.get("video_resolution", "720p")  # 720p default; Seedance also 480p/1080p (Omni is 720p-only)
+    try:
+        setup = clip_setup(doc)
+    except ValueError as e:
+        print(e)
+        return None
+    if setup["approx"]:
+        print(f"[aspect] using confirmed approximation \"{setup['aspect']}\" for project "
+              f"aspect \"{doc.get('aspect', '16:9')}\" on {setup['model']}")
     clip_dir = os.path.join(project_dir, "clips")
     os.makedirs(clip_dir, exist_ok=True)
 
-    # Aspect routing: prefer the project's own target aspect; only fall back to an
-    # approximation when this model has no matching enum value, and never apply that
-    # approximation without a human confirming it first (see styles.resolve_video_aspect).
-    resolved_aspect, aspect_exact = resolve_video_aspect(aspect, model)
-    if not aspect_exact:
-        if not doc.get("aspect_approx_confirmed"):
-            print(f"ASPECT MISMATCH: project aspect \"{aspect}\" has no exact match on "
-                  f"{model}; nearest supported is \"{resolved_aspect}\". This changes the "
-                  f"output framing — confirm with the user before generating, then set "
-                  f"\"aspect_approx_confirmed\": true in beats.json to proceed (or pick a "
-                  f"different video_model / aspect).")
-            return
-        print(f"[aspect] using confirmed approximation \"{resolved_aspect}\" for project "
-              f"aspect \"{aspect}\" on {model}")
-    if resolved_aspect:
-        aspect = resolved_aspect   # every shot below shares this one resolved aspect
-
     prov = get_provider(doc.get("provider"))
-    items, skipped = [], []
+    items, skipped, held = [], [], []
     for beat in doc["beats"]:
         for shot, key in shots_of(beat):
             if only and key not in only:
                 continue
             if shot.get("kind") == "host":      # presenter shots use host_clips.py
                 continue
-            url = shot.get("keyframe_url")
-            if not url and shot.get("keyframe_path") and os.path.exists(shot["keyframe_path"]):
-                # user-provided keyframe (e.g. hand-made collage card) -> upload it
-                url = prov.upload(shot["keyframe_path"])     # upload is free
-                shot["keyframe_url"] = url
+            if not shot.get("keyframe_url") and shot.get("keyframe_path") and \
+                    check_media(shot["keyframe_path"], "image")[0]:
+                # user-provided keyframe (e.g. hand-made collage card) -> upload it (free)
+                shot["keyframe_url"] = prov.upload(shot["keyframe_path"])
                 save()
-                print(f"[{key}] uploaded provided keyframe -> {url}")
-            if not url:
-                print(f"[{key}] no keyframe — provide keyframe_path or run keyframes.py")
+                print(f"[{key}] uploaded provided keyframe -> {shot['keyframe_url']}")
+            state, req = clip_state(doc, beat, shot, setup)
+            if state in ("fresh", "locked"):
+                skipped.append(key)
+                print(f"[{key}] reuse clip ({state})")
                 continue
-            # new schema: camera_move (token) + element_motion (rich). Back-compat: old `motion`.
-            camera = shot.get("camera_move") or shot.get("motion", "push_in")
-            element = shot.get("element_motion")
-            if style == "collage":
-                prompt = collage_prompt(camera, element_motion=element, feel=beat.get("feel"),
-                                        palette=beat.get("bg"), amplitude=motion_style,
-                                        anchor_freeze=doc.get("anchor_freeze"),
-                                        has_title=shot.get("title", True), constraints=constraints)
-            else:
-                prompt = painterly_prompt(shot.get("motion", camera))
-            dur = int(shot.get("dur", 10))
-            if "seedance" in model:                 # ratio (not aspect_ratio); real-person OK
-                params = dict(image=url, duration=dur, ratio=aspect,
-                              resolution=vid_res, generate_audio=False)
-            elif "kling-video-o3-pro/reference-to-video" in model:  # has an aspect_ratio enum
-                params = dict(image=url, duration=dur, aspect_ratio=aspect, sound=False)
-            elif "kling" in model:                   # image-to-video / video-edit: follows input; allows real people
-                params = dict(image=url, duration=dur, sound=False)
-            else:                                    # gemini omni flash
-                params = dict(image=url, duration=dur, aspect_ratio=aspect, resolution="720p")
-            signature = sig(model, prompt, params)
-            job = shot.get("clip_job")
-            ok, why = check_media(shot.get("clip_path"), "video")
-            if ok and (not job or job.get("sig") == signature):
-                skipped.append(key)                 # verified clip for these exact inputs
-                print(f"[{key}] reuse existing clip {shot['clip_path']}")
+            if state in ("no_keyframe", "keyframe_stale"):
+                held.append(key)
+                print(f"[{key}] keyframe {'missing' if state == 'no_keyframe' else 'OUT OF DATE'}"
+                      f" -> run keyframes.py first (no clip paid for)")
                 continue
-            if shot.get("clip_path") and not ok:
-                print(f"[{key}] existing clip unusable ({why}) -> needs a new clip")
-            elif ok:
-                print(f"[{key}] inputs changed since the existing clip -> new clip")
+            if state == "unverified":
+                held.append(key)
+                print(f"[{key}] existing clip has no record of its inputs (old project) -> not "
+                      f"reused, not replaced. Keep it: \"clip_locked\": true; regenerate: "
+                      f"delete \"clip_path\"")
+                continue
+            if state == "stale":
+                print(f"[{key}] clip is OUT OF DATE (inputs changed) -> new clip")
+            model, prompt, params, signature = req
             items.append(PaidItem(
                 key, shot, "clip_job", signature,
                 submit=(lambda m=model, p=prompt, pr=params: prov.submit_video(m, p, **pr)),
                 dest=os.path.join(clip_dir, f"clip_{key}.mp4"),
                 apply=(lambda url, dest, sh=shot: sh.update(clip_url=url, clip_path=dest))))
-            print(f"[{key}] queued ({dur}s, {model.split('/')[1]})")
+            print(f"[{key}] queued ({params['duration']}s, {model.split('/')[1]})")
 
     save()
     try:
         summary = run_paid_items(prov, items, save, poll_s=5, stall_s=240, deadline_s=1200)
-    except AtlasAuthError as e:
+    except STOP_ERRORS as e:
         save()
         print(f"STOPPED: {e}\nProgress so far is saved in {bpath}.")
         raise
+    summary["blocked"] += held
     save()
     print_summary("clips", summary, skipped)
     print("updated", bpath)
@@ -212,7 +258,7 @@ if __name__ == "__main__":
     only = set(sys.argv[2].split(",")) if len(sys.argv) > 2 else None
     try:
         res = run(os.path.abspath(proj), only=only)
-    except AtlasAuthError:
+    except STOP_ERRORS:
         sys.exit(1)                       # message printed, progress saved
     if res and (res["failed"] or res["pending"] or res["blocked"]):
         sys.exit(3)                       # partial: re-run to continue

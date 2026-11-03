@@ -34,7 +34,8 @@ import json
 import os
 import sys
 
-from provider import get_provider, run_jobs
+from project_io import Ledger, file_sig, sig
+from provider import get_provider, run_jobs_ledger
 from styles import compose_collage_prompt, resolve_theme, image_params
 
 EDIT_MODEL = "google/nano-banana-2/edit"   # fallback: openai/gpt-image-2/edit
@@ -110,7 +111,9 @@ def run(project_dir):
     doc["anchor_photo_url"] = photo_url
     doc["anchor_freeze"] = FREEZE[kind]
 
-    specs, by_key = {}, {}
+    photo_id = photo if photo.startswith("http") else file_sig(photo)   # stable across uploads
+    params = image_params(img_model, aspect, img_res)
+    specs, by_key, sigs = {}, {}, {}
     for beat in doc["beats"]:
         for shot, key in shots_of(beat):
             if shot.get("keyframe_url"):
@@ -124,16 +127,22 @@ def run(project_dir):
             prompt = lock + world + CROLL_GUARDS
             shot["keyframe_prompt"] = prompt
             specs[key] = (lambda p=prompt: prov.submit_image(
-                img_model, p, images=[photo_url], **image_params(img_model, aspect, img_res)))
+                img_model, p, images=[photo_url], **params))
+            sigs[key] = sig(img_model, prompt, params, photo_id)
             by_key[key] = shot
 
-    done = run_jobs(prov, specs, poll_s=3, stall_s=90, max_retries=2, deadline_s=420)
+    done = run_jobs_ledger(prov, specs, sigs, Ledger(project_dir, "croll_keyframes"),
+                           poll_s=3, stall_s=90, deadline_s=420)
 
     for key, url in done.items():
         if not url:
             continue
         dest = os.path.join(kf_dir, f"kf_{key}.jpg")
-        prov.download(url, dest)
+        try:
+            prov.download(url, dest)
+        except Exception as e:
+            print(f"[{key}] download failed ({e}); re-run to retry the download (free)")
+            continue
         shot = by_key[key]
         shot["keyframe_url"] = url
         shot["keyframe_path"] = dest

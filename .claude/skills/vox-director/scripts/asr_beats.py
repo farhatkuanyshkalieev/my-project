@@ -23,6 +23,7 @@ import subprocess
 import sys
 
 import atlas_cloud
+from project_io import Ledger, file_sig, plan, sig, blocked_hint
 from provider import get_provider
 
 # Both Omni video-edit and Kling video-edit cap a single call at 10s; leave headroom
@@ -99,6 +100,60 @@ def segment_words(words, max_dur=MAX_BEAT_DUR, min_dur=MIN_BEAT_DUR, pause_gap=P
     return merged
 
 
+def transcribe_once(project_dir, prov, audio_path, language, keyterm):
+    """Paid ASR with a job ledger (<project>/.jobs/asr_beats.json): the id is recorded
+    before polling (and a "submitting" marker before the POST), a finished result is
+    reused, a recorded running job is resumed - a re-run never pays for the same audio
+    twice, and an unknown submit outcome is never resent automatically."""
+    from datetime import datetime, timezone
+    led = Ledger(project_dir, "asr_beats")
+    rec = led.rec("asr")
+    terms = keyterm.split(",") if keyterm else None
+    signature = sig("xai/stt-v1", file_sig(audio_path), language, terms)
+    job = rec.get("job")
+    if job and job.get("sig") == signature and job.get("status") == "done" and job.get("result"):
+        print("ASR: reusing the recorded transcript (no new charge)")
+        return job["result"]
+    action, info = plan(job, signature)
+
+    def put(**kw):
+        cur = rec.get("job") if (rec.get("job") or {}).get("sig") == signature else {"sig": signature}
+        cur.update(kw, at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        rec["job"] = cur
+        led.save()
+
+    if action == "blocked":
+        raise SystemExit(f"ASR not resubmitted ({info}); {blocked_hint('job', job)} "
+                         f"in {led.path}")
+    job_id = info if action == "resume" else None
+    if job_id:
+        print(f"ASR: resuming recorded job {job_id} (no new POST)")
+        audio_url = None
+    else:
+        print("uploading audio for ASR...")
+        audio_url = prov.upload(audio_path)
+        put(status="submitting", id=None, error=None)
+    print("transcribing (xai/stt-v1)...")
+    try:
+        result = atlas_cloud.transcribe(audio_url, language=language, keyterm=terms,
+                                        job_id=job_id,
+                                        on_submitted=lambda pid: put(status="submitted", id=pid))
+    except atlas_cloud.AtlasCloudError as e:
+        has_id = bool((rec.get("job") or {}).get("id"))
+        if has_id:                                    # task exists: never lose its id
+            st = "failed" if " failed: " in str(e) else "timeout"   # timeout -> resume later
+        elif isinstance(e, (atlas_cloud.STOP_ERRORS, atlas_cloud.AtlasTransient)):
+            st = "not_accepted"                       # provably not created
+        elif isinstance(e, atlas_cloud.AtlasRejected):
+            st = "rejected"
+        else:
+            st = "submit_unknown"                     # sent, no usable answer
+        put(status=st, error=str(e)[:300])
+        raise
+    put(status="done", result=result, error=None)
+    return result
+
+
 def run(project_dir, source, language=None, keyterm=None, max_beat_dur=MAX_BEAT_DUR,
         provider_name=None):
     os.makedirs(project_dir, exist_ok=True)
@@ -114,11 +169,7 @@ def run(project_dir, source, language=None, keyterm=None, max_beat_dur=MAX_BEAT_
         extract_audio(source, audio_path)
 
     prov = get_provider(provider_name)
-    print("uploading audio for ASR...")
-    audio_url = prov.upload(audio_path)
-    print("transcribing (xai/stt-v1)...")
-    result = atlas_cloud.transcribe(audio_url, language=language,
-                                    keyterm=keyterm.split(",") if keyterm else None)
+    result = transcribe_once(project_dir, prov, audio_path, language, keyterm)
     words = result.get("words", [])
     if not words:
         raise SystemExit("ASR returned no word timestamps -- check the source audio")

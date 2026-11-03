@@ -54,9 +54,15 @@ def _job_note(job):
     if not job:
         return ""
     st = job.get("status")
-    if st in ("rejected", "submit_unknown"):
+    if st in ("rejected",):
         return (f" [job {st}: {str(job.get('error', ''))[:90]} -> change the inputs or delete "
                 f"the job record to retry]")
+    if st in ("submit_unknown", "submitting", "lost"):
+        return (f" [job {st}: a PAID task may exist; Atlas has no way to look it up - check the "
+                f"Atlas console/billing before deleting the job record]")
+    if st == "output_expired":
+        return (" [paid output not downloadable (expired?) -> re-run retries the free download; "
+                "delete the job record only if you accept paying for a new one]")
     if st in ("submitted", "timeout", "poll_error"):
         return " [job still running -> re-run the stage to collect it]"
     if st == "download_failed":
@@ -66,28 +72,72 @@ def _job_note(job):
     return ""
 
 
+_STATE_MSG = {
+    "stale": "OUT OF DATE (made from different inputs than beats.json now has)",
+    "unverified": "no record of the inputs it was made from (old project) - set the *_locked "
+                  "flag to keep it or delete the path to regenerate",
+    "missing": "missing or unusable",
+    "no_keyframe": "its keyframe is missing -> run keyframes.py, then clips.py",
+    "keyframe_stale": "its keyframe is OUT OF DATE -> run keyframes.py, then clips.py",
+    "no_music": "no music chosen",
+}
+
+
 def preflight(doc):
-    """List every missing/unusable input of the final assembly (no exceptions)."""
+    """List every missing, broken or OUT-OF-DATE input of the final assembly.
+    Freshness uses the same signatures as the stages, so a clip/narration/music made
+    from older inputs (edited scene, narration text, voice, music...) is never used."""
+    import audio as _audio
+    import clips as _clips
+    import keyframes as _kf
     problems = []
     beats = doc.get("beats") or []
     if not beats:
         return ["beats.json has no beats"]
+    try:
+        setup = _clips.clip_setup(doc)
+    except ValueError as e:
+        setup, problems = None, [str(e)]
+    v = _audio.voice_setup(doc)
+    gate = _audio.language_gate(v["voice"], v["language"], v["clone_ref"],
+                                [b.get("narration", "") for b in beats])
+    if gate:
+        problems.append(gate)
     for bi, beat in enumerate(beats, 1):
         bid = beat.get("id", bi)
         if not str(beat.get("narration", "")).strip():
             problems.append(f"beat {bid}: no narration text (needed for the caption)")
-        ok, why = check_media(beat.get("narration_audio"), "audio")
-        if not ok:
-            problems.append(f"beat {bid}: narration audio - {why} -> {_FIX['narration']}"
-                            + _job_note(beat.get("narration_job")))
+        else:
+            st, _ = _audio.narration_state(v, beat)
+            if st not in ("fresh", "locked"):
+                why = check_media(beat.get("narration_audio"), "audio")[1] if st == "missing" \
+                    else _STATE_MSG[st]
+                problems.append(f"beat {bid}: narration audio - {why} -> {_FIX['narration']}"
+                                + _job_note(beat.get("narration_job")))
         for shot in shots_of(beat):
             key = f"{bid}{shot.get('id', '') if shot is not beat else ''}"
-            ok, why = check_media(shot.get("clip_path"), "video")
-            if not ok:
-                problems.append(f"beat {bid}, shot {key}: video clip - {why} -> {_FIX['clip']}"
+            if shot.get("kind") == "host":            # host composites: integrity only
+                ok, why = check_media(shot.get("clip_path"), "video")
+                if not ok:
+                    problems.append(f"beat {bid}, shot {key}: host clip - {why} -> run host_clips.py")
+                continue
+            if setup is None:
+                continue
+            try:
+                st, _ = _clips.clip_state(doc, beat, shot, setup)
+            except ValueError as e:
+                problems.append(f"beat {bid}, shot {key}: {e}")
+                continue
+            if st not in ("fresh", "locked"):
+                why = check_media(shot.get("clip_path"), "video")[1] if st == "missing" \
+                    else _STATE_MSG[st]
+                fix = "" if st in ("no_keyframe", "keyframe_stale") else f" -> {_FIX['clip']}"
+                problems.append(f"beat {bid}, shot {key}: video clip - {why}{fix}"
                                 + _job_note(shot.get("clip_job")))
-    ok, why = check_media(doc.get("bgm_path"), "audio")
-    if not ok:
+    st, info = _audio.bgm_state(doc)
+    if st not in ("fresh", "locked"):
+        why = (info if st == "no_music" else
+               check_media(doc.get("bgm_path"), "audio")[1] if st == "missing" else _STATE_MSG[st])
         problems.append(f"background music - {why} -> {_FIX['bgm']}" + _job_note(doc.get("bgm_job")))
     return problems
 
