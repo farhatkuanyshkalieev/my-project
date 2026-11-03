@@ -23,7 +23,14 @@ for cid, start in plan["clips"].items():
     a = int(start * SR)
     b = min(total, a + len(y))
     track[a:b] += y[: b - a]
-sf.write(f"public/vo/{name}.wav", track, SR, subtype="PCM_24")
+raw_path = f"public/vo/{name}.raw.wav"
+sf.write(raw_path, track, SR, subtype="PCM_24")
+# голос — к −16 LUFS с потолком −1.5 dBTP (музыка под ним будет ~ −30 LUFS)
+import subprocess
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw_path, "-af",
+                "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", str(SR), "-ac", "1", "-c:a", "pcm_s24le", f"public/vo/{name}.wav"], check=True)
+os.remove(raw_path)
+track, _ = sf.read(f"public/vo/{name}.wav")
 
 # дакинг: где голос звучит — музыка 0.3, в паузах — 1.0; атака 2 кадра, отпускание 12 кадров
 hop = SR // FPS

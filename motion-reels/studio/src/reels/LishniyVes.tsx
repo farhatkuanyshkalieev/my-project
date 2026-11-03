@@ -126,7 +126,8 @@ const musicVolume = (f: number) => {
   });
   // дакинг под голосом (посчитан build_vo.py по реальной дорожке)
   const vo = (DUCK as number[])[Math.min(f, DUCK.length - 1)] ?? 1;
-  return 0.6 * duck * vo;
+  // 0.3 в паузах (≈ −20 LUFS), под голосом ×0.3 → ≈ −30 LUFS, на 14 dB ниже голоса
+  return 0.3 * duck * vo;
 };
 
 const Scene: React.FC = () => {
