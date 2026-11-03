@@ -327,13 +327,14 @@ export const Tree: React.FC<{
 };
 
 /* ───────────────────────── Карточка исследования ───────────────────────── */
-export const ResearchCard: React.FC<{ at: number; end: number; y: number; title: string; sub: string; dark?: boolean }> = ({
+export const ResearchCard: React.FC<{ at: number; end: number; y: number; title: string; sub: string; dark?: boolean; label?: string }> = ({
   at,
   end,
   y,
   title,
   sub,
   dark,
+  label = "исследование",
 }) => (
   <Shell at={at} end={end} style={{ left: 150, right: 150, top: y }}>
     <div
@@ -367,7 +368,7 @@ export const ResearchCard: React.FC<{ at: number; end: number; y: number; title:
       </div>
       <div style={{ ...textStyle, letterSpacing: "-0.035em" }}>
         <div style={{ fontSize: 24, fontWeight: 600, color: dark ? "rgba(255,255,255,0.5)" : C.grey, letterSpacing: 0 }}>
-          исследование
+          {label}
         </div>
         <div style={{ fontSize: 38, color: dark ? "white" : C.ink, marginTop: 4 }}>{title}</div>
         <div style={{ fontSize: 28, fontWeight: 500, color: dark ? "rgba(255,255,255,0.6)" : "#6E6B71", marginTop: 4 }}>{sub}</div>
@@ -446,13 +447,15 @@ export const StepRing: React.FC<{
 };
 
 /* ───────────────────────── 3D-айфон с чек-листом ───────────────────────── */
-export const Phone: React.FC<{ at: number; end: number; y: number; nick: string; items: string[] }> = ({
-  at,
-  end,
-  y,
-  nick,
-  items,
-}) => {
+export const Phone: React.FC<{
+  at: number;
+  end: number;
+  y: number;
+  nick: string;
+  items: string[];
+  /** Свой экран вместо чек-листа (например, директ) */
+  screen?: React.ReactNode;
+}> = ({ at, end, y, nick, items, screen }) => {
   const frame = useCurrentFrame();
   if (!visible(frame, at, end)) return null;
   const f0 = s2f(at);
@@ -477,6 +480,7 @@ export const Phone: React.FC<{ at: number; end: number; y: number; nick: string;
         }}
       >
         <div style={{ position: "absolute", top: 22, left: "50%", translate: "-50% 0", width: 170, height: 48, borderRadius: 30, background: "#000", zIndex: 2 }} />
+        {screen ?? (
         <div style={{ padding: "96px 34px 0", fontFamily: `'${FONT}', sans-serif`, color: "white" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 18, paddingBottom: 22, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
             <div style={{ width: 70, height: 70, borderRadius: "50%", background: `linear-gradient(135deg,#F2B8C6,${C.wine})` }} />
@@ -521,6 +525,7 @@ export const Phone: React.FC<{ at: number; end: number; y: number; nick: string;
             })}
           </div>
         </div>
+        )}
       </div>
     </div>
   );
