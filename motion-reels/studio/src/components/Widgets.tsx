@@ -261,7 +261,9 @@ export const Tree: React.FC<{
   title: string;
   left: [string, string];
   right: [string, string];
-}> = ({ at, end, y, title, left, right }) => {
+  /** Секунды появления веток под голос; без них — по фиксированным задержкам */
+  cues?: { left: number; leftSub: number; right: number; rightSub: number };
+}> = ({ at, end, y, title, left, right, cues }) => {
   const frame = useCurrentFrame();
   if (!visible(frame, at, end)) return null;
   const f0 = s2f(at);
@@ -270,8 +272,11 @@ export const Tree: React.FC<{
   const L = stairs(510, top, 270, top + 230, 5);
   const R = stairs(570, top, 810, top + 230, 5);
   const t = blurIn(frame, f0, 9);
-  const lineP = prog(frame, f0 + 6, 16, (x) => x);
-  const lab = (delay: number) => blurIn(frame, f0 + delay, 9);
+  const c = cues ?? { left: at + 0.6, leftSub: at + 0.6, right: at + 0.8, rightSub: at + 0.8 };
+  // ветка «дорисовывается» к своему слову: заканчивает ровно в момент, когда его произносят
+  const lineL = prog(frame, s2f(c.left) - 14, 14, (x) => x);
+  const lineR = prog(frame, s2f(c.right) - 14, 14, (x) => x);
+  const labAt = (sec: number) => blurIn(frame, s2f(sec), 9);
   const labStyle = (side: "l" | "r"): React.CSSProperties => ({
     position: "absolute",
     top: top + 250,
@@ -280,8 +285,10 @@ export const Tree: React.FC<{
     textAlign: "center",
     ...textStyle,
   });
-  const L1 = lab(18);
-  const R1 = lab(24);
+  const L1 = labAt(c.left);
+  const R1 = labAt(c.right);
+  const L2 = labAt(c.leftSub);
+  const R2 = labAt(c.rightSub);
   return (
     <div style={{ position: "absolute", left: 0, top: y, width: 1080, height: 520, opacity: o.opacity, filter: `blur(${o.blur}px)` }}>
       <div
@@ -303,16 +310,16 @@ export const Tree: React.FC<{
       </div>
       <svg width={1080} height={520} style={{ position: "absolute", inset: 0 }}>
         {[L, R].map((d, i) => (
-          <path key={i} d={d} stroke={C.wine} strokeWidth={8} fill="none" strokeLinejoin="round" strokeLinecap="round" {...evolvePath(lineP, d)} />
+          <path key={i} d={d} stroke={C.wine} strokeWidth={8} fill="none" strokeLinejoin="round" strokeLinecap="round" {...evolvePath(i ? lineR : lineL, d)} />
         ))}
       </svg>
       {[
-        { s: L1, side: "l" as const, txt: left },
-        { s: R1, side: "r" as const, txt: right },
-      ].map(({ s, side, txt }) => (
-        <div key={side} style={{ ...labStyle(side), opacity: s.opacity, filter: s.filter, scale: s.scale }}>
-          <div style={{ fontSize: 60, color: C.wineText }}>{txt[0]}</div>
-          <div style={{ fontSize: 42, color: C.ink, marginTop: 6 }}>{txt[1]}</div>
+        { s: L1, s2: L2, side: "l" as const, txt: left },
+        { s: R1, s2: R2, side: "r" as const, txt: right },
+      ].map(({ s, s2, side, txt }) => (
+        <div key={side} style={labStyle(side)}>
+          <div style={{ fontSize: 62, color: C.wineText, opacity: s.opacity, filter: s.filter, scale: s.scale }}>{txt[0]}</div>
+          <div style={{ fontSize: 46, color: C.ink, marginTop: 8, opacity: s2.opacity, filter: s2.filter, scale: s2.scale }}>{txt[1]}</div>
         </div>
       ))}
     </div>
@@ -370,10 +377,19 @@ export const ResearchCard: React.FC<{ at: number; end: number; y: number; title:
 );
 
 /* ───────────────────────── Кольцо шагов ───────────────────────── */
-export const StepRing: React.FC<{ at: number; fillDur: number; end: number; y: number }> = ({ at, fillDur, end, y }) => {
+export const StepRing: React.FC<{
+  at: number;
+  fillDur: number;
+  end: number;
+  y: number;
+  from?: number;
+  to?: number;
+  kcalLabel?: string;
+  fillAt?: number; // секунда начала счёта (по умолчанию через 0.2 с после появления)
+}> = ({ at, fillDur, end, y, from = 3000, to = 10000, kcalLabel, fillAt }) => {
   const frame = useCurrentFrame();
-  const p = prog(frame, s2f(at) + 6, s2f(fillDur), ringEase);
-  const steps = 3000 + 7000 * p;
+  const p = prog(frame, fillAt !== undefined ? s2f(fillAt) : s2f(at) + 6, s2f(fillDur), ringEase);
+  const steps = from + (to - from) * p;
   const r = 230;
   const circ = 2 * Math.PI * r;
   const kcal = blurIn(frame, s2f(at + fillDur) + 4, 9);
@@ -391,7 +407,7 @@ export const StepRing: React.FC<{ at: number; fillDur: number; end: number; y: n
             fill="none"
             strokeLinecap="round"
             strokeDasharray={circ}
-            strokeDashoffset={circ * (1 - (0.3 + 0.7 * p))}
+            strokeDashoffset={circ * (1 - steps / to)}
           />
         </svg>
         <div
@@ -410,6 +426,7 @@ export const StepRing: React.FC<{ at: number; fillDur: number; end: number; y: n
           <div style={{ fontSize: 46, color: "rgba(255,255,255,0.6)", marginTop: 6 }}>шагов</div>
         </div>
       </div>
+{kcalLabel ? (
       <div
         style={{
           ...textStyle,
@@ -421,8 +438,9 @@ export const StepRing: React.FC<{ at: number; fillDur: number; end: number; y: n
           scale: kcal.scale,
         }}
       >
-        ≈ +300 ккал
+        {kcalLabel}
       </div>
+      ) : null}
     </Shell>
   );
 };
