@@ -21,7 +21,7 @@ const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : n
     const outdir = flag('--outdir');
     fs.mkdirSync(outdir, { recursive: true });
     for (const s of frames.split(',').map(Number)) {
-      await page.evaluate((t) => window.render(t), s);
+      await page.evaluate(async (t) => { await window.render(t); }, s);
       await page.screenshot({ path: path.join(outdir, `f_${s.toFixed(1).padStart(4, '0')}.png`) });
     }
     await browser.close();
@@ -34,7 +34,7 @@ const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : n
     '-c:a', 'aac', '-b:a', '160k', '-shortest', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
   const n = Math.round(FPS * DUR);
   for (let i = 0; i < n; i++) {
-    await page.evaluate((t) => window.render(t), i / FPS);
+    await page.evaluate(async (t) => { await window.render(t); }, i / FPS);
     const buf = await page.screenshot({ type: 'jpeg', quality: 95 });
     if (!ff.stdin.write(buf)) await new Promise((r) => ff.stdin.once('drain', r));
   }

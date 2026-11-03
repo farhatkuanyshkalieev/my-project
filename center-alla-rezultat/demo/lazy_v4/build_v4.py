@@ -111,7 +111,6 @@ SCENES_2_4 = """<!-- ===================== SCENE 2: Тоже я (simplified) ===
   </div>
   <div class="btn" id="cta" style="top:1300px; overflow:hidden"><div class="shine" id="shine"></div><b>Напишите «ЛЕНЬ»</b><small>в директ @center.alla.rezultat</small></div>
   <div class="abs center" style="top:1700px; font-weight:600; font-size:32px; color:var(--grey)">Алматы · Аксай-1, 10/3 · аль-Фараби, 83</div>
-  <div class="abs center demo" style="top:1830px">демо-концепт ролика</div>
 </div></div>
 
 <script>"""
@@ -119,7 +118,7 @@ SCENES_2_4 = """<!-- ===================== SCENE 2: Тоже я (simplified) ===
 FIGURE_JS = r"""/* ---------- female figure, front view; p=0 before (fuller), p=1 after ---------- */
 function figure(cx, top, h, p) {
   const b = 1 - p;
-  const outer = [[0, .042], [.035, .058], [.075, .165 + .015 * b], [.13, .160 + .02 * b], [.19, .150 + .05 * b],
+  const outer = [[0, .033], [.035, .050], [.075, .165 + .015 * b], [.13, .160 + .02 * b], [.19, .150 + .05 * b],
     [.27, .108 + .075 * b], [.33, .102 + .092 * b], [.42, .176 + .068 * b], [.50, .182 + .06 * b],
     [.60, .146 + .05 * b], [.74, .090 + .03 * b], [.80, .080 + .02 * b], [.95, .052], [.99, .058]];
   const inner = [[.995, .016], [.80, .02], [.66, .006 + .012 * p], [.55, 0]];
@@ -134,18 +133,18 @@ function figure(cx, top, h, p) {
   return { body, arms, head: [cx, top - .052 * h, .058 * h, .070 * h] };
 }
 
-/* hair: voluminous mass behind the head down to the shoulders + a wavy lock over one shoulder */
+/* hair: one smooth mass framing the face down to the shoulders (drawn behind the body)
+   + a fringe whose outer edge lies inside that mass, so the two read as one shape */
 function hairBack(hx, hy, rx, ry, h, top, sway) {
-  const side = s => [[hx + s * rx * 1.30, hy - ry * 0.70], [hx + s * rx * 1.55, hy + ry * 0.35],
-                     [hx + s * (rx * 1.85 + sway), top + .085 * h], [hx + s * rx * 1.15, top + .095 * h],
-                     [hx + s * rx * 0.70, hy + ry * 1.05]];
-  return smooth([[hx, hy - ry * 1.30], ...side(1), [hx, hy + ry * 0.9], ...side(-1).reverse()]);
+  const R = [[hx + rx * 1.20, hy - ry * 0.95], [hx + rx * 1.42, hy - ry * 0.05], [hx + rx * 1.50, hy + ry * 0.85],
+             [hx + rx * 1.66 + sway, top + .085 * h], [hx + rx * 1.42 + sway, top + .135 * h], [hx + rx * 0.80, top + .115 * h]];
+  const L = R.map(([x, y]) => [2 * hx - x, y]).reverse();
+  return smooth([[hx, hy - ry * 1.34], ...R, [hx, top + .10 * h], ...L]);
 }
-function hairLock(hx, hy, rx, ry, h, top, sway) {
-  return smooth([[hx + rx * 0.82, hy + ry * 0.05], [hx + rx * 1.35, hy + ry * 0.55],
-                 [hx + rx * 1.55 + sway, top + .08 * h], [hx + rx * 1.20 + sway * 1.4, top + .14 * h],
-                 [hx + rx * 1.55 + sway * 1.8, top + .20 * h], [hx + rx * 1.00 + sway * 1.8, top + .215 * h],
-                 [hx + rx * 0.62 + sway, top + .15 * h], [hx + rx * 0.88, top + .08 * h], [hx + rx * 0.80, hy + ry * 0.75]]);
+function fringe(hx, hy, rx, ry) {
+  return smooth([[hx - rx * 1.14, hy - ry * 0.10], [hx - rx * 1.06, hy - ry * 0.85], [hx - rx * 0.20, hy - ry * 1.24],
+                 [hx + rx * 0.88, hy - ry * 1.00], [hx + rx * 1.16, hy - ry * 0.15],
+                 [hx + rx * 0.82, hy - ry * 0.42], [hx + rx * 0.10, hy - ry * 0.60], [hx - rx * 0.78, hy - ry * 0.38]]);
 }
 
 let FIG_UID = 0;
@@ -165,10 +164,8 @@ function drawFigure(g, cx, top, h, p, col, t = 0) {
       <rect x="${cx - h}" y="${top + .405 * h}" width="${2 * h}" height="${.62 * h}" fill="${col.cloth}"/>
       <rect x="${cx - h}" y="${top + .405 * h}" width="${2 * h}" height="${.025 * h}" fill="#ffffff" opacity=".25"/>
     </g>
-    <ellipse cx="${hx}" cy="${hy + ry * .12}" rx="${rx * .80}" ry="${ry * .88}" fill="${col.skin}" ${st}/>
-    <path d="M${hx - rx * .85} ${hy - ry * .25} Q${hx - rx * .2} ${hy - ry * 1.15} ${hx + rx * .95} ${hy - ry * .45}
-             Q${hx + rx * .3} ${hy - ry * .78} ${hx - rx * .85} ${hy - ry * .25}Z" fill="${col.hair}"/>
-    <path d="${hairLock(hx, hy, rx, ry, h, top, sway)}" fill="${col.hair}"/>`;
+    <ellipse cx="${hx}" cy="${hy}" rx="${rx}" ry="${ry}" fill="${col.skin}"/>
+    <path d="${fringe(hx, hy, rx, ry)}" fill="${col.hair}"/>`;
 }
 """
 
@@ -281,6 +278,7 @@ RENDER_REST_JS = r"""  /* ---- transitions (scene 1 itself is untouched) ---- */
     const sh = ((lt - 1.6) % 1.6) / 1.6;
     $('shine').style.left = (lt > 1.6 ? -200 + sh * 1100 : -300) + 'px';
   }
+  const pend = window.__pending; window.__pending = null; return pend;
 };
 
 function drift(ids, t) {
@@ -333,3 +331,23 @@ for line in ["  show('s2',", "  show('s3',", "  show('s4',"]:
 
 (HERE / "index.html").write_text(out, encoding="utf-8")
 print("written", HERE / "index.html")
+
+# --- scene 1: replace v3 calendar scene with frames pre-rendered from render_lazy_ad_v2.scene_me1 ---
+S1_HTML = """<!-- ===================== SCENE 1: original first scene (frames from v2) ===================== -->
+<div class="scene" id="s1" style="opacity:1"><img id="s1img" alt="" style="position:absolute;left:0;top:0;width:1080px;height:1920px"></div>
+
+"""
+i = out.index("<!-- ===================== SCENE 1"); j = out.index("<!-- ===================== SCENE 2")
+out = out[:i] + S1_HTML + out[j:]
+i = out.index("  /* scene 1 */\n  if (t < T_ME2) {"); j = out.index("  /* ---- transitions")
+out = out[:i] + """  /* scene 1: original first scene, pre-rendered frames */
+  if (t < T_ME2 + 0.45) {
+    const src = 's1_frames/' + String(Math.min(Math.round(t * 30), 154)).padStart(4, '0') + '.png';
+    const img = $('s1img');
+    if (img.getAttribute('src') !== src) { img.setAttribute('src', src); window.__pending = img.decode().catch(() => {}); }
+  }
+
+""" + out[j:]
+out = out.replace("  show('s1', t < T_ME2 ? 1 : 0);\n", "")
+(HERE / "index.html").write_text(out, encoding="utf-8")
+print("scene 1 replaced with v2 frames")
