@@ -33,7 +33,13 @@ Vox 拼贴的**样子**和**动效**是两件事、两步:
 
 ## 前置检查(别跳过)
 
-- `echo "${ATLASCLOUD_API_KEY:+set}"` —— 空的话让用户去 https://www.atlascloud.ai/console/api-keys 拿 key 设上,没设就停。
+- **Atlas Cloud 鉴权** —— `ATLASCLOUD_API_KEY` 是**可选**的:key 可以来自环境变量,也可以由代理注入
+  (如 Claude Code 云端的 **network secret**,绑定 `api.atlascloud.ai`,header `Authorization`,前缀 `Bearer`)。
+  没有环境变量时脚本不发 `Authorization` 头,由代理补上。别检查变量,直接用**免费**探针检查鉴权
+  (GET 一个不存在的任务 id,不建任务、不花钱):`python3 scripts/atlas_cloud.py`(退出码 0 = 通过)。
+  **401** = 未鉴权,让用户设 key(https://www.atlascloud.ai/console/api-keys)或加 network secret,然后停;
+  **404** = 鉴权通过、任务不存在(正常),继续;其他 = 异常,报告并停。不要打印或写出 key;
+  `--ping` 会真生成一张图(收费),不要拿它做就绪检查。
 - `command -v ffmpeg ffprobe` —— 合成必需(macOS:`brew install ffmpeg`)。
 - `python3 -c "import PIL"` —— Pillow,用来烧字幕/水印。
 

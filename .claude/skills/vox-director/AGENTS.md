@@ -17,7 +17,10 @@ any coding agent that can read instructions and run scripts can drive it.
 
 ## Requirements
 
-- `ATLASCLOUD_API_KEY` in the environment — https://www.atlascloud.ai/console/api-keys
+- Atlas Cloud auth: `ATLASCLOUD_API_KEY` in the environment
+  (https://www.atlascloud.ai/console/api-keys) **or** a proxy-injected credential such as a
+  Claude Code cloud network secret for `api.atlascloud.ai`. Check it for free with
+  `python3 scripts/atlas_cloud.py` (HTTP 404 = authenticated, 401 = not).
 - `ffmpeg` + `ffprobe`
 - Python 3 with `pillow`
 

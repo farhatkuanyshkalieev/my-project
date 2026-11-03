@@ -44,8 +44,20 @@ between "a real Vox collage" and "a moving PowerPoint".
 
 ## Prerequisites (check, don't skip)
 
-- `echo "${ATLASCLOUD_API_KEY:+set}"` — if empty, tell the user to set it (get one at
-  https://www.atlascloud.ai/console/api-keys) and stop.
+- **Atlas Cloud auth** — `ATLASCLOUD_API_KEY` is **optional**. The key can come from either
+  the environment variable *or* a credential-injecting proxy (e.g. a Claude Code cloud
+  **network secret** bound to `api.atlascloud.ai`, header `Authorization`, prefix `Bearer`).
+  With no env key, the scripts send no `Authorization` header and let the proxy add it.
+  Don't test for the variable — test auth itself with a **free** probe (a GET for a
+  prediction id that cannot exist; it creates nothing and costs nothing):
+  `python3 scripts/atlas_cloud.py` (exit 0 = OK), or the raw equivalent:
+  `curl -sS -o /dev/null -w "%{http_code}\n" https://api.atlascloud.ai/api/v1/model/prediction/00000000-0000-0000-0000-000000000000`
+  • **401** → not authenticated: tell the user to export `ATLASCLOUD_API_KEY` (get one at
+    https://www.atlascloud.ai/console/api-keys) or add the network secret, and stop.
+  • **404** → authenticated; the probe task just doesn't exist (expected). Proceed.
+  • anything else → the API was reached but answered unexpectedly; report it and stop.
+  Never print, echo or write the key anywhere. `atlas_cloud.py --ping` is a **paid** test
+  (one image) — don't use it as a readiness check.
 - `command -v ffmpeg ffprobe` — required for assembly (`brew install ffmpeg` on macOS).
 - `python3 -c "import PIL"` — Pillow, for captions/watermark overlays.
 
