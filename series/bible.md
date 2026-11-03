@@ -1,6 +1,6 @@
 # Библия сериала — Stickman Animation (YouTube Shorts)
 
-Статус: **этап 1 — черновик на утверждение.** Блоки помечены статусом:
+Статус: **этап 1 — направление утверждено (ред. 2: камера, мимика, живость, Consistency System, голос).** Блоки помечены статусом:
 🔒 зафиксировано · 📝 черновик, ждёт утверждения · ⏳ решение не принято.
 
 Блоки в `text`-рамках — это готовые английские фрагменты промптов. В промпты их вставляют **дословно**, без сокращений вроде «same character» или «as before».
@@ -14,7 +14,7 @@
 | Платформа | YouTube Shorts |
 | Соотношение | 9:16 (вертикаль) |
 | Длительность эпизода | 60 с |
-| Структура | 6 самостоятельных клипов по ~10 с |
+| Структура | 6 сцен = 6 самостоятельных клипов по ~10 с (без изменений) |
 | Режим скилла | A · Director (`directing-stickman-videos`) |
 | Стиль | **A4 · Style 4 Cozy Storytelling, светлая минималистичная вариация** |
 | Целевая видеомодель | Gemini Omni Flash / Omni 1.1 Flash (запасные: Kling 3 Omni, Veo 3.1) |
@@ -54,7 +54,9 @@ rapid scene changes, kinetic motion-graphic transformations, and frequent visual
 
 | ID | Роль | Файл | Статус |
 |---|---|---|---|
-| `hero` | Главный герой (рабочее имя ⏳) | [`characters/hero/character.md`](characters/hero/character.md) | 📝 описание готово, референсы на этапе 2 |
+| `hero` | Главный герой (рабочее имя ⏳) | [`characters/hero/character.md`](characters/hero/character.md) | 🔒 направление утверждено, референсы на этапе 2 |
+
+Что во внешности героя неизменно и что может меняться, задаёт **Character Consistency System** — [раздел 2 паспорта](characters/hero/character.md#2-character-consistency-system-). Её правила действуют для всех эпизодов.
 
 Второстепенных персонажей добавляем только под конкретный эпизод. Для каждого — свой полный паспорт по той же схеме и минимум два отличия от героя, не связанных с цветом. Фоновых прохожих и клонов без плана не допускаем.
 
@@ -63,28 +65,50 @@ rapid scene changes, kinetic motion-graphic transformations, and frequent visual
 - Глубина вместо горизонтали: передний, средний и задний планы, герой движется к камере или от неё.
 - Вертикальные раскрытия: тилт вверх или вниз, предмет падает или поднимается через кадр.
 - Проходы на переднем плане (дверь, лист, рука, предмет) — вытеснение кадра (wipe) для склейки.
-- Внутри 10-секундной сцены 2–3 смены плана: общий → средний → крупный по лицу ради эмоции.
-- Наезды и отъезды мотивированы действием, а не просто «зумом по картинке».
+- **Камера следует за действием.** Наезд, отъезд, панорама или проводка появляются, только когда их требует действие или эмоция: герой побежал — ведём его, удивился — подъезжаем к лицу, что-то упало — тилт вниз. Нет мотивации — нет движения камеры.
+- *Рекомендация, не обязательное правило:* внутри 10-секундной сцены обычно 2–3 смены плана (общий → средний → крупный по лицу ради эмоции). Если действие лучше читается одним непрерывным планом с проводкой, держим один план.
+- Никаких «зумов по статичной картинке»: любое движение камеры сопровождается движением персонажа.
 - Верхние ~15 % и нижние ~20 % кадра держим чистыми под интерфейс Shorts и субтитры.
 
 ## 6. Анимация и актёрская игра 📝
 
 - Каждые 2–3 секунды происходит заметное визуальное событие. Персонаж никогда не стоит без дела.
 - Только конкретные физические действия (бежит, хватает, открывает, роняет). Никаких абстрактных «перетеканий» предметов друг в друга: на них видеомодели дёргаются и теряют кадры.
-- Эмоция = глаза + брови + рот + поза тела + тайминг. Короткая реакционная пауза допустима, неподвижный «говорящий» кадр — нет.
+- Эмоция = глаза + брови + рот + наклон головы + поза тела + тайминг.
+- **Мимика:** регулярное моргание; глаза следят за предметами и движением; брови поднимаются, хмурятся и наклоняются на каждом эмоциональном такте; несколько простых форм рта; небольшие наклоны, кивки и повороты головы в соответствии с эмоцией. Рот выражает только эмоцию — герой **не говорит и не синхронизирует губы** с закадровым голосом.
+- **Живость в паузах:** реакционная пауза допустима, но герой в ней не замирает — лёгкое дыхание туловища, перенос веса с ноги на ногу, мелкие движения рук, моргание, взгляд в сторону. Движения плавные, с замахом и доводкой.
+- Подробная спецификация — в разделах 3–4 [паспорта персонажа](characters/hero/character.md).
+
+Фрагмент «актёрской игры» вставляется в каждый промпт **отдельно** от описания персонажа:
+
+```text
+CHARACTER PERFORMANCE: The character feels alive in every frame. Natural blinks every few seconds; the eyes follow moving objects and glance toward what the character is thinking about; the eyebrows rise, furrow and tilt with each emotional beat; the mouth switches between a few simple shapes (short line, smile curve, frown curve, small open oval, wide open grin) to express emotion only, and the character never speaks or lip-syncs the narration. Small head tilts, nods and turns follow the emotion. During pauses and reactions the character never freezes: subtle breathing in the torso, slight weight shifts between the feet, small arm and hand adjustments, blinks and quick eye glances. All motion is smooth, with natural anticipation, follow-through and easing.
+```
 - В кадре по-прежнему 2 руки и 2 ноги: двигающаяся конечность заменяет прежнюю позу, а не дублирует её.
 - Эффекты (линии скорости, искры, значки) рисуются на предметах или отдельно от тела, а не шлейфом от конечностей.
 - Никакого текста в кадре: пузыри сообщений, экраны и часы — только значками. Надписи добавляются на монтаже.
 
 ## 7. Звук ⏳
 
-**Голос.** Один закадровый рассказчик на весь эпизод, а лучше на весь сериал. Губы не синхронизируются, реплик персонажей нет, если отдельно не утвердим иное. Окончательный профиль утверждается на этапе 3 (Phase A).
+**Голос** ⏳ — направление задано, окончательно **не утверждён**.
 
-Черновик по умолчанию — мужской блок, который проверен в скилле на слух. Если выберете другой голос (женский, русский и т. п.), составлю новый полный блок.
+Один закадровый рассказчик на весь эпизод, а лучше на весь сериал. Губы не синхронизируются, реплик персонажей нет, если отдельно не утвердим иное.
 
-```text
-One off-screen adult male narrator throughout. General American accent, warm clean baritone, medium-low pitch, gentle chest resonance, no raspiness or breathiness. Calm conversational delivery, restrained pitch variation, steady speaking pace, and close, dry studio sound. Keep the same vocal timbre, register, accent, pace, and recording quality throughout. Emotional progression belongs to the visuals and music; do not change the narrator's voice or switch to character dialogue.
-```
+| Поле профиля | Значение |
+|---|---|
+| Кто | Молодой взрослый мужчина (≈ 20–30 лет), закадровый рассказчик |
+| Подача | Естественная, живая, с эмоциональной окраской по сюжету: удивление, ирония, тепло, напряжение |
+| Язык | ⏳ выбираем на этапе эпизода 1 |
+| Акцент, тембр, высота, резонанс | ⏳ выбираем на этапе эпизода 1 |
+| Темп | Ровный разговорный, без ускорения под хронометраж — лишний текст сокращаем |
+| Запись | Близкая, «сухая», студийная, без реверберации помещения |
+
+Правила скилла, которые сохраняются при любом выборе:
+- Эмоция меняет интонацию, акценты и паузы, но **не** личность голоса: тембр, высота, акцент, темп и запись одинаковы во всех клипах.
+- На этапе эпизода 1 из этих полей собирается один полный английский блок голоса. Он замораживается и вставляется дословно во все 6 промптов.
+- Музыка и визуал несут эмоциональную дугу, голос не «переигрывает» сцену.
+
+Для стабильности между клипами рекомендую записать одну цельную дорожку озвучки в ElevenLabs и подложить её при монтаже. Звук видеомодели оставляем для эффектов.
 
 Для стабильности между клипами рекомендую записать одну цельную дорожку озвучки в ElevenLabs и подложить её при монтаже. Звук видеомодели оставляем для эффектов.
 
@@ -95,7 +119,7 @@ One off-screen adult male narrator throughout. General American accent, warm cle
 ## 8. Общие запреты (negative) 📝
 
 ```text
-No photorealism, no 3D CGI or 3D humanoid rendering, no realistic skin, no detailed irises or pupils, no lips, no nose, no hair, no clothing or accessories on the character, no extra or duplicated limbs, no retained previous limb poses, no changing head or body proportions, no broken or changing line weight, no unintended extra characters or clones, no paper texture, no sketchbook border, no white card frame, no visible words, letters, numbers, captions, subtitles, logos or watermarks, no speech bubbles or dialogue boxes, no abstract liquid morphing of objects, no static image with only a zoom; the character must be fully animated.
+No photorealism, no 3D CGI or 3D humanoid rendering, no realistic skin, no detailed irises or pupils, no lips, no nose, no hair, no clothing or accessories on the character, no extra or duplicated limbs, no retained previous limb poses, no changing head or body proportions, no broken or changing line weight, no unintended extra characters or clones, no paper texture, no sketchbook border, no white card frame, no visible words, letters, numbers, captions, subtitles, logos or watermarks, no speech bubbles or dialogue boxes, no abstract liquid morphing of objects, no static image with only a zoom, no frozen or unblinking face, no lip-sync or talking mouth; the character must be fully animated.
 ```
 
 ## 9. Конвейер эпизода
