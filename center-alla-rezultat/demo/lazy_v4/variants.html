@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><title>hair variants</title>
+<link rel="stylesheet" href="fonts/montserrat.css">
+<style>
+html,body{margin:0;width:1600px;height:1040px;background:#F4FBFA;font-family:Montserrat}
+.cell{position:absolute;width:760px;height:480px;border-radius:28px;background:linear-gradient(#fff,#E6F8F6);
+      box-shadow:0 14px 40px rgba(18,140,132,.12);overflow:hidden}
+.cell svg{position:absolute;left:0;top:70px}
+.l{position:absolute;left:30px;top:22px;font-weight:800;font-size:32px;color:#373435}
+.l b{color:#1EBBB0}
+</style></head>
+<body>
+<div class="cell" style="left:30px;top:30px"><div class="l"><b>A</b> · длинные волосы на подушке</div><svg width="760" height="410" viewBox="-110 -250 760 410"><g id="A"></g></svg></div>
+<div class="cell" style="left:810px;top:30px"><div class="l"><b>B</b> · пучок</div><svg width="760" height="410" viewBox="-110 -250 760 410"><g id="B"></g></svg></div>
+<div class="cell" style="left:30px;top:540px"><div class="l"><b>C</b> · коса</div><svg width="760" height="410" viewBox="-110 -250 760 410"><g id="C"></g></svg></div>
+<div class="cell" style="left:810px;top:540px"><div class="l"><b>D</b> · высокий хвост</div><svg width="760" height="410" viewBox="-110 -250 760 410"><g id="D"></g></svg></div>
+<script>function smooth(){return ''}</script>
+<script src="lying_simple.js"></script>
+<script>['A','B','C','D'].forEach(v => drawLyingSimple(document.getElementById(v), 0, 0, 1, 0.3, v));</script>
+</body></html>
