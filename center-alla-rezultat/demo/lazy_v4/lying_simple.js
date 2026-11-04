@@ -62,7 +62,7 @@ function drawLyingSimple(g, ox, oy, s, t, variant = LS_DEFAULT_VARIANT) {
 
 
 /* ===== hairstyles (head centre 145,-65, r 65; crown towards the pillow, face to the right) ===== */
-const LS_DEFAULT_VARIANT = 'A';
+const LS_DEFAULT_VARIANT = 'B';
 const H = LS_COL.hair, H2 = '#7A5040';   // hair + a lighter tone for subtle strands
 
 // shared: smooth cap over the crown with a side-swept fringe, face left open
