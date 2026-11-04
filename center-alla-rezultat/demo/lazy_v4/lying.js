@@ -32,10 +32,18 @@ function lyHead() {
 }
 // hair: ONE shape. Outer edge wraps the crown and flows over the pillow; the inner edge
 // is the hairline on the head, so there is no seam between pieces.
-function lyHair(sway) {
-  return smooth([[56, -114], [34, -112], [14, -100], [0, -82], [-8, -62], [-24, -58], [-46, -56 + sway],
-                 [-68, -50 + sway], [-86, -44 + sway], [-98, -37], [-92, -31], [-70, -30], [-40, -30],
-                 [-6, -30], [26, -29], [44, -25], [30, -38], [22, -60], [26, -84], [40, -104]]);
+function lyHair() {
+  // Hand-set cubic Béziers with matching tangents at every joint -> one clean, even silhouette.
+  // forehead -> round crown -> soft drape onto the pillow -> rounded end -> along the pillow
+  // -> rounded nape -> hairline on the side of the head -> back to the forehead
+  return 'M60 -110' +
+    ' C44 -120, 14 -112, 4 -92' +        // crown
+    ' C-6 -72, -50 -46, -84 -36' +       // drape onto the pillow
+    ' C-90 -34, -90 -28.5, -78 -28.5' +  // rounded end
+    ' L36 -27.5' +                       // resting on the pillow
+    ' C44 -27.5, 44 -36, 40 -46' +       // nape
+    ' C36 -58, 36 -86, 48 -102' +        // hairline behind the ear and temple
+    ' C52 -107, 56 -109, 60 -110 Z';     // to the forehead
 }
 
 function drawLying(g, ox, oy, s, t) {
@@ -87,7 +95,7 @@ function drawLying(g, ox, oy, s, t) {
     </g>
     <!-- head (profile), then the hair as one shape on top -->
     <path d="${lyHead()}" fill="url(#lySkin)"/>
-    <path d="${lyHair(sway)}" fill="${LY.hair}"/>
+    <path d="${lyHair()}" fill="${LY.hair}"/>
     <!-- near arm -->
     <path d="${arm}" fill="url(#lySkin)" stroke="#20BDB3" stroke-width="2.5" stroke-linejoin="round"/>
     <!-- EMS pads -->
