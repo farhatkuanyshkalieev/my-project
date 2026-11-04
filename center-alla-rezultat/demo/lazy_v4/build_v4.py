@@ -34,8 +34,7 @@ SCENES_2_4 = """<!-- ===================== SCENE 2: Тоже я (simplified) ===
       <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#128C84" flood-opacity=".18"/></filter>
     </defs>
     <g id="waves2" fill="none" stroke="#3CE0D7" stroke-linecap="round"></g>
-    <ellipse cx="540" cy="900" rx="190" ry="24" fill="#128C84" opacity=".08"/>
-    <g filter="url(#shadow)"><g id="fig2"></g></g>
+    <g id="fig2"></g>
     <g id="zones2"></g>
   </svg>
   <div class="card" id="cmp2" style="left:90px; top:1560px; width:900px; height:250px; display:flex; align-items:center">
@@ -113,6 +112,7 @@ SCENES_2_4 = """<!-- ===================== SCENE 2: Тоже я (simplified) ===
   <div class="abs center" style="top:1700px; font-weight:600; font-size:32px; color:var(--grey)">Алматы · Аксай-1, 10/3 · аль-Фараби, 83</div>
 </div></div>
 
+<script src="lying.js"></script>
 <script>"""
 
 FIGURE_JS = r"""/* ---------- female figure, front view; p=0 before (fuller), p=1 after ---------- */
@@ -189,22 +189,21 @@ RENDER_REST_JS = r"""  /* ---- transitions (scene 1 itself is untouched) ---- */
     const s = 1 + 0.22 * Math.max(0, 1 - lt / 0.22);
     $('s2title').style.transform = `scale(${s})`;
     words('s2sub', ['лежу', '30', 'минут', '—', '\n', 'а', 'мышцы', 'работают'], lt - 0.45, 0.09, 4);
-    drawFigure($('fig2'), 540, 150, 720, 0.8,
-               { skin: '#E4FAF8', cloth: '#3CE0D7', hair: '#5C3A2C', stroke: '#A5EAE4' }, lt);
+    // girl lying on the couch, side view (lying.js)
+    const LOX = 154, LOY = 560, LS = 1.06;
+    drawLying($('fig2'), LOX, LOY, LS, lt);
     const pulse = Math.pow(Math.abs(Math.sin(lt * Math.PI * 2.4)), 2);
-    const zx = 540, zt = 150, zh = 720;
-    const zones = [[zx - .035 * zh, zt + .27 * zh, 28, 34], [zx + .035 * zh, zt + .27 * zh, 28, 34],
-                   [zx - .035 * zh, zt + .335 * zh, 28, 34], [zx + .035 * zh, zt + .335 * zh, 28, 34],
-                   [zx - .09 * zh, zt + .56 * zh, 44, 78], [zx + .09 * zh, zt + .56 * zh, 44, 78]];
     const za = ease((lt - 0.3) / 0.5);
-    $('zones2').innerHTML = zones.map(([x, y, rx, ry]) =>
-      `<ellipse cx="${x}" cy="${y}" rx="${rx * 1.7}" ry="${ry * 1.5}" fill="url(#gZone)" opacity="${(0.3 + 0.6 * pulse) * za}" filter="url(#soft)"/>
-       <ellipse cx="${x}" cy="${y}" rx="${rx * .55}" ry="${ry * .6}" fill="#3CE0D7" opacity="${(0.25 + 0.45 * pulse) * za}"/>`).join('');
+    $('zones2').innerHTML = '';
+    // EMS waves rising from the pads on the belly and the thigh
     let w = '';
-    for (let i = 0; i < 3; i++) {
-      const ph = (lt * 0.9 + i / 3) % 1, r = 70 + ph * 300;
-      w += `<circle cx="540" cy="${150 + .3 * 720}" r="${r}" stroke-width="${8 * (1 - ph)}" opacity="${0.45 * (1 - ph) * za}"/>`;
-    }
+    [[332, -66], [530, -68]].forEach(([px, py], k) => {
+      const cx = LOX + px * LS, cy = LOY + py * LS;
+      for (let i = 0; i < 3; i++) {
+        const ph = (lt * 0.8 + i / 3 + k * 0.15) % 1, r = 40 + ph * 260;
+        w += `<path d="M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}" stroke-width="${7 * (1 - ph)}" opacity="${0.5 * (1 - ph) * za}"/>`;
+      }
+    });
     $('waves2').innerHTML = w;
     $('cmp2').style.opacity = ease((lt - 0.8) / 0.35);
     $('cmp2').style.transform = `translateY(${(1 - eo((lt - 0.8) / 0.45)) * 40}px)`;
