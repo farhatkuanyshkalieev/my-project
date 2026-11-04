@@ -197,7 +197,8 @@ RENDER_REST_JS = r"""  /* ---- transitions (scene 1 itself is untouched) ---- */
     $('zones2').innerHTML = '';
     // EMS waves rising from the pads on the belly and the thigh
     let w = '';
-    [[332, -66], [530, -68]].forEach(([px, py], k) => {
+    [[334, -66], [530, -68]].forEach(([px0, py0], k) => {
+      const [px, py] = lyRot(px0, py0);
       const cx = LOX + px * LS, cy = LOY + py * LS;
       for (let i = 0; i < 3; i++) {
         const ph = (lt * 0.8 + i / 3 + k * 0.15) % 1, r = 40 + ph * 260;
