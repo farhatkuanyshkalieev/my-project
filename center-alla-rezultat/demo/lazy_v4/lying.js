@@ -36,33 +36,42 @@ function lyRot(x, y, k = 1) {
   const a = r.ang * w * Math.PI / 180, dx = x - r.px, dy = y - r.py;
   return [r.px + dx * Math.cos(a) - dy * Math.sin(a), r.py + dx * Math.sin(a) + dy * Math.cos(a)];
 }
-const LY_HEAD = (() => { const [x, y] = lyRot(66, -80); return { x, y, rot: -22 }; })();
+// head on the shoulders, along the reclined torso axis, slightly turned up to the viewer
+const LY_HEAD = { x: 130, y: -184, rot: -34 };
 
 function lyPts(arr) { return arr.map(([x, y]) => lyRot(x, y)); }
 
 /* --- head in its own upright frame: face centre at 0,0, face oval rx 30, ry 38 --- */
 // hair behind the face: rounded crown, falls to shoulder length on both sides
-const LY_HAIR_BACK = 'M0 -54' +
-  ' C28 -54, 46 -38, 48 -10' +      // crown -> right side
-  ' C50 18, 50 50, 48 76' +         // right side to the shoulder
-  ' C47 88, 30 90, 29 78' +         // rounded end
-  ' C27 56, 24 38, 20 24' +         // inner edge (hidden by the face/neck)
-  ' L-20 24' +
-  ' C-30 40, -44 58, -60 70' +      // left side flows out over the pillow
-  ' C-68 77, -80 73, -79 63' +      // rounded end
-  ' C-76 40, -66 16, -58 -8' +      // outer left edge going up
-  ' C-50 -36, -28 -54, 0 -54 Z';
-// front layer: side part, fringe swept across the forehead, lock along the cheek towards the shoulder
-const LY_HAIR_FRONT = 'M-6 -51' +
-  ' C14 -53, 34 -41, 39 -18' +
-  ' C43 6, 44 46, 42 82' +
-  ' C41 94, 27 96, 27 84' +
-  ' C26 56, 26 24, 24 4' +
-  ' C22 -13, 11 -25, -6 -28' +
-  ' C-18 -29, -28 -24, -33 -13' +
-  ' C-36 -30, -26 -47, -6 -51 Z';
-// short neck from under the chin to the shoulder
-const LY_NECK = 'M-13 20 C-13 34, -12 46, -10 62 L18 62 C16 46, 14 34, 13 20 Z';
+const LY_HAIR_BACK = 'M0 -50' +
+  ' C26 -50, 42 -34, 42 -8' +       // crown -> right
+  ' C42 24, 42 56, 40 82' +         // right side, softly to the shoulder
+  ' C39 94, 28 98, 18 96' +         // rounded end
+  ' C6 100, -6 100, -18 96' +       // behind the neck (no gaps)
+  ' C-28 98, -39 94, -40 82' +      // rounded end
+  ' C-42 56, -42 24, -42 -8' +      // left side
+  ' C-42 -34, -26 -50, 0 -50 Z';
+// front layer: side part, fringe in a soft arc across the forehead, lock along the cheek over the shoulder
+const LY_HAIR_FRONT = 'M-8 -46' +
+  ' C14 -48, 36 -36, 40 -10' +
+  ' C44 22, 43 54, 41 80' +
+  ' C40 92, 29 94, 28 84' +
+  ' C27 58, 26 34, 24 10' +
+  ' C22 -8, 12 -20, -4 -24' +
+  ' C-16 -26, -26 -18, -30 -6' +
+  ' C-32 -26, -24 -42, -8 -46 Z';
+// face and neck as ONE shape (one colour, no seam); the neck widens towards the shoulders
+const LY_SKIN = 'M-30 0' +
+  ' C-30 -22, -17 -38, 0 -38' +
+  ' C17 -38, 30 -22, 30 0' +
+  ' C30 18, 21 31, 12 37' +
+  ' C12 48, 15 58, 22 68' +
+  ' L-20 68' +
+  ' C-14 58, -12 48, -12 37' +
+  ' C-21 31, -30 18, -30 0 Z';
+// soft shadow under the chin
+const LY_CHIN = 'M-12 37 C-5 43, 5 43, 12 37 C12 42, 12.5 47, 13 51 C5 47, -5 47, -12.5 51 C-12 47, -12 42, -12 37 Z';
+const LY_SKIN_COLOR = '#86EEE7', LY_CHIN_COLOR = '#5FE0D7';
 
 function lyHeadTransform() { return `translate(${LY_HEAD.x} ${LY_HEAD.y}) rotate(${LY_HEAD.rot})`; }
 
@@ -114,8 +123,11 @@ function drawLying(g, ox, oy, s, t) {
       <ellipse cx="530" cy="-62" rx="85" ry="34" fill="url(#lyGlow)" filter="url(#lyBlur)"/>
     </g>
     <!-- hair behind the head, then the neck (its base is hidden by the shoulders) -->
-    <g transform="${lyHeadTransform()}"><path d="${LY_HAIR_BACK}" fill="${LY.hair}"/>
-      <path d="${LY_NECK}" fill="url(#lyFace)"/></g>
+    <g transform="${lyHeadTransform()}">
+      <path d="${LY_HAIR_BACK}" fill="${LY.hair}"/>
+      <path d="${LY_SKIN}" fill="${LY_SKIN_COLOR}"/>
+      <path d="${LY_CHIN}" fill="${LY_CHIN_COLOR}" opacity=".55"/>
+    </g>
     <!-- body -->
     <path d="${body}" fill="url(#lySkin)"/>
     <g clip-path="url(#lyBodyClip)">
@@ -125,7 +137,6 @@ function drawLying(g, ox, oy, s, t) {
     </g>
     <!-- neck, face (plain oval, no features), front hair -->
     <g transform="${lyHeadTransform()}">
-      <ellipse cx="0" cy="0" rx="30" ry="38" fill="url(#lyFace)"/>
       <path d="${LY_HAIR_FRONT}" fill="${LY.hair}"/>
     </g>
     <!-- near arm -->
