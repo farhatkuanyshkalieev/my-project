@@ -51,7 +51,7 @@ SCENES_2_4 = """<!-- ===================== SCENE 2: Тоже я (simplified) ===
     <circle id="c3b" cx="1100" cy="430" r="300" fill="#3CE0D7" opacity=".1"/>
   </svg>
   <div class="abs center" style="top:290px"><h1 id="s3title" style="font-size:112px"></h1></div>
-  <div class="abs center sub" id="s3sub" style="top:420px; color:var(--turq-d); font-weight:700">30 минут · без нагрузки</div>
+  <div class="abs center sub" id="s3sub" style="top:420px; color:var(--turq-d); font-weight:700">45 минут · без нагрузки</div>
   <svg class="abs" style="left:0; top:540px" width="1080" height="880" viewBox="0 0 1080 880">
     <defs>
       <linearGradient id="gSkinB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D3DADC"/><stop offset="1" stop-color="#B9C3C6"/></linearGradient>
@@ -108,11 +108,13 @@ SCENES_2_4 = """<!-- ===================== SCENE 2: Тоже я (simplified) ===
     <div style="width:2px; height:130px; background:#E3F4F2"></div>
     <div style="text-align:center"><div class="stat-val" id="n1" style="color:var(--turq-d)">0</div><div class="stat-label">месяц</div></div>
   </div>
-  <div class="btn" id="cta" style="top:1300px; overflow:hidden"><div class="shine" id="shine"></div><b>Напишите «ЛЕНЬ»</b><small>в директ @center.alla.rezultat</small></div>
-  <div class="abs center" style="top:1700px; font-weight:600; font-size:32px; color:var(--grey)">Алматы · Аксай-1, 10/3 · аль-Фараби, 83</div>
+  <div class="btn" id="cta" style="top:1300px; overflow:hidden"><div class="shine" id="shine"></div><b>Оставьте заявку</b><small>по телефону</small></div>
+  <div class="abs center" id="phone" style="top:1500px; font-weight:900; font-size:66px; color:var(--graphite); letter-spacing:.02em"><svg width="52" height="52" viewBox="0 0 24 24" style="vertical-align:-6px; margin-right:14px" fill="#1EBBB0"><path d="M6.6 10.8a15.1 15.1 0 006.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 013 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>8 707 474 78 24</div>
+  <div class="abs center" style="top:1700px; font-weight:600; font-size:32px; color:var(--grey)">Алматы · Аксай-1, 10/3 · Аль-Фараби, 83</div>
 </div></div>
 
 <script src="lying.js"></script>
+<script src="lying_simple.js"></script>
 <script>"""
 
 FIGURE_JS = r"""/* ---------- female figure, front view; p=0 before (fuller), p=1 after ---------- */
@@ -188,10 +190,10 @@ RENDER_REST_JS = r"""  /* ---- transitions (scene 1 itself is untouched) ---- */
     drift(['c2a', 'c2b', 'c2c'], t);
     const s = 1 + 0.22 * Math.max(0, 1 - lt / 0.22);
     $('s2title').style.transform = `scale(${s})`;
-    words('s2sub', ['лежу', '30', 'минут', '—', '\n', 'а', 'мышцы', 'работают'], lt - 0.45, 0.09, 4);
+    words('s2sub', ['лежу', '45', 'минут', '—', '\n', 'а', 'мышцы', 'работают'], lt - 0.45, 0.09, 4);
     // girl lying on the couch, side view (lying.js)
     const LOX = 154, LOY = 560, LS = 1.06;
-    drawLying($('fig2'), LOX, LOY, LS, lt);
+    drawLyingSimple($('fig2'), 50, 560, 1.0, lt);
     const pulse = Math.pow(Math.abs(Math.sin(lt * Math.PI * 2.4)), 2);
     const za = ease((lt - 0.3) / 0.5);
     $('zones2').innerHTML = '';
@@ -205,7 +207,7 @@ RENDER_REST_JS = r"""  /* ---- transitions (scene 1 itself is untouched) ---- */
         w += `<path d="M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}" stroke-width="${7 * (1 - ph)}" opacity="${0.5 * (1 - ph) * za}"/>`;
       }
     });
-    $('waves2').innerHTML = w;
+    $('waves2').innerHTML = '';
     $('cmp2').style.opacity = ease((lt - 0.8) / 0.35);
     $('cmp2').style.transform = `translateY(${(1 - eo((lt - 0.8) / 0.45)) * 40}px)`;
     const mp = eo((lt - 1.0) / 2.4);
@@ -271,9 +273,11 @@ RENDER_REST_JS = r"""  /* ---- transitions (scene 1 itself is untouched) ---- */
     $('s4stats').style.opacity = sa;
     $('s4stats').style.transform = `translateY(${(1 - eo((lt - 0.8) / 0.45)) * 40}px)`;
     const c = eo((lt - 0.9) / 1.0);
-    $('n30').textContent = Math.round(30 * c); $('n1').textContent = Math.round(1 * c);
+    $('n30').textContent = Math.round(45 * c); $('n1').textContent = Math.round(1 * c);
     const a = ease((lt - 1.3) / 0.35);
     $('cta').style.opacity = a;
+    $('phone').style.opacity = ease((lt - 1.6) / 0.35);
+    $('phone').style.transform = `translateY(${(1 - eo((lt - 1.6) / 0.45)) * 30}px)`;
     $('cta').style.transform = `translateY(${(1 - eo((lt - 1.3) / 0.45)) * 40}px) scale(${1 + 0.025 * Math.sin(lt * 6)})`;
     const sh = ((lt - 1.6) % 1.6) / 1.6;
     $('shine').style.left = (lt > 1.6 ? -200 + sh * 1100 : -300) + 'px';
