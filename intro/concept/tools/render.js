@@ -10,13 +10,19 @@ const { spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const TL = JSON.parse(fs.readFileSync(path.join(ROOT, 'timeline.json'), 'utf8'));
-const URL = 'file://' + path.join(ROOT, 'index.html');
+const PAGE_URL = 'file://' + path.join(ROOT, 'index.html');
 const mk = d => fs.mkdirSync(path.join(ROOT, d), { recursive: true });
 
 async function open(browser, mode, w = 1080, h = 1920) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
+  page.setDefaultTimeout(180000);
   page.on('pageerror', e => console.error('pageerror', e.message));
-  await page.goto(URL + '#' + mode, { waitUntil: 'domcontentloaded', timeout: 180000 });
+  // serve three.js and the fonts from vendor/ so rendering never waits on the network
+  const V = path.join(ROOT, 'vendor');
+  await page.route('https://cdnjs.cloudflare.com/**', r => r.fulfill({ path: path.join(V, 'three.r128.min.js'), contentType: 'application/javascript' }));
+  await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ path: path.join(V, 'fonts/fonts.css'), contentType: 'text/css' }));
+  await page.route('https://fonts.gstatic.com/**', r => r.fulfill({ path: path.join(V, 'fonts', path.basename(new URL(r.request().url()).pathname)), contentType: 'font/woff2' }));
+  await page.goto(PAGE_URL + '#' + mode, { waitUntil: 'domcontentloaded', timeout: 180000 });
   await page.waitForFunction(() => typeof window.__ready === 'function', null, { timeout: 180000 });
   const ok = await page.evaluate(() => window.__ready());
   if (!ok) throw new Error('3D scene did not start (WebGL/three.js)');
@@ -36,14 +42,18 @@ function ffmpeg(args) {
 const WORKERS = Math.max(1, Math.min(4, require('os').cpus().length));
 async function frames(mode, t0, t1, fps, alpha) {
   const n = Math.round((t1 - t0) * fps);
-  const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'intro-'));
+  mk('exports/qa'); const dir = fs.mkdtempSync(path.join(ROOT, 'exports/qa', 'seq-'));
   const per = Math.ceil(n / WORKERS), started = Date.now();
-  await Promise.all(Array.from({ length: WORKERS }, (_, w) => new Promise((res, rej) => {
-    const i0 = w * per, i1 = Math.min(n, i0 + per);
-    if (i0 >= i1) return res();
-    const p = spawn(process.execPath, [__filename, '_worker', mode, i0, i1, t0, fps, dir, alpha ? 1 : 0, w * 4000], { stdio: 'inherit' });
-    p.on('close', c => c === 0 ? res() : rej(new Error('worker ' + w)));
-  })));
+  const procs = [];
+  try {
+    await Promise.all(Array.from({ length: WORKERS }, (_, w) => new Promise((res, rej) => {
+      const i0 = w * per, i1 = Math.min(n, i0 + per);
+      if (i0 >= i1) return res();
+      const p = spawn(process.execPath, [__filename, '_worker', mode, i0, i1, t0, fps, dir, alpha ? 1 : 0, w * 4000], { stdio: 'inherit' });
+      procs.push(p);
+      p.on('close', c => c === 0 ? res() : rej(new Error('worker ' + w)));
+    })));
+  } catch (e) { procs.forEach(p => { try { p.kill(); } catch (_) {} }); cleanup(dir); throw e; }
   console.log(`  ${n} frames in ${((Date.now() - started) / 1000).toFixed(0)} s`);
   return { dir, pattern: path.join(dir, alpha ? '%05d.png' : '%05d.jpg') };
 }

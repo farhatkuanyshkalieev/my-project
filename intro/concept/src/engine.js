@@ -182,7 +182,7 @@
     T = t;
     const s1 = TL.scene1, tr = TL.transition;
     // ---- scene 1 visibility
-    const inS1 = t < tr.cut + 0.05;
+    const inS1 = t < tr.cut;
     $('s1').style.visibility = (inS1 || MODE === 'layer-plate' || MODE === 'still-profile') ? 'visible' : 'hidden';
     // ---- 3D
     if (P && show.plate && (inS1 || MODE === 'layer-plate' || MODE === 'still-profile')) {
@@ -226,7 +226,7 @@
       arw.setAttribute('d', `M${sx},${sy} C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${tip[0].toFixed(2)},${tip[1].toFixed(2)}`);
       const pr = io(t, A.draw[0], A.draw[1], E.inOut), ao = 1 - io(t, A.out[0], A.out[1], E.inOut);
       arw.style.strokeDasharray = '1 1'; arw.style.strokeDashoffset = (1 - pr).toFixed(4);
-      arw.style.opacity = ao.toFixed(3);
+      arw.style.opacity = pr > 0.002 ? ao.toFixed(3) : '0';   // a zero-length dash with round caps would draw a dot
       const hl = 5.2, ang = 0.5, ca = Math.cos(ang), sa = Math.sin(ang);
       const b1 = [tip[0] - hl * (dx * ca - dy * sa), tip[1] - hl * (dy * ca + dx * sa)];
       const b2 = [tip[0] - hl * (dx * ca + dy * sa), tip[1] - hl * (dy * ca - dx * sa)];
