@@ -6,9 +6,9 @@ Writes
     exports/audio/THERMINAL_intro_sfx_mix.wav            6.6 s, fade at the cut, for the video
     exports/audio/THERMINAL_intro_sfx_mix_tail.wav       with the logo tail, for editing
     exports/audio/stems/0N_<group>.wav                   one stem per sound group (with tail)
-    assets/audio/intro_sfx_mix.m4a                       preview for the prototype
+    assets/audio/intro_sfx_mix.mp3                       preview for the prototype
     assets/audio/cues.json                               cue sheet shown on the page
-Needs numpy, scipy, ffmpeg (loudness measurement and m4a).
+Needs numpy, scipy, ffmpeg (loudness measurement and mp3).
 """
 import json, pathlib, subprocess, wave, re
 import numpy as np
@@ -317,7 +317,7 @@ for k, b in enumerate(buses, 1):
     write24(out_dir / 'stems' / f'0{k}_{b.name}.wav', b.buf * gain)
 i2, tp2 = lufs(out_dir / 'THERMINAL_intro_sfx_mix.wav')
 subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-i', str(out_dir / 'THERMINAL_intro_sfx_mix.wav'),
-                '-c:a', 'aac', '-b:a', '192k', str(ROOT / 'assets/audio/intro_sfx_mix.m4a')], check=True)
+                '-c:a', 'libmp3lame', '-b:a', '256k', str(ROOT / 'assets/audio/intro_sfx_mix.mp3')], check=True)
 CUES.sort(key=lambda c: c['t'])
 (ROOT / 'assets/audio/cues.json').write_text(json.dumps(CUES, ensure_ascii=False, indent=1), encoding='utf-8')
 print(f'mix {i2:.1f} LUFS, true peak {tp2:.1f} dBFS, {len(CUES)} cues')
