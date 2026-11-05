@@ -100,7 +100,7 @@ function createProfileScene(canvas, SOLID, LINES, cfg) {
   sideMat.onBeforeCompile = sh => {
     sh.uniforms.uFall = { value: cfg.coat.falloff };
     sh.vertexShader = 'varying float vWY;\n' + sh.vertexShader.replace('#include <worldpos_vertex>',
-      '#include <worldpos_vertex>\n vWY = (modelMatrix * vec4(transformed, 1.0)).y;');
+      '#include <worldpos_vertex>\n vWY = transformed.z;');
     sh.fragmentShader = 'varying float vWY;\nuniform float uFall;\n' + sh.fragmentShader.replace('#include <tonemapping_fragment>',
       'gl_FragColor.rgb *= mix(1.0, 0.0, smoothstep(0.0, uFall, -vWY));\n#include <tonemapping_fragment>');
   };
@@ -131,7 +131,7 @@ function createProfileScene(canvas, SOLID, LINES, cfg) {
   const rim = new T.DirectionalLight(0xffffff, cfg.light.rim); rim.position.set(900, 400, -2000); scene.add(rim);
   const glint = new T.DirectionalLight(0xffffff, 0); scene.add(glint);
 
-  const cam = new T.PerspectiveCamera(cfg.fov, 9 / 16, 10, 30000);
+  const cam = new T.PerspectiveCamera(cfg.fov, 9 / 16, 20, 200000);
 
   function setSize(w, h, dpr) { renderer.setPixelRatio(dpr); renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
 
@@ -157,5 +157,16 @@ function createProfileScene(canvas, SOLID, LINES, cfg) {
     const q = new T.Vector3(px - CX, 0, py - CY).project(cam);
     return [(q.x + 1) / 2, (1 - q.y) / 2];
   }
-  return { setSize, render, setCam, project };
+  /* move the whole profile (fly-in); rot in radians (Euler XYZ), applied to the rig */
+  let objKey = '';
+  function setObject(o) {
+    const p = o && o.pos || [0, 0, 0], r = o && o.rot || [0, 0, 0];
+    const k = p.concat(r).map(v => v.toFixed(3)).join(',');
+    if (k === objKey) return;
+    objKey = k;
+    rig.position.set(p[0], p[1], p[2]); rig.rotation.set(r[0], r[1], r[2]);
+    rig.updateMatrixWorld(true);
+    renderer.shadowMap.needsUpdate = true;
+  }
+  return { setSize, render, setCam, project, setObject };
 }
