@@ -1,0 +1,347 @@
+<title>THERMINAL Intro v3 монтаж</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an edit decision list — one horizontal timeline of the 9 s, then a vertical shot list where each row pairs the frame with its timing, graphics, motion and sound */
+:root{
+  --paper:#f4f4f1; --sheet:#ffffff; --ink:#171717; --ink-2:#55585c; --rule:#d9d9d4;
+  --red:#c81111; --red-soft:#f6e3e1; --warn:#8a5a00; --warn-soft:#f6ecd8; --ok:#2f6b46; --ok-soft:#e3efe6;
+  --dark-shot:#1b1c1e; --light-shot:#e4e4df; --gfx-shot:#ffffff;
+  --f-display:'Montserrat',Arial,sans-serif; --f-body:'IBM Plex Sans',Arial,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121314; --sheet:#1b1c1e; --ink:#ececea; --ink-2:#a3a6aa; --rule:#33353a;
+  --red:#ef3b3b; --red-soft:#3a1c1c; --warn:#e0b25c; --warn-soft:#352a16; --ok:#7fc296; --ok-soft:#1c2d22;
+  --dark-shot:#050505; --light-shot:#8d8e8a; --gfx-shot:#d9d9d6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121314; --sheet:#1b1c1e; --ink:#ececea; --ink-2:#a3a6aa; --rule:#33353a;
+  --red:#ef3b3b; --red-soft:#3a1c1c; --warn:#e0b25c; --warn-soft:#352a16; --ok:#7fc296; --ok-soft:#1c2d22;
+  --dark-shot:#050505; --light-shot:#8d8e8a; --gfx-shot:#d9d9d6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:52px}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(24px,4vw,38px);letter-spacing:.14em;text-transform:uppercase}
+h2{font-size:13px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;display:flex;gap:12px;align-items:center}
+h2::after{content:"";flex:1;height:1px;background:var(--rule)}
+h3{font-size:15px;letter-spacing:.06em;font-weight:600}
+p{margin:0;max-width:70ch}
+section{display:flex;flex-direction:column;gap:20px}
+.mono{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+.meta span{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.meta b{font-weight:500;color:var(--ink)}
+.head{border-bottom:1px solid var(--rule);padding-bottom:20px;display:flex;flex-direction:column;gap:6px}
+.lede{font-size:17px;max-width:72ch}
+.chip{display:inline-flex;align-items:center;font-family:var(--f-mono);font-size:11px;padding:2px 7px;border-radius:3px;white-space:nowrap;background:var(--rule);color:var(--ink)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+
+/* comparison table */
+.tablewrap{overflow-x:auto}
+table.cmp{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+.cmp th,.cmp td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--rule)}
+.cmp th{font-family:var(--f-mono);font-size:11.5px;font-weight:500;color:var(--ink-2)}
+.cmp td:first-child{font-weight:600;white-space:nowrap}
+.cmp td.v3{background:var(--sheet)}
+
+/* reference strip */
+.refstrip{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
+.refstrip figure{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.refstrip img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:3px;display:block;box-shadow:0 0 0 1px var(--rule)}
+.refstrip figcaption{font-size:11px;line-height:1.35;color:var(--ink-2)}
+.refstrip figcaption b{display:block;font-family:var(--f-mono);font-weight:500;color:var(--ink)}
+.principles{margin:0;padding-left:20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 32px;font-size:14px}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;gap:6px}
+.bar{display:flex;height:64px;border-radius:4px;overflow:hidden;box-shadow:0 0 0 1px var(--rule)}
+.bar div{position:relative;border-right:1px solid var(--paper);display:flex;align-items:flex-end;padding:4px 5px;font-family:var(--f-mono);font-size:10.5px;min-width:0;overflow:hidden}
+.bar .d{background:var(--dark-shot);color:#e6e6e6}
+.bar .l{background:var(--light-shot);color:#1d1d1d}
+.bar .g{background:var(--gfx-shot);color:#1d1d1d;background-image:repeating-linear-gradient(90deg,transparent 0 7px,rgba(0,0,0,.06) 7px 8px)}
+.bar div span{position:absolute;left:5px;top:4px;font-weight:500}
+.ticks{position:relative;height:18px;font-family:var(--f-mono);font-size:10.5px;color:var(--ink-2)}
+.ticks i{position:absolute;top:0;transform:translateX(-50%);font-style:normal;white-space:nowrap}
+.beats{position:relative;height:10px}
+.beats i{position:absolute;top:0;width:1px;height:10px;background:var(--ink-2);opacity:.45}
+.beats i.down{height:10px;opacity:.9;background:var(--red)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:6px;box-shadow:0 0 0 1px var(--rule)}
+
+/* shot list */
+.shots{display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.shot{display:grid;grid-template-columns:140px minmax(0,1fr);gap:22px;padding:18px 0;border-bottom:1px solid var(--rule)}
+.shot img{width:140px;aspect-ratio:9/16;object-fit:cover;border-radius:4px;display:block;box-shadow:0 0 0 1px var(--rule)}
+.shot .body{display:flex;flex-direction:column;gap:10px;min-width:0}
+.shot .top{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline}
+.shot .num{font-family:var(--f-mono);font-size:12px;color:var(--red)}
+.shot .time{font-family:var(--f-mono);font-size:13px;font-weight:500}
+.shot .dur{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 26px}
+.grid4 div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.grid4 b{font-family:var(--f-display);font-weight:600;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+.grid4 span{font-size:14px}
+.hooktext{font-family:var(--f-display);letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+
+/* sound */
+.layers{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px 28px}
+.layers div{border-top:1px solid var(--rule);padding-top:10px;display:flex;flex-direction:column;gap:4px}
+.layers b{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.layers span{font-size:13.5px;color:var(--ink-2)}
+
+/* decisions */
+.decide{counter-reset:n;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.decide li{list-style:none;counter-increment:n;display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding:13px 0;border-bottom:1px solid var(--rule)}
+.decide li::before{content:counter(n,decimal-leading-zero);font-family:var(--f-mono);font-size:12px;color:var(--red)}
+.decide b{font-weight:600}
+.decide p{font-size:13.5px;color:var(--ink-2);margin-top:3px}
+.note{border-left:2px solid var(--red);padding:2px 0 2px 14px;color:var(--ink-2);font-size:14px}
+footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:16px}
+
+@media (max-width:860px){
+  .refstrip{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .principles{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .shot{grid-template-columns:96px minmax(0,1fr);gap:14px}
+  .shot img{width:96px}
+  .grid4{grid-template-columns:minmax(0,1fr)}
+  .bar{height:52px}
+  .bar div span{display:none}
+}
+</style>
+
+<div class="wrap">
+
+<header class="head">
+  <h1>THERMINAL · Intro v3</h1>
+  <div class="meta">
+    <span>Статус: <b>монтажный план на утверждение</b></span>
+    <span>Длительность: <b>9,0 с</b></span>
+    <span>Планов: <b>11</b></span>
+    <span>Средний план: <b>0,82 с</b></span>
+    <span>Сетка: <b>120 BPM, склейки на 1/8</b></span>
+  </div>
+</header>
+
+<p class="lede">v2 получилась одним длинным техническим номером: два плана за 6,6 с, вся графика на отдельном листе. В референсе графика живёт внутри короткой сцены, а после неё идёт серия коротких планов с текстовыми хуками. В v3 это перенесено на материалы THERMINAL. Используются только реальные рендеры с сайта, 3D-профиль из чертежа VIKING 90 и уже готовая графика. Выдуманных съёмочных кадров нет.</p>
+
+<section aria-labelledby="h-cmp">
+  <h2 id="h-cmp">Сравнение с референсом</h2>
+  <div class="tablewrap"><table class="cmp">
+    <thead><tr><th>Параметр</th><th>Референс, 0–14,2 с</th><th>THERMINAL v2</th><th>THERMINAL v3, план</th></tr></thead>
+    <tbody>
+      <tr><td>Планов</td><td>10 за 14,2 с</td><td>2 за 6,6 с</td><td class="v3">11 за 9,0 с</td></tr>
+      <tr><td>Средняя длина плана</td><td>1,4 с; после 6,6 с — 0,8 с</td><td>3,3 с</td><td class="v3">0,82 с, самый длинный 1,25 с</td></tr>
+      <tr><td>Типы планов</td><td>предмет в руке, чертёж, синхрон спикера, макровставки, руки с изделием, предметка</td><td>3D-профиль, чертёж</td><td class="v3">3D-макро, 3D-средний, вид сверху, рендеры сайта крупно и макро, чертёж, предметка, плашка</td></tr>
+      <tr><td>Текстовые хуки</td><td>7: вопросы и короткие ответы крупно по центру</td><td>2 фразы</td><td class="v3">6 хуков + подписи на выносках</td></tr>
+      <tr><td>Графика</td><td>стрелка и подписи на предмете, чертёж, мелкие подписи на предметке</td><td>почти вся на белом листе</td><td class="v3">на 8 планах внутри кадра, лист сокращён до 1,25 с</td></tr>
+      <tr><td>Светлые и тёмные планы</td><td>чередуются: тёмный, белый, цех, тёмный, серый</td><td>тёмный, затем белый</td><td class="v3">тёмный и светлый меняются 6 раз</td></tr>
+      <tr><td>Склейки</td><td>прямые и по форме, на фразу голоса</td><td>одна, через засветку</td><td class="v3">прямые на долю, 2 по форме, 1 засветка</td></tr>
+      <tr><td>Звук</td><td>голос и музыка, удары на склейках</td><td>эффекты без ритма</td><td class="v3">пульс 120 BPM и свой акцент на каждой склейке</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section aria-labelledby="h-ref">
+  <h2 id="h-ref">Как смонтирован референс</h2>
+  <div class="refstrip">
+    <figure><img src="ref/r01.jpg" alt="Референс: предмет в руке на тёмном фоне"><figcaption><b>0,0–3,0</b>предмет в руке, фраза по словам, стрелка</figcaption></figure>
+    <figure><img src="ref/r02.jpg" alt="Референс: засветка"><figcaption><b>3,0–3,1</b>засветка</figcaption></figure>
+    <figure><img src="ref/r03.jpg" alt="Референс: технический чертёж"><figcaption><b>3,1–6,6</b>чертёж, размеры, табличка</figcaption></figure>
+    <figure><img src="ref/r04.jpg" alt="Референс: спикер"><figcaption><b>6,6–7,7</b>синхрон «Ну что это такое?»</figcaption></figure>
+    <figure><img src="ref/r05.jpg" alt="Референс: макро открывашка"><figcaption><b>7,7–8,3</b>макро, хук «ОТКРЫВАШКА?»</figcaption></figure>
+    <figure><img src="ref/r06.jpg" alt="Референс: брелок"><figcaption><b>8,3–9,2</b>макро, хук «БРЕЛОК?»</figcaption></figure>
+    <figure><img src="ref/r07.jpg" alt="Референс: карабин"><figcaption><b>9,2–10,4</b>макро, «КАРАБИН…», «НУ…»</figcaption></figure>
+    <figure><img src="ref/r08.jpg" alt="Референс: спикер почти"><figcaption><b>10,4–10,9</b>синхрон «почти»</figcaption></figure>
+    <figure><img src="ref/r09.jpg" alt="Референс: руки с изделием"><figcaption><b>10,9–12,2</b>руки ставят изделие, ответ</figcaption></figure>
+    <figure><img src="ref/r10.jpg" alt="Референс: предметка с подписями"><figcaption><b>12,2–14,2</b>предметка, подписи на выносках</figcaption></figure>
+  </div>
+  <h3>Что переносим</h3>
+  <ul class="principles">
+    <li>Загадка в начале: изделие показано раньше, чем названо.</li>
+    <li>Фраза собирается по словам прямо на изделии.</li>
+    <li>Короткие вставки 0,5–0,75 с, на каждой одно слово или одна подпись.</li>
+    <li>Тёмные и светлые планы чередуются и сами задают ритм.</li>
+    <li>Графика рисуется поверх изображения: стрелки, выноски, подписи.</li>
+    <li>Склейки по форме: торец → чертёж → камера профиля.</li>
+    <li>Предметка с мелкими подписями на выносках, как «17 pro / 17 pro max».</li>
+    <li>Каждая склейка совпадает с долей и имеет свой звук.</li>
+  </ul>
+  <p class="note">Что без кадров заказчика не переносится: синхрон спикера, руки с изделием, живое макро. Для них в плане оставлены места (см. «Решения»), чтобы позже заменить план 8 или продолжить ролик после 9,0 с.</p>
+</section>
+
+<section aria-labelledby="h-tl">
+  <h2 id="h-tl">Таймлайн 0–9 с</h2>
+  <div class="tl">
+    <div class="beats" aria-hidden="true">
+      <i class="down" style="left:0%"></i><i style="left:5.556%"></i><i style="left:11.111%"></i><i style="left:16.667%"></i><i class="down" style="left:22.222%"></i><i style="left:27.778%"></i><i style="left:33.333%"></i><i style="left:38.889%"></i><i class="down" style="left:44.444%"></i><i style="left:50%"></i><i style="left:55.556%"></i><i style="left:61.111%"></i><i class="down" style="left:66.667%"></i><i style="left:72.222%"></i><i style="left:77.778%"></i><i style="left:83.333%"></i><i class="down" style="left:88.889%"></i><i style="left:94.444%"></i>
+    </div>
+    <div class="bar" role="img" aria-label="Таймлайн из 11 планов на 9 секунд">
+      <div class="d" style="width:5.556%"><span>1</span></div>
+      <div class="d" style="width:11.111%"><span>2</span></div>
+      <div class="l" style="width:8.333%"><span>3</span></div>
+      <div class="d" style="width:5.556%"><span>4</span></div>
+      <div class="g" style="width:13.889%"><span>5</span></div>
+      <div class="d" style="width:8.333%"><span>6</span></div>
+      <div class="d" style="width:8.333%"><span>7</span></div>
+      <div class="l" style="width:5.556%"><span>8</span></div>
+      <div class="l" style="width:13.889%"><span>9</span></div>
+      <div class="d" style="width:11.111%"><span>10</span></div>
+      <div class="d" style="width:8.333%"><span>11</span></div>
+    </div>
+    <div class="ticks" aria-hidden="true"><i style="left:0%;transform:none">0</i><i style="left:11.111%">1</i><i style="left:22.222%">2</i><i style="left:33.333%">3</i><i style="left:44.444%">4</i><i style="left:55.556%">5</i><i style="left:66.667%">6</i><i style="left:77.778%">7</i><i style="left:88.889%">8</i><i style="left:100%;transform:translateX(-100%)">9 с</i></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--dark-shot)"></i>тёмный план</span><span><i style="background:var(--light-shot)"></i>светлый план</span><span><i style="background:var(--gfx-shot)"></i>техническая графика</span><span><i style="background:var(--red)"></i>сильная доля (каждые 2 с), тонкие риски через 0,5 с</span></div>
+</section>
+
+<section aria-labelledby="h-shots">
+  <h2 id="h-shots">Покадровый план</h2>
+  <div class="shots">
+
+    <article class="shot"><img src="frames/f01.jpg" alt="План 1: макро торца 3D-профиля">
+      <div class="body">
+        <div class="top"><span class="num">План 1</span><span class="time">0,00–0,50</span><span class="dur">0,50 с</span><span class="chip">экстремальное макро · 3D</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>3D-профиль VIKING 90 из чертежа: пазы и стенки торца крупно</span></div>
+          <div><b>Графика и текст</b><span class="hooktext">«Это»</span><span class="muted">появляется на 0,30 с, слева сверху</span></div>
+          <div><b>Анимация</b><span>Боковой проезд камеры, по торцу проходит узкий блик. Кадр проявляется из чёрного за 0,15 с</span></div>
+          <div><b>Звук</b><span>Мягкий низкий удар на 0,00 · металлический блеск на блике · тик слова</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f02.jpg" alt="План 2: профиль 3/4">
+      <div class="body">
+        <div class="top"><span class="num">План 2</span><span class="time">0,50–1,50</span><span class="dur">1,00 с</span><span class="chip">средний план · 3D</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Профиль 3/4 сверху, ракурс из v2</span></div>
+          <div><b>Графика и текст</b><span class="hooktext">«Это / дверная / система»</span><span class="muted">слова на 0,55 · 0,85 · 1,15</span></div>
+          <div><b>Анимация</b><span>Плавный наезд 6%, слова проявляются из размытия</span></div>
+          <div><b>Звук</b><span>Прямая склейка на долю с тихим щелчком · три тика с растущим тоном</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f03.jpg" alt="План 3: угол полотна VIKING 90">
+      <div class="body">
+        <div class="top"><span class="num">План 3</span><span class="time">1,50–2,25</span><span class="dur">0,75 с</span><span class="chip">крупная деталь · рендер сайта</span><span class="chip warn">1080 px, мягче</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Угол полотна VIKING 90 «вклейка», рендер с сайта на светлом фоне</span></div>
+          <div><b>Графика и текст</b><span class="hooktext">«VIKING 90»</span><span class="muted">тонкая стрелка к кромке полотна</span></div>
+          <div><b>Анимация</b><span>Наезд 1,00→1,06; стрелка рисуется за 0,3 с</span></div>
+          <div><b>Звук</b><span>Склейка тёмный→светлый с воздушным «пф» · тон слова · шорох стрелки</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f04.jpg" alt="План 4: камеры профиля сверху">
+      <div class="body">
+        <div class="top"><span class="num">План 4</span><span class="time">2,25–2,75</span><span class="dur">0,50 с</span><span class="chip">вид сверху · 3D</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Те же камеры профиля строго сверху</span></div>
+          <div><b>Графика и текст</b><span>Выноска «камеры» с точкой; внизу мелко «с многокамерными профилями»</span></div>
+          <div><b>Анимация</b><span>Резкий наезд сверху с размытием движения на входе 3 кадра, затем остановка</span></div>
+          <div><b>Звук</b><span>Короткий свист входа · щелчок выноски</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f05.jpg" alt="План 5: технический лист">
+      <div class="body">
+        <div class="top"><span class="num">План 5</span><span class="time">2,75–4,00</span><span class="dur">1,25 с</span><span class="chip">техническая графика</span><span class="chip warn">размеры пустые</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Векторное сечение VIKING 90, готовое из v2</span></div>
+          <div><b>Графика и текст</b><span>Сверху «и инновационной изоляционной зоной»; два размера «— мм»</span></div>
+          <div><b>Анимация</b><span>Засветка 0,15 с; прорисовка ускорена до 0,5 с; с 3,40 наезд 1,0→2,4 в центральную зону, её прямоугольник заполняет кадр</span></div>
+          <div><b>Звук</b><span>Удар засветки · перо по бумаге · щелчки засечек · подъём к склейке</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f06.jpg" alt="План 6: изоляционная зона в 3D">
+      <div class="body">
+        <div class="top"><span class="num">План 6</span><span class="time">4,00–4,75</span><span class="dur">0,75 с</span><span class="chip">макро · 3D</span><span class="chip warn">выноска ждёт технолога</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Та же центральная зона в 3D сверху: прямоугольник чертежа превращается в настоящую камеру</span></div>
+          <div><b>Графика и текст</b><span>Выноска «изоляционная зона»</span></div>
+          <div><b>Анимация</b><span>Склейка по форме, наезд продолжается и гаснет; выноска рисуется за 0,3 с</span></div>
+          <div><b>Звук</b><span>Глухой удар на склейке · тик выноски</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f07.jpg" alt="План 7: угол рамы и хук">
+      <div class="body">
+        <div class="top"><span class="num">План 7</span><span class="time">4,75–5,50</span><span class="dur">0,75 с</span><span class="chip">макро · рендер сайта</span><span class="chip warn">серия не подписана</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Угол рамы на чёрном, главная страница, 1255 px</span></div>
+          <div><b>Графика и текст</b><span class="hooktext">«Словно дверь от сейфа»</span><span class="muted">слоган с сайта из блока VIKING 90, крупно по центру</span></div>
+          <div><b>Анимация</b><span>Толчок камеры 1,00→1,10 за 0,2 с, затем медленный дрейф</span></div>
+          <div><b>Звук</b><span>Тяжёлый низкий удар · металлический щелчок засова</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f08.jpg" alt="План 8: ручка двери">
+      <div class="body">
+        <div class="top"><span class="num">План 8</span><span class="time">5,50–6,00</span><span class="dur">0,50 с</span><span class="chip">крупная деталь · рендер сайта</span><span class="chip warn">увеличение ×1,9</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Ручка двери VIKING 90, рендер с сайта</span></div>
+          <div><b>Графика и текст</b><span>Без текста, пауза после хука</span></div>
+          <div><b>Анимация</b><span>Боковой проезд справа налево</span></div>
+          <div><b>Звук</b><span>Короткий металлический щелчок, пульс приглушён</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f09.jpg" alt="План 9: предметка дверь и окно">
+      <div class="body">
+        <div class="top"><span class="num">План 9</span><span class="time">6,00–7,25</span><span class="dur">1,25 с</span><span class="chip">общий план · предметка</span><span class="chip warn">окно 538 px, только мелко</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Дверь и окно VIKING 90, рендеры с сайта на светло-сером</span></div>
+          <div><b>Графика и текст</b><span class="hooktext">«Окна и двери VIKING 90»</span><span class="muted">выноски «дверь», «окно»</span></div>
+          <div><b>Анимация</b><span>Изделия въезжают по очереди с разницей 0,15 с; выноски рисуются после остановки</span></div>
+          <div><b>Звук</b><span>Сильная доля 6,00 · мягкое нарастание · два тика выносок</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f10.jpg" alt="План 10: сечение окна на чёрном">
+      <div class="body">
+        <div class="top"><span class="num">План 10</span><span class="time">7,25–8,25</span><span class="dur">1,00 с</span><span class="chip">макро-сечение · рендер сайта</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Оконное сечение VIKING 90 на чёрном, главная страница, 1255 px</span></div>
+          <div><b>Графика и текст</b><span>Выноски «глубина профиля 90 мм» и «стеклопакет до 58 мм». Оба факта на сайте указаны для окон</span></div>
+          <div><b>Анимация</b><span>Наезд 1,00→1,12, блик по стеклу, выноски по очереди</span></div>
+          <div><b>Звук</b><span>Тик и звон стекла на выноске стеклопакета</span></div>
+        </div></div></article>
+
+    <article class="shot"><img src="frames/f11.jpg" alt="План 11: знак THERMINAL">
+      <div class="body">
+        <div class="top"><span class="num">План 11</span><span class="time">8,25–9,00</span><span class="dur">0,75 с</span><span class="chip">плашка</span></div>
+        <div class="grid4">
+          <div><b>Материал</b><span>Знак THERMINAL на чёрном</span></div>
+          <div><b>Графика и текст</b><span>«THERMINAL», мелко «окна и двери VIKING 90»</span></div>
+          <div><b>Анимация</b><span>Знак проявляется, линия штампа. Отсюда склейка на синхрон спикера, когда будут кадры</span></div>
+          <div><b>Звук</b><span>Тёплый аккорд знака из v2, пульс останавливается</span></div>
+        </div></div></article>
+
+  </div>
+</section>
+
+<section aria-labelledby="h-sound">
+  <h2 id="h-sound">Звуковая система v3</h2>
+  <div class="layers">
+    <div><b>Пульс 120 BPM</b><span>Низкий приглушённый удар на каждую долю и тихий щелчок на восьмые. Склейки стоят на сетке 0,25 с. Пульс стихает на плане 8 и останавливается на знаке.</span></div>
+    <div><b>Склейки</b><span>У каждой склейки свой звук по типу: прямая — щелчок, тёмный→светлый — воздух, по форме — глухой удар, засветка — удар с хвостом.</span></div>
+    <div><b>Текст</b><span>Тик с коротким тоном на каждое слово. Тон растёт внутри фразы. Хук «Словно дверь от сейфа» получает удар вместо тика.</span></div>
+    <div><b>Графика</b><span>Стрелка — шорох пера; выноски — щелчок точки; размеры — щелчки засечек; прорисовка — перо по бумаге.</span></div>
+    <div><b>Материал</b><span>Блик по алюминию — металлический блеск; засов — щелчок; стеклопакет — звон стекла.</span></div>
+    <div><b>Место под голос</b><span>Эффекты на −20 LUFS, пульс ещё на 6 дБ тише. Голос спикера ляжет сверху без перегруза.</span></div>
+  </div>
+  <p class="muted">Всё синтезируется тем же инструментом, что в v2, по одному таймлайну. Голос не генерируется.</p>
+</section>
+
+<section aria-labelledby="h-dec">
+  <h2 id="h-dec">Решения на утверждение</h2>
+  <ol class="decide">
+    <li><div><b>Хук на плане 7: утверждение или вопрос</b><p>Вариант А: слоган «СЛОВНО ДВЕРЬ ОТ СЕЙФА» на угле рамы (в плане). Вариант Б, ближе к референсу: «ДВЕРЬ ОТ СЕЙФА?» → «ПОЧТИ.» на кадре сейфа с сайта. Но тот кадр 710 px и, похоже, стоковый: нужны права и он будет мягким.</p></div></li>
+    <li><div><b>Окно в интро про дверь</b><p>Планы 9 и 10 показывают окно VIKING 90 со своими фактами (90 мм, стеклопакет до 58 мм). Геометрия окна и двери не смешивается, у каждого кадра свои подписи. Если интро должно быть только про дверь, планы 9–10 заменяются дверью и ручкой, длина сокращается до 7,5 с.</p></div></li>
+    <li><div><b>Пульс под монтаж</b><p>Нужна ли ритмическая подложка 120 BPM или только эффекты. В референсе есть музыка под голосом.</p></div></li>
+    <li><div><b>Длина: 9,0 с или 7,0 с</b><p>Для 7 с убираются планы 8 и 11, план 9 сокращается до 0,75 с.</p></div></li>
+    <li><div><b>Места под кадры заказчика</b><p>Когда появится съёмка: синхрон спикера после плана 11 (как в референсе на 6,6 с) и живое макро профиля вместо плана 8.</p></div></li>
+  </ol>
+  <p class="note">Без изменений остаются: реальная геометрия VIKING 90, пустые размеры до получения чертежа, ч/б эстетика, Montserrat, знак THERMINAL как единственный цветной элемент, готовые элементы v2 (сечение, стрелка, выноски, звуки). Кадры выше — превизуализация реальных материалов, анимация ещё не делалась.</p>
+</section>
+
+<footer>Материалы: рендеры с therminal.kz, 3D-профиль из чертежа VIKING 90, графика v2. Референс: IMG_2568, 0–14,2 с. Прототип v2: claude.ai/artifact/K5FmZthWoUnVAjdtm7L7Ta</footer>
+</div>

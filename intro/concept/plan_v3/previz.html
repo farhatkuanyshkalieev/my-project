@@ -1,0 +1,78 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>v3 previz frames</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap">
+<style>
+/* previz frames for the v3 edit plan: real THERMINAL images and stills of the 3D profile, cropped to 9:16, with the planned graphics on top */
+body{margin:0;background:#333;display:flex;flex-wrap:wrap;gap:10px;padding:10px;font-family:'Montserrat',Arial,sans-serif}
+.f{width:360px;height:640px;position:relative;overflow:hidden;background:#000}
+.f.light{background:#fff}
+.f img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cap{position:absolute;color:#fff;font-size:14px;font-weight:400;letter-spacing:.27em;line-height:1.36;text-transform:uppercase}
+.dark .cap,.light .cap{color:#fff}
+.light .cap.ink{color:#151515}
+.hook{position:absolute;left:0;right:0;text-align:center;color:#fff;font-size:15px;font-weight:500;letter-spacing:.3em;line-height:1.5;text-transform:uppercase}
+.small{position:absolute;color:#ececec;font-size:9.6px;letter-spacing:.16em;line-height:1.6}
+.lbl{position:absolute;color:#fff;font-size:7.6px;letter-spacing:.08em;line-height:1.35}
+.lbl.ink{color:#1b1b1b}
+.ovl{position:absolute;inset:0;width:360px;height:640px}
+.ovl path,.ovl line{fill:none;stroke:#fff;stroke-width:.9;stroke-linecap:round;stroke-linejoin:round}
+.ovl .ink{stroke:#1b1b1b}
+.ovl circle{fill:#fff}
+.ovl circle.ink{fill:#1b1b1b}
+.tag{position:absolute;left:10px;top:8px;font-size:8px;color:rgba(255,200,0,.9);letter-spacing:.04em;font-weight:600}
+.vig{position:absolute;inset:0;background:radial-gradient(120% 85% at 50% 52%,rgba(0,0,0,0) 55%,rgba(0,0,0,.5) 100%)}
+</style>
+
+<!-- 1 macro 3D -->
+<div class="f" id="f1"><img class="bg" src="previz_src/s1_macro.png"><div class="vig"></div>
+  <div class="cap" style="left:92px;top:150px">Это</div></div>
+
+<!-- 2 profile 3/4 -->
+<div class="f" id="f2"><img class="bg" src="previz_src/s2_profile.png"><div class="vig"></div>
+  <div class="cap" style="left:92px;top:150px">Это<br>дверная<br>система</div></div>
+
+<!-- 3 real render door corner -->
+<div class="f light" id="f3"><img class="bg" src="previz_src/door_corner.jpg" style="object-position:8% 50%;transform:scale(1.25);transform-origin:18% 45%">
+  <div class="cap ink" style="left:44px;top:118px">VIKING 90</div>
+  <svg class="ovl" viewBox="0 0 360 640"><path d="M60,150 C42,186 62,214 128,226"/><path d="M120,220 L129,226 L120,232"/></svg></div>
+
+<!-- 4 top-down chambers -->
+<div class="f" id="f4"><img class="bg" src="previz_src/s4_top.png">
+  <svg class="ovl" viewBox="0 0 360 640"><circle cx="250" cy="250" r="1.8"/><path d="M250,250 L300,200 L338,200"/></svg>
+  <div class="lbl" style="left:258px;top:186px">камеры</div>
+  <div class="small" style="left:40px;top:470px">с многокамерными<br>профилями</div></div>
+
+<!-- 5 white sheet -->
+<div class="f light" id="f5"><img class="bg" src="previz_src/sheet.jpg" style="transform:scale(1.18);transform-origin:52% 46%"></div>
+
+<!-- 6 3D zone match cut -->
+<div class="f" id="f6"><img class="bg" src="previz_src/s6_zone.png">
+  <svg class="ovl" viewBox="0 0 360 640"><circle cx="180" cy="330" r="1.8"/><path d="M180,330 L230,330 L262,300 L330,300"/></svg>
+  <div class="lbl" style="left:266px;top:286px">изоляционная<br>зона*</div></div>
+
+<!-- 7 hook on homepage corner macro -->
+<div class="f" id="f7"><img class="bg" src="previz_src/corner_macro.jpg" style="object-position:62% 50%;transform:scale(1.08)"><div class="vig"></div>
+  <div class="hook" style="top:150px">Словно дверь<br>от сейфа</div></div>
+
+<!-- 8 handle detail -->
+<div class="f light" id="f8"><img class="bg" src="previz_src/door_handle.jpg" style="object-position:20% 50%;transform:scale(1.9);transform-origin:24% 50%"></div>
+
+<!-- 9 hero: door + window -->
+<div class="f light" id="f9" style="background:#ececec">
+  <img src="previz_src/door_full.jpg" style="position:absolute;left:-40px;top:150px;width:300px;mix-blend-mode:multiply">
+  <img src="previz_src/window.png" style="position:absolute;left:206px;top:262px;width:150px;mix-blend-mode:multiply">
+  <svg class="ovl" viewBox="0 0 360 640"><path class="ink" d="M110,150 L110,128 L150,128"/><path class="ink" d="M280,262 L280,240 L320,240"/></svg>
+  <div class="lbl ink" style="left:154px;top:123px">дверь</div><div class="lbl ink" style="left:288px;top:230px">окно</div>
+  <div class="cap ink" style="left:40px;top:70px;font-size:11px">окна и двери<br>VIKING 90</div></div>
+
+<!-- 10 window section with verified window facts -->
+<div class="f" id="f10"><img class="bg" src="previz_src/window_section.jpg" style="object-position:55% 50%;transform:scale(1.15);transform-origin:55% 55%"><div class="vig"></div>
+  <svg class="ovl" viewBox="0 0 360 640"><circle cx="262" cy="196" r="1.8"/><path d="M262,196 L300,150 L338,150"/><circle cx="120" cy="420" r="1.8"/><path d="M120,420 L80,470 L30,470"/></svg>
+  <div class="lbl" style="left:252px;top:122px">стеклопакет<br>до 58 мм</div>
+  <div class="lbl" style="left:30px;top:476px">глубина профиля<br>90 мм</div></div>
+
+<!-- 11 end card -->
+<div class="f" id="f11"><img src="previz_src/logo.png" style="position:absolute;left:150px;top:268px;width:60px">
+  <div class="cap" style="left:0;right:0;top:330px;text-align:center;font-size:11px;font-weight:600;letter-spacing:.42em;color:#bdbdbd">THERMINAL</div>
+  <div class="small" style="left:0;right:0;top:352px;text-align:center;color:#8a8a8a">окна и двери VIKING 90</div></div>
