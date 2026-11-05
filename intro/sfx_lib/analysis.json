@@ -1,0 +1,170 @@
+{
+ "arrow": {
+  "dur": 4.064,
+  "onset": 0.96,
+  "peak": 2.556,
+  "end": 2.846,
+  "peak_db": -0.9
+ },
+ "bass": {
+  "dur": 5.1,
+  "onset": 0.06,
+  "peak": 0.163,
+  "end": 1.295,
+  "peak_db": 0.2
+ },
+ "chimes_01": {
+  "dur": 1.22,
+  "onset": 0.234,
+  "peak": 0.53,
+  "end": 0.977,
+  "peak_db": -22.3
+ },
+ "cinematic_whoosh_4": {
+  "dur": 2.376,
+  "onset": 0.235,
+  "peak": 0.433,
+  "end": 0.716,
+  "peak_db": -1.0
+ },
+ "fast_swipe": {
+  "dur": 1.0,
+  "onset": 0.024,
+  "peak": 0.077,
+  "end": 0.146,
+  "peak_db": -0.5
+ },
+ "fast_swipe_right": {
+  "dur": 1.0,
+  "onset": 0.031,
+  "peak": 0.063,
+  "end": 0.126,
+  "peak_db": -0.4
+ },
+ "fast_swish": {
+  "dur": 0.572,
+  "onset": 0.128,
+  "peak": 0.234,
+  "end": 0.507,
+  "peak_db": 0.0
+ },
+ "hard": {
+  "dur": 1.0,
+  "onset": 0.03,
+  "peak": 0.082,
+  "end": 0.214,
+  "peak_db": -0.2
+ },
+ "light_up": {
+  "dur": 3.7,
+  "onset": 0.209,
+  "peak": 0.472,
+  "end": 0.872,
+  "peak_db": -0.4
+ },
+ "long_woosh": {
+  "dur": 5.557,
+  "onset": 0.343,
+  "peak": 1.086,
+  "end": 2.265,
+  "peak_db": 0.0
+ },
+ "mouse_click": {
+  "dur": 0.448,
+  "onset": 0.0,
+  "peak": 0.032,
+  "end": 0.26,
+  "peak_db": -24.3
+ },
+ "pop_up_02": {
+  "dur": 0.956,
+  "onset": 0.103,
+  "peak": 0.543,
+  "end": 0.6,
+  "peak_db": -4.8
+ },
+ "pop_up_03": {
+  "dur": 1.147,
+  "onset": 0.158,
+  "peak": 0.512,
+  "end": 0.664,
+  "peak_db": -2.0
+ },
+ "pop_up_04": {
+  "dur": 0.575,
+  "onset": 0.102,
+  "peak": 0.197,
+  "end": 0.254,
+  "peak_db": -4.8
+ },
+ "pop_up_05": {
+  "dur": 0.64,
+  "onset": 0.111,
+  "peak": 0.252,
+  "end": 0.282,
+  "peak_db": -2.4
+ },
+ "rise": {
+  "dur": 1.3,
+  "onset": 0.107,
+  "peak": 0.275,
+  "end": 0.488,
+  "peak_db": -0.5
+ },
+ "riser_metallic": {
+  "dur": 1.707,
+  "onset": 0.51,
+  "peak": 1.698,
+  "end": 1.707,
+  "peak_db": -0.7
+ },
+ "soft_wipe": {
+  "dur": 1.0,
+  "onset": 0.068,
+  "peak": 0.144,
+  "end": 0.249,
+  "peak_db": -0.5
+ },
+ "standard_whip": {
+  "dur": 1.56,
+  "onset": 0.499,
+  "peak": 0.573,
+  "end": 0.814,
+  "peak_db": -2.2
+ },
+ "whip_whoosh_large_2": {
+  "dur": 0.267,
+  "onset": 0.024,
+  "peak": 0.041,
+  "end": 0.103,
+  "peak_db": -0.5
+ },
+ "whoosh1_slow_thick": {
+  "dur": 1.535,
+  "onset": 0.163,
+  "peak": 0.467,
+  "end": 1.137,
+  "peak_db": -2.4
+ },
+ "whoosh2_fast_airy": {
+  "dur": 0.534,
+  "onset": 0.155,
+  "peak": 0.266,
+  "end": 0.38,
+  "peak_db": -2.1
+ },
+ "zoom_impact": {
+  "dur": 1.222,
+  "onset": 0.127,
+  "peak": 0.517,
+  "end": 0.658,
+  "peak_db": -1.0
+ },
+ "zoom_in_v2": {
+  "dur": 2.377,
+  "onset": 0.133,
+  "peak": 1.75,
+  "end": 2.154,
+  "peak_db": -1.0
+ }
+}

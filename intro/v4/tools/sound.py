@@ -1,4 +1,4 @@
-"""THERMINAL intro v3: atmospheric music bed + sound effects, all derived from timeline.json.
+"""THERMINAL intro v4: atmospheric music bed + the customer's sound effects, placed from timeline.json.
 No samples, no voice, no rhythmic pulse. The customer's voice is meant to sit on top later.
 
     python3 tools/sound.py
@@ -149,11 +149,13 @@ def pad(chord, length, cutoff0, cutoff1, gain=1.0):
 
 
 # chord plan (midi): D minor colour -> Bb -> F/A -> resolve on F major add9 at the logo
-chords = [(0.0, 3.0, [50, 57, 62, 64, 69], 500, 1100),      # Dm(add9)
-          (2.75, 4.75, [46, 53, 58, 62, 69], 700, 1300),     # Bbmaj7 under the sheet
-          (4.75, 6.0, [43, 50, 55, 58, 65], 450, 650),       # Gm, darker under the hook
-          (5.9, 8.4, [45, 53, 57, 60, 64], 800, 1900),       # F/A, opens up on the products
-          (8.2, 10.0, [41, 53, 57, 60, 67], 1200, 900)]      # Fadd9, warm resolve on the logo
+_S = {x['id']: x for x in TL['shots']}
+_hook, _prod, _logo = _S['s4']['from'], _S['s6']['from'], _S['s8']['from']
+chords = [(0.0, _S['s2']['from'], [50, 57, 62, 64, 69], 500, 1100),                 # Dm(add9): space and the hero
+          (_S['s2']['from'] - 0.1, _S['s3']['from'], [46, 53, 58, 62, 69], 700, 1300),  # Bbmaj7 under the drawing
+          (_S['s3']['from'] - 0.1, _prod, [43, 50, 55, 58, 65], 450, 650),         # Gm, darker under the hook
+          (_prod - 0.1, _logo, [45, 53, 57, 60, 64], 800, 1900),                     # F/A opens on the products
+          (_logo - 0.1, TL['duration'] + TAIL, [41, 53, 57, 60, 67], 1200, 900)]     # Fadd9 on the logo
 for a, b, ch, c0, c1 in chords:
     L = b - a + 0.8
     x = pad(ch, L, c0, c1)
@@ -168,121 +170,127 @@ for a, b, ch, _, _ in chords:
     sub[i0:i1] += np.sin(2 * np.pi * note(ch[0] - 12) * tl) * np.minimum(1, np.minimum(tl / 0.5, (tl[-1] - tl) / 0.5)) * 0.35
 mus_env = np.clip(tt(nb) / 1.2, 0, 1) ** 1.5
 # duck under the hook, lift on the products, settle on the logo
-mus_env *= 1 - 0.35 * np.exp(-((tt(nb) - 5.1) / 0.45) ** 2) + 0.18 * np.exp(-((tt(nb) - 6.6) / 0.8) ** 2)
+mus_env *= 1 - 0.35 * np.exp(-((tt(nb) - (_hook + 0.6)) / 0.55) ** 2) + 0.18 * np.exp(-((tt(nb) - (_prod + 0.7)) / 0.9) ** 2)
 music.buf += np.stack([air + sub, air[::-1] + sub]) * mus_env
 music.buf *= mus_env
 music.buf = reverb(music.buf, 3.0, 5000, 0.45)
 cue(0.0, 'Музыкальная основа: Dm(add9) → B♭ → Gm под хуком → F/A → F(add9) на знаке', '01_music')
 
-# ---------------------------------------------------------------- cuts (each cut has its own sound by type)
-shots = TL['shots']
-for s in shots:
-    t0, kind = s['from'], s['cut']
-    if kind == 'flyin':
-        land = s['object'][1]['t']
-        n = int((land - 0.05) * SR); w = sweep_bp(noise(n), 180, 5200, 1.3, 2.4) * np.linspace(0, 1, n) ** 3.2
-        trans.add(pan_glide(w, 0.45, 0), 0.05, -11)
-        cuts.add(pan(mixs(thump(70, 36, 1.8, 0.4), shimmer(1.4, 2093) * 0.6), 0), land, -8)
-        gfx.add(reverb(pan(shimmer(2.0, 3520) * 0.35, -0.2), 2.5, 9000, 0.5), 0.0, -24)
-        cue(0.05, 'Подлёт из космоса: нарастающий свист', '05_transitions'); cue(land, 'Приземление профиля: удар и блеск', '02_cuts')
-    elif kind == 'start':
-        cuts.add(pan(thump(64, 38, 1.6, 0.0) * 0.9, 0), t0, -9); cue(t0, 'Начало: мягкий низкий удар', '02_cuts')
-    elif kind == 'hard':
-        cuts.add(pan(thump(80, 50, 0.3, 0.5) * 0.6, 0), t0, -17); cue(t0, f'Склейка в {s["id"]}: короткий щелчок', '02_cuts')
-    elif kind == 'dark-light':
-        cuts.add(reverb(pan(air_puff(0.32), 0.1), 0.8, 8000, 0.25), t0 - 0.06, -16); cue(t0, f'Склейка тёмный→светлый в {s["id"]}: воздух', '02_cuts')
-    elif kind == 'light-dark':
-        cuts.add(pan(air_puff(0.3, 600, 4000, rev=True), -0.1), t0 - 0.24, -18); cuts.add(pan(thump(60, 40, 0.5, 0.2), 0), t0, -15)
-        cue(t0, f'Склейка светлый→тёмный в {s["id"]}: обратный воздух и удар', '02_cuts')
-    elif kind == 'whip':
-        trans.add(pan_glide(whoosh(0.32, 400, 4200), 0.3, -0.2), t0 - 0.14, -12); cue(t0, 'Резкий наезд сверху: свист', '05_transitions')
-    elif kind == 'flash':
-        fl = TL['flashes'][0]['t']
-        n = int(0.42 * SR); r = sweep_bp(noise(n), 300, 7000, 1.6, 1.6) * np.linspace(0, 1, n) ** 2.6
-        trans.add(np.stack([r, r[::-1] * 0.4 + r * 0.6]), fl[1] - 0.42, -13)
-        hit = mixs(thump(50, 38, 1.2, 0.0), shimmer(1.2, 2637) * 0.8, filt(noise(int(1.2 * SR)), 'bp', (1500, 9000)) * env(int(1.2 * SR), 0.002, 0.3, 6) * 0.3)
-        trans.add(reverb(pan(hit, 0), 2.2, 7500, 0.42), fl[1], -10); cue(fl[1], 'Засветка в лист: подъём и воздушный удар', '05_transitions')
-    elif kind == 'match':
-        trans.add(reverb(pan(mixs(thump(56, 36, 0.9, 0.1), shimmer(0.6, 1760) * 0.5), 0), 1.6, 5000, 0.3), t0, -10)
-        n = int(0.58 * SR); z = sweep_bp(noise(n), 300, 2600, 1.2, 2.0) * np.linspace(0, 1, n) ** 2
-        trans.add(pan(z, 0), t0 - 0.58, -16); cue(t0, 'Склейка по форме: наезд в зону и глухой удар', '05_transitions')
+# ---------------------------------------------------------------- user sound library
+# Sound effects come from the customer's library (Google Drive "звуки / Саунд Етап"), stored in ../sfx_lib/raw.
+# Each placement: file, event time, alignment (onset: sound starts at the event, peak: loudest moment hits it),
+# gain in dB, pan, optional segment [from, to] in seconds inside the file.
+LIB = ROOT.parent / 'sfx_lib'
+_cache = {}
 
-# 3D glints: metallic shine
-for s in shots:
-    if s['type'] == '3d' and s.get('glint', 0) >= 1.2:
-        mid = (s['from'] + s['to']) / 2
-        gfx.add(reverb(pan(shimmer(0.7, 3136) * 0.6, 0.2), 1.2, 9000, 0.3), mid - 0.15, -20)
-        cue(mid - 0.15, f'Блик по алюминию в {s["id"]}', '04_graphics')
 
-# ---------------------------------------------------------------- text
-base = [1318.5, 1568.0, 1760.0, 1975.5]
-for k, tx in enumerate(TL['texts']):
+def sample(name):
+    if name not in _cache:
+        src = next((LIB / 'raw').glob(name + '.*'))
+        raw = subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-i', str(src), '-ar', str(SR), '-ac', '2', '-f', 'f32le', '-'],
+                             capture_output=True, check=True).stdout
+        x = np.frombuffer(raw, dtype='<f4').reshape(-1, 2).T.astype(np.float64)
+        e = np.sqrt(np.convolve((x ** 2).mean(0), np.ones(480) / 480, 'same'))
+        _cache[name] = (x, int(np.argmax(e > e.max() * 0.1)), int(e.argmax()))
+    return _cache[name]
+
+
+def place(bus, name, t, align='onset', gain=0.0, panp=0.0, seg=None, fade=0.01, label=None):
+    x, on, pk = sample(name)
+    if seg:
+        a, b = int(seg[0] * SR), int(seg[1] * SR); x = x[:, a:b]; on, pk = max(0, on - a), max(0, pk - a)
+        n = x.shape[1]; f = int(fade * SR)
+        if f: x = x.copy(); x[:, :f] *= np.linspace(0, 1, f); x[:, -f:] *= np.linspace(1, 0, f)
+    ref = {'onset': on, 'peak': pk, 'start': 0}[align] / SR
+    if panp:
+        g = (panp + 1) * np.pi / 4; x = x * np.array([[np.cos(g) * 1.414], [np.sin(g) * 1.414]])
+    t0 = t - ref
+    if t0 < 0:
+        x = x[:, int(-t0 * SR):]; t0 = 0
+    bus.add(x, t0, gain)
+    if label: cue(t, label, bus.name)
+
+
+shots = TL['shots']; S = {s['id']: s for s in shots}
+T = {tx['words'][0]['text']: tx for tx in TL['texts']}
+
+# fly-in from space and landing
+s1 = shots[0]; land = s1['object'][1]['t']
+place(trans, 'long_woosh', land - 0.02, 'peak', -9, 0.3, label='Подлёт из космоса: Long Woosh')
+place(trans, 'riser_metallic', land, 'peak', -7, 0.0, label='Подлёт: Riser Metallic до приземления')
+place(cuts, 'zoom_impact', land, 'peak', -5, 0.0, label='Приземление: Zoom Impact')
+place(cuts, 'bass', land, 'onset', -9, 0.0, label='Приземление: Bass')
+
+# words appear: pops
+pops = ['pop_up_04', 'pop_up_05']
+for tx in TL['texts']:
     st = tx['style']
     for i, w in enumerate(tx['words']):
         if st == 'hook':
-            if '?' in w['text']:
-                text.add(pan(latch(), 0), w['t'], -9); text.add(pan(thump(48, 34, 1.0, 0.0), 0), w['t'], -10)
-                cue(w['t'], f'Хук «{w["text"]}»: удар и щелчок засова', '03_text')
-            elif w['text'].endswith('.'):
-                x, pre = tick(1046.5, 0.5, 0.4); text.add(reverb(pan(mixs(x, air_puff(0.5, 2000, 8000) * 0.5), 0), 1.6, 6000, 0.35), w['t'] - pre, -12)
-                cue(w['t'], f'Ответ «{w["text"]}»: мягкий выдох', '03_text')
-            else:
-                text.add(pan(thump(70, 45, 0.4, 0.6) * 0.8, 0), w['t'], -13); cue(w['t'], f'Хук «{w["text"]}»: акцент', '03_text')
             continue
-        f = base[i % 4] * (0.75 if st in ('small', 'top', 'tag', 'sub') else 1.0)
-        length, bright, g = {'cap': (0.22, 1.0, -15), 'small': (0.16, 0.6, -21), 'top': (0.18, 0.8, -18),
-                             'tag': (0.12, 0.5, -23), 'word': (0.3, 0.6, -19), 'sub': (0.14, 0.5, -24)}[st]
-        x, pre = tick(f, length, bright)
-        text.add(reverb(pan(x, -0.3 + 0.12 * i), 1.2, 6500, 0.25), w['t'] - pre, g)
-        cue(w['t'], f'Текст «{w["text"]}»', '03_text')
+        if st in ('tag', 'sub'):
+            place(text, 'mouse_click', w['t'], 'peak', 4, -0.2, label=f'Строка «{w["text"]}»: клик')
+        else:
+            place(text, pops[i % 2], w['t'], 'peak', {'cap': -11, 'top': -14, 'word': -12}.get(st, -12), -0.25 + 0.15 * i,
+                  label=f'Слово «{w["text"]}»: Pop Up')
 
-# ---------------------------------------------------------------- graphics
-def snap(g=1.0):
-    n = int(0.08 * SR)
-    return (filt(noise(n), 'bp', (1800, 5200)) * env(n, 0.0005, 0.03, 6) + np.sin(2 * np.pi * 620 * tt(n)) * env(n, 0.001, 0.05, 6) * 0.4) * g
+# hooks
+hk = T['Дверь']
+place(cuts, 'whip_whoosh_large_2', S['s4']['from'], 'peak', -6, 0.0, label='Склейка на хук: Whip Whoosh Large')
+place(text, 'pop_up_05', hk['words'][0]['t'], 'peak', -11, 0.0)
+place(text, 'hard', hk['words'][1]['t'], 'onset', -5, 0.0, label='«от сейфа?»: Hard')
+place(text, 'bass', hk['words'][1]['t'], 'onset', -13, 0.0)
+pc = T['Почти.']
+place(cuts, 'soft_wipe', S['s5']['from'], 'peak', -9, 0.1, label='Склейка на «Почти.»: Soft Wipe')
+place(text, 'pop_up_03', pc['words'][0]['t'], 'peak', -12, 0.0, label='«Почти.»: Pop Up')
 
+# graphics
+for g in TL['graphics']:
+    if g['type'] == 'arrow':
+        x, on, pk = sample('arrow')
+        place(gfx, 'arrow', g['draw'][1], 'peak', -9, 0.15, seg=[pk / SR - 0.55, pk / SR + 0.35], fade=0.04, label='Стрелка: Arrow Sound Effect')
+    elif g['type'] == 'callout':
+        place(gfx, 'pop_up_02', g['t'], 'peak', -14, 0.2, label=f'Выноска «{" ".join(g["label"])}»: Pop Up')
+        if g['label'][0].startswith('стеклопакет'):
+            gfx.add(reverb(pan(glass_ping(), 0.3), 1.6, 9000, 0.3), g['t'] + 0.02, -20)
+    elif g['type'] == 'brackets':
+        for i in range(4): place(gfx, 'mouse_click', g['t'] + 0.04 * i, 'peak', 2, -0.3 + 0.2 * i)
+        cue(g['t'], 'Рамка-прицел: четыре клика', gfx.name)
+    elif g['type'] == 'logo':
+        place(logo, 'chimes_01', g['t'], 'onset', 8, 0.0, label='Знак: Chimes')
+        place(logo, 'bass', g['t'] - 0.04, 'onset', -14, 0.0)
 
-for gr in TL['graphics']:
-    ty = gr['type']
-    if ty == 'arrow':
-        a, b = gr['draw']; n = int((b - a + 0.12) * SR)
-        sw = sweep_bp(noise(n) * (0.6 + 0.4 * np.abs(filt(noise(n), 'low', 30))), 1100, 4200, 3.0, 0.8) * np.sin(np.pi * np.linspace(0, 1, n)) ** 1.5
-        gfx.add(pan_glide(sw, -0.4, 0.2), a, -14); cue(a, 'Стрелка: шорох пера', '04_graphics')
-    elif ty == 'callout':
-        n = int(0.16 * SR); pop = np.sin(2 * np.pi * np.cumsum(1300 - 500 * np.linspace(0, 1, n)) / SR) * env(n, 0.002, 0.12, 5)
-        gfx.add(reverb(pan(pop, 0.15), 0.9, 7000, 0.2), gr['t'], -17)
-        n = int(0.34 * SR); gfx.add(pan(sweep_bp(noise(n), 2500, 5500, 4, 1) * np.sin(np.pi * np.linspace(0, 1, n)) * 0.45, 0.2), gr['t'] + 0.06, -24)
-        cue(gr['t'], f'Выноска «{" ".join(gr["label"])}»', '04_graphics')
-    elif ty == 'brackets':
-        for i in range(4): gfx.add(pan(snap(0.7), -0.3 + 0.2 * i), gr['t'] + 0.04 * i, -20)
-        cue(gr['t'], 'Рамка-прицел вокруг камеры: четыре щелчка', '04_graphics')
-    elif ty == 'tagline':
-        x, _ = tick(2093, 0.12, 0.5, air=False); gfx.add(pan(x, -0.3), gr['t'], -23)
-    elif ty == 'rule':
-        n = int(0.4 * SR); gfx.add(pan(sweep_bp(noise(n), 3000, 6000, 4, 1) * np.sin(np.pi * np.linspace(0, 1, n)) * 0.35, 0), gr['t'], -26)
-    elif ty == 'logo':
-        n = int(3.2 * SR); t = tt(n); bell = np.zeros(n)
-        for b0, am in [(349.23, 1.0), (523.25, 0.55), (659.25, 0.35)]:
-            for r, a, d in [(1, 1, 2.4), (2.0, .3, 1.3), (2.76, .15, 1.0), (4.07, .06, .6)]:
-                bell += np.sin(2 * np.pi * b0 * r * t) * a * am * env(n, 0.006, d, 4)
-        logo.add(reverb(np.stack([bell * 0.9 + np.sin(2 * np.pi * 43.65 * t) * env(n, 0.02, 1.6, 4) * 0.6, bell]), 2.8, 6000, 0.42), gr['t'], -16)
-        cue(gr['t'], 'Знак THERMINAL: тёплый аккорд', '06_logo')
-# glass ping on the double glazing label
-for gr in TL['graphics']:
-    if gr['type'] == 'callout' and gr['label'][0].startswith('стеклопакет'):
-        gfx.add(reverb(pan(glass_ping(), 0.3), 1.6, 9000, 0.3), gr['t'] + 0.02, -16); cue(gr['t'], 'Стеклопакет: звон стекла', '04_graphics')
+# transitions and cuts
+for s in shots[1:]:
+    t0, kind = s['from'], s['cut']
+    if kind == 'flash':
+        place(trans, 'cinematic_whoosh_4', t0, 'peak', -7, 0.0, label='Засветка в лист: Cinematic Whoosh 4')
+        place(trans, 'light_up', t0 + 0.02, 'peak', -10, 0.0, label='Засветка: Light Up')
+    elif kind == 'match':
+        place(trans, 'zoom_in_v2', t0, 'peak', -7, 0.0, label='Наезд в камеру: Zoom In')
+        place(cuts, 'hard', t0, 'onset', -9, 0.0, label='Склейка по форме: Hard')
+    elif kind == 'dark-light':
+        place(cuts, 'whoosh2_fast_airy', t0, 'peak', -9, 0.2, label=f'Склейка в {s["id"]}: Whoosh Fast Airy')
+    elif kind == 'light-dark':
+        place(cuts, 'whoosh1_slow_thick', t0, 'peak', -11, -0.2, label=f'Склейка в {s["id"]}: Whoosh Slow Thick')
+    elif kind == 'hard' and s['type'] == 'logo':
+        place(cuts, 'fast_swish', t0, 'peak', -11, 0.0, label='Склейка на знак: Fast Swish')
+    for i, im in enumerate(s.get('images', [])):
+        if 'enter' in im:
+            place(gfx, ['fast_swipe_right', 'fast_swipe'][i % 2], im['enter']['t'][0] + 0.02, 'onset', -12, -0.4 if i == 0 else 0.4,
+                  label=f'Въезд изделия {i + 1}: Fast Swipe')
 
-# sheet: pen texture and dimension snaps
+# sheet: dimension clicks and a quiet synthesized pen texture (the library has no pencil sound)
 SH = next(s for s in shots if s['type'] == 'sheet')
-d0, d1 = SH['draw']; n = int((d1 - d0) * SR); ge = np.zeros(n)
-for k in rng.integers(0, max(1, n - 2400), int((d1 - d0) * 48)):
-    L = int(rng.uniform(0.01, 0.05) * SR); ge[k:k + L] += np.hanning(L)[:len(ge[k:k + L])] * rng.uniform(0.4, 1)
-sh = np.clip(np.linspace(0, 1, n) / 0.1, 0, 1) * np.clip((1 - np.linspace(0, 1, n)) / 0.2, 0, 1)
-gfx.add(np.stack([filt(noise(n), 'bp', (2400, 6500)) * ge * sh, filt(noise(n), 'bp', (2400, 6500)) * ge * sh]) * 0.7, d0, -14)
-cue(d0, 'Прорисовка сечения: перо по бумаге', '04_graphics')
 for dm in SH['dims']:
-    gfx.add(pan(snap(0.8), -0.2), dm['t'], -18); gfx.add(pan(snap(1.0), 0.15), dm['t'] + 0.26, -17)
-    cue(dm['t'], 'Размерная линия: щелчки засечек', '04_graphics')
+    place(gfx, 'mouse_click', dm['t'], 'peak', 4, -0.2); place(gfx, 'mouse_click', dm['t'] + 0.26, 'peak', 4, 0.2)
+    cue(dm['t'], 'Размерная линия: клики', gfx.name)
+d0, d1 = SH['draw']; n = int((d1 - d0) * SR); ge = np.zeros(n)
+for k in rng.integers(0, max(1, n - 2400), int((d1 - d0) * 40)):
+    Ln = int(rng.uniform(0.01, 0.05) * SR); ge[k:k + Ln] += np.hanning(Ln)[:len(ge[k:k + Ln])] * rng.uniform(0.4, 1)
+shp = np.clip(np.linspace(0, 1, n) / 0.1, 0, 1) * np.clip((1 - np.linspace(0, 1, n)) / 0.2, 0, 1)
+gfx.add(np.stack([filt(noise(n), 'bp', (2400, 6500)) * ge * shp, filt(noise(n), 'bp', (2400, 6500)) * ge * shp]) * 0.7, d0, -20)
+cue(d0, 'Прорисовка сечения: тихое перо (синтез)', gfx.name)
 
 # ---------------------------------------------------------------- mix and export
 buses = [music, cuts, text, gfx, trans, logo]
