@@ -1,0 +1,616 @@
+<meta charset="utf-8">
+<title>THERMINAL Intro VIKING 90</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: drawing-sheet page — narrow technical columns, the 9:16 player pinned beside the script, hairline rules like a profile catalogue */
+:root{
+  --paper:#f4f4f1; --sheet:#ffffff; --ink:#171717; --ink-2:#55585c; --rule:#d9d9d4;
+  --red:#c81111; --red-soft:#f6e3e1; --ok:#2f6b46; --ok-soft:#e3efe6; --warn:#8a5a00; --warn-soft:#f6ecd8;
+  --f-display:'Montserrat',Arial,sans-serif; --f-body:'IBM Plex Sans',Arial,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121314; --sheet:#1b1c1e; --ink:#ececea; --ink-2:#a3a6aa; --rule:#33353a;
+  --red:#ef3b3b; --red-soft:#3a1c1c; --ok:#7fc296; --ok-soft:#1c2d22; --warn:#e0b25c; --warn-soft:#352a16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121314; --sheet:#1b1c1e; --ink:#ececea; --ink-2:#a3a6aa; --rule:#33353a;
+  --red:#ef3b3b; --red-soft:#3a1c1c; --ok:#7fc296; --ok-soft:#1c2d22; --warn:#e0b25c; --warn-soft:#352a16; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,4.2vw,40px);letter-spacing:.14em;text-transform:uppercase;font-weight:500}
+h2{font-size:13px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;display:flex;gap:12px;align-items:center}
+h2::after{content:"";flex:1;height:1px;background:var(--rule)}
+h3{font-size:16px;letter-spacing:.06em;font-weight:600}
+p{margin:0;max-width:68ch}
+a{color:inherit;text-decoration-color:var(--red);text-underline-offset:3px}
+.mono{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.stack{display:flex;flex-direction:column;gap:14px}
+section{display:flex;flex-direction:column;gap:22px}
+
+/* header */
+.head{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:end;border-bottom:1px solid var(--rule);padding-bottom:22px}
+.head img{width:64px;height:auto}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+.meta span{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.meta b{font-weight:500;color:var(--ink)}
+.lede{font-size:17px;max-width:70ch}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11.5px;padding:2px 8px;border-radius:3px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+
+/* player */
+.proto{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:40px;align-items:start}
+.player{display:flex;flex-direction:column;gap:10px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.screen{position:relative;width:100%;aspect-ratio:9/16;max-width:100%;overflow:hidden;background:#0c0c0c;border-radius:6px;box-shadow:0 0 0 1px var(--rule)}
+.stage{position:absolute;left:0;top:0;width:360px;height:640px;transform-origin:0 0;overflow:hidden;font-family:var(--f-display)}
+.ctrl{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.ctrl button{font-family:var(--f-mono);font-size:12px;background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:6px 10px;cursor:pointer;min-width:74px}
+.ctrl button:focus-visible,.jump button:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+input[type=range]{width:100%;accent-color:var(--red)}
+.jump{display:flex;gap:6px;flex-wrap:wrap}
+.jump button{font-family:var(--f-mono);font-size:11.5px;background:none;border:1px solid var(--rule);color:var(--ink-2);border-radius:3px;padding:3px 8px;cursor:pointer}
+
+/* stage scenes */
+.s1,.s2{position:absolute;inset:0}
+.s2{background:#fff}
+.s1{background:radial-gradient(120% 70% at 60% 45%,#232323 0%,#0d0d0d 55%,#060606 100%)}
+.door{position:absolute;left:-40px;top:150px;width:430px;height:430px;will-change:transform;-webkit-mask:linear-gradient(180deg,transparent 19%,#000 33%);mask:linear-gradient(180deg,transparent 19%,#000 33%)}
+.door img{width:100%;height:100%;display:block}
+.sweep{position:absolute;inset:0;-webkit-mask:url(assets/viking90_door_corner.png) center/100% 100% no-repeat;mask:url(assets/viking90_door_corner.png) center/100% 100% no-repeat;
+  background:linear-gradient(105deg,transparent 0%,transparent 40%,rgba(255,255,255,.28) 50%,transparent 60%,transparent 100%);background-size:260% 100%;mix-blend-mode:screen}
+.fadeb{position:absolute;left:0;right:0;top:380px;height:140px;background:linear-gradient(transparent,#070707 78%)}
+.fadeb2{position:absolute;left:0;right:0;top:500px;bottom:0;background:#070707}
+.cap{position:absolute;left:46px;top:112px;color:#fff;font-size:15px;font-weight:500;letter-spacing:.24em;line-height:1.28;text-transform:uppercase}
+.cap span{display:block;opacity:0}
+.small{position:absolute;left:170px;top:448px;color:#e9e9e9;font-size:10px;font-weight:400;letter-spacing:.12em;line-height:1.5}
+.arrow{position:absolute;left:0;top:0;width:360px;height:640px;overflow:visible}
+.wtop{position:absolute;left:44px;right:30px;top:66px;color:#1e1e1e;font-size:10px;letter-spacing:.1em;line-height:1.5}
+.wtop span{opacity:0}
+.spec{position:absolute;left:44px;top:170px;display:grid;grid-template-columns:78px auto;gap:4px 10px;font-size:7.5px;letter-spacing:.1em;color:#8b8b8b;text-transform:uppercase}
+.spec b{font-weight:500;color:#2a2a2a;letter-spacing:.08em}
+.draw{position:absolute;left:0;top:0;width:360px;height:640px}
+.draw path.sec{fill:none;stroke:#2b2b2b;stroke-width:.8;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.draw .dim{stroke:#6d6d6d;stroke-width:.6;fill:none;vector-effect:non-scaling-stroke}
+.draw text{font-family:var(--f-display);fill:#4a4a4a;font-size:7.5px;letter-spacing:.08em}
+.draw .lbl{fill:#1e1e1e;font-size:8px;letter-spacing:.1em}
+.draw .dot{fill:#1e1e1e}
+.mark{position:absolute;right:28px;bottom:42px;display:flex;align-items:center;gap:8px;opacity:0}
+.mark img{width:24px;height:auto}
+.mark span{font-family:var(--f-display);font-weight:600;font-size:10px;letter-spacing:.32em;color:#8f8f8f}
+.tc{position:absolute;left:10px;top:8px;font-family:var(--f-mono);font-size:8px;color:rgba(160,160,160,.75);letter-spacing:.04em;pointer-events:none}
+
+/* script list */
+.script{display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.script li{list-style:none;display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:14px;padding:11px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.script ul{padding:0;margin:0}
+.script .t{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.script q{font-family:var(--f-display);quotes:none;letter-spacing:.06em}
+.script .up{text-transform:uppercase;letter-spacing:.16em}
+.note{border-left:2px solid var(--red);padding:2px 0 2px 14px;color:var(--ink-2);font-size:14px}
+
+/* storyboard */
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}
+.shot{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pair figure{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.pair img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:3px;box-shadow:0 0 0 1px var(--rule);display:block}
+.pair figcaption{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-2)}
+.shot h3{font-size:13px;letter-spacing:.08em;display:flex;justify-content:space-between;gap:8px}
+.shot h3 .mono{color:var(--ink-2);font-weight:400}
+.shot p{font-size:13.5px;color:var(--ink-2)}
+
+/* object block */
+.obj{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px}
+.figs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.figs figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.figs img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:3px;box-shadow:0 0 0 1px var(--rule);display:block}
+.figs figcaption{font-size:12px;color:var(--ink-2)}
+.figs .wide{grid-column:1/-1}
+.figs .wide img{aspect-ratio:auto}
+.overlay{position:relative;background:#fff;border-radius:3px;box-shadow:0 0 0 1px var(--rule);overflow:hidden}
+.overlay img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.55;box-shadow:none;aspect-ratio:auto;border-radius:0}
+.overlay svg{position:relative;display:block;width:100%;height:auto}
+.overlay path{fill:none;stroke:var(--red);stroke-width:1.1;vector-effect:non-scaling-stroke}
+ol.why{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+
+/* series */
+.series{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card .thumbs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.card .thumbs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;background:#fff;display:block}
+.card ul{margin:0;padding-left:18px;font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.card .k{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em}
+.card header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.specs{width:100%;border-collapse:collapse;font-size:13px}
+.specs td{border-top:1px solid var(--rule);padding:6px 4px;vertical-align:top}
+.specs td:last-child{font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+.tablewrap{overflow-x:auto}
+
+/* brand */
+.brand{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:32px}
+.logo-tile{background:#0f0f0f;border-radius:4px;padding:28px;display:flex;align-items:center;justify-content:center}
+.logo-tile img{width:100%;max-width:190px;height:auto}
+.sw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sw div{display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.sw i{display:block;height:54px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px 28px}
+.facts div{display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--rule);padding-top:10px}
+.facts b{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+
+/* needs */
+.needs{counter-reset:n;display:flex;flex-direction:column;border-top:1px solid var(--rule);margin:0;padding:0}
+.needs li{list-style:none;counter-increment:n;display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:14px;padding:13px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.needs li::before{content:counter(n,decimal-leading-zero);font-family:var(--f-mono);font-size:12px;color:var(--red)}
+.needs b{font-weight:600}
+.needs p{font-size:13.5px;color:var(--ink-2);margin-top:3px}
+footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+
+@media (max-width:860px){
+  .proto,.obj,.brand{grid-template-columns:minmax(0,1fr)}
+  .player{position:static;max-width:380px;width:100%;margin:0 auto}
+  .series{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:480px){
+  .script li{grid-template-columns:62px minmax(0,1fr)}
+  .script li .chip{grid-column:2}
+  .needs li{grid-template-columns:28px minmax(0,1fr)}
+  .needs li .chip{grid-column:2;justify-self:start}
+  .head{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){ .sweep{display:none} }
+</style>
+
+<div class="wrap">
+
+<header class="head">
+  <img src="assets/logo.png" alt="Знак THERMINAL">
+  <div>
+    <h1>THERMINAL · Intro</h1>
+    <div class="meta">
+      <span>Объект: <b>VIKING 90, дверь «вклейка»</b></span>
+      <span>Формат: <b>9:16, 1080×1920</b></span>
+      <span>Длительность: <b>6,6 с</b></span>
+      <span>Статус: <b>визуальная концепция v1, до монтажа</b></span>
+    </div>
+  </div>
+</header>
+
+<p class="lede">Интро повторяет ход референса: в тёмной сцене предметный макрокадр с белыми подписями, затем переход на белый лист, где строится техническое сечение того же изделия. Объект взят из реальных материалов THERMINAL: рендер двери VIKING 90 и контурный чертёж её сечения с сайта therminal.kz. Ниже работающий прототип, раскадровка, итоги изучения бренда и список материалов для чистовой версии.</p>
+
+<section id="proto" aria-labelledby="h-proto">
+  <h2 id="h-proto">Прототип</h2>
+  <div class="proto">
+    <div class="player">
+      <div class="screen" id="screen">
+        <div class="stage" id="stage">
+          <div class="s2" id="s2">
+            <svg class="draw" viewBox="0 0 360 640" aria-hidden="true">
+              <g id="frameLines" class="dim">
+                <line x1="18" y1="34" x2="18" y2="606"/>
+                <line x1="342" y1="34" x2="342" y2="606"/>
+              </g>
+              <g id="section" transform="translate(44 262) scale(.3203)">
+                <path class="sec" d="M9.0,7.3 L7.3,9.0 L7.3,23.0 L8.3,24.3 L10.0,25.3 L15.0,26.7 L16.3,26.3 L17.0,25.0 L17.3,19.0 L19.3,17.3 L21.7,17.0 L30.0,17.3 L32.0,19.0 L32.0,69.3 L29.0,73.7 L29.0,75.3 L27.7,77.7 L27.7,79.7 L28.3,80.7 L36.0,80.3 L36.7,81.0 L36.0,83.3 L35.3,84.0 L34.3,84.0 L32.7,86.7 L32.7,103.0 L32.3,104.7 L31.0,106.0 L19.0,106.0 L18.0,105.3 L17.3,104.0 L17.0,97.3 L16.3,96.7 L13.3,96.7 L8.7,98.7 L7.3,100.3 L7.3,111.7 L7.7,112.3 L9.7,113.3 L30.0,113.3 L31.7,114.0 L32.3,114.7 L32.7,116.7 L32.7,132.3 L33.3,133.7 L35.0,135.0 L36.3,137.3 L35.3,138.3 L30.7,138.3 L30.3,138.0 L27.7,139.3 L27.7,141.3 L29.0,143.7 L29.3,146.0 L32.0,149.7 L32.0,226.0 L33.0,229.3 L32.0,232.7 L32.0,309.0 L29.3,312.7 L29.0,315.0 L27.7,317.3 L27.7,319.3 L28.3,320.0 L30.0,320.3 L37.7,319.7 L38.7,320.7 L37.3,322.7 L34.7,323.3 L32.7,326.3 L32.7,342.3 L32.3,344.0 L31.3,345.0 L9.7,345.0 L7.3,346.7 L7.3,358.3 L9.0,360.3 L12.0,361.0 L12.7,361.7 L16.3,361.7 L16.7,361.3 L17.0,356.0 L17.7,353.7 L18.7,352.7 L21.0,352.3 L31.3,352.7 L32.3,353.7 L32.7,355.7 L32.7,372.0 L34.0,374.3 L36.7,375.0 L38.0,377.3 L37.0,378.3 L30.3,378.0 L30.0,377.7 L28.3,378.0 L27.7,379.0 L27.7,381.0 L29.0,383.3 L29.3,385.3 L32.0,389.3 L32.0,415.7 L33.0,419.0 L32.0,422.3 L31.7,440.0 L30.3,441.0 L28.3,441.3 L18.7,441.0 L17.3,439.3 L17.0,433.3 L16.0,431.7 L13.7,431.7 L12.3,432.7 L10.0,433.0 L8.7,433.7 L7.3,435.3 L7.3,449.7 L8.3,450.7 L9.3,451.0 L333.0,451.0 L335.0,451.3 L336.3,451.0 L337.7,449.0 L337.7,433.3 L337.0,431.7 L337.7,429.3 L337.7,418.3 L336.3,414.7 L334.7,413.3 L333.7,411.3 L335.0,410.0 L359.3,410.0 L361.0,410.3 L362.3,411.7 L363.3,416.0 L363.3,420.3 L362.7,421.0 L362.7,435.7 L363.0,436.3 L362.0,438.3 L362.3,450.0 L364.3,451.3 L367.7,451.0 L809.7,451.0 L810.0,451.3 L813.7,451.3 L814.0,451.0 L814.3,451.3 L814.3,455.7 L815.0,456.3 L823.3,456.3 L824.0,455.3 L823.7,452.0 L824.3,451.0 L828.3,451.3 L828.7,451.0 L917.3,451.0 L918.0,449.7 L918.0,438.7 L917.3,436.7 L916.3,436.3 L570.0,436.3 L568.0,435.3 L567.0,433.0 L563.7,431.3 L560.7,431.3 L557.3,434.7 L556.0,434.7 L553.0,431.3 L546.7,430.7 L543.7,427.0 L533.7,426.7 L532.7,425.3 L532.3,423.7 L532.3,405.7 L532.7,404.0 L534.7,402.3 L543.0,402.3 L544.7,401.3 L545.3,389.7 L545.7,388.3 L547.0,387.0 L549.0,382.7 L549.3,379.0 L548.7,378.0 L547.0,377.7 L540.3,378.3 L539.7,377.7 L540.0,376.0 L541.3,374.7 L543.3,374.3 L544.3,373.0 L544.7,354.3 L545.0,353.7 L546.3,352.7 L548.7,352.3 L556.7,352.3 L559.3,353.0 L560.0,354.0 L560.0,360.3 L560.7,361.7 L562.0,362.0 L564.3,361.7 L568.7,360.0 L569.7,358.7 L570.0,356.7 L570.0,348.7 L569.7,346.7 L568.7,345.3 L567.7,345.0 L546.3,345.0 L544.7,343.7 L544.3,325.3 L542.0,323.0 L539.7,322.7 L538.7,321.0 L539.7,319.7 L547.7,320.3 L548.7,320.0 L549.7,318.7 L548.7,314.7 L547.0,311.0 L545.7,309.7 L545.0,307.0 L545.0,232.3 L544.3,230.0 L545.0,226.3 L545.0,151.7 L545.7,149.0 L547.3,147.0 L548.7,144.0 L549.3,139.7 L548.3,138.3 L541.7,138.3 L541.0,137.7 L542.0,135.3 L544.0,134.0 L544.7,131.0 L544.7,88.0 L543.7,84.7 L542.0,84.0 L540.3,81.3 L541.3,80.3 L548.7,80.7 L549.3,78.7 L548.7,75.0 L545.3,69.0 L544.7,56.3 L543.3,55.3 L541.3,55.0 L535.0,55.3 L533.7,54.7 L532.7,53.0 L532.7,49.7 L533.0,49.3 L534.3,50.0 L538.0,49.7 L539.0,49.0 L539.3,41.0 L540.0,39.7 L541.7,38.7 L625.7,38.7 L628.7,40.7 L630.0,43.3 L637.7,43.3 L638.7,43.0 L639.0,41.7 L638.3,40.0 L637.3,39.0 L637.3,34.7 L639.0,33.3 L640.3,33.0 L684.0,33.0 L686.0,33.7 L687.0,34.7 L687.0,39.3 L685.7,41.0 L686.0,43.0 L691.3,43.3 L692.3,42.7 L692.7,41.7 L692.7,33.7 L693.0,33.3 L693.0,30.0 L692.3,28.0 L691.7,27.7 L640.0,27.3 L638.7,25.3 L638.7,22.3 L639.0,22.0 L917.3,22.0 L918.0,20.7 L918.0,9.7 L917.7,8.0 L916.7,7.3 L240.3,7.3 L239.3,8.7 L239.3,21.3 L240.3,22.3 L241.0,26.0 L245.3,33.0 L246.3,36.3 L247.3,37.3 L247.0,39.0 L244.0,44.0 L244.0,45.7 L243.0,48.7 L240.0,48.7 L238.3,48.0 L216.0,48.0 L215.0,47.3 L214.7,46.7 L214.7,10.7 L214.3,8.3 L213.0,7.3 L9.3,7.3"/>
+<path class="sec" d="M240.0,7.7 L240.3,7.3 L916.7,7.3 L917.7,8.3 L918.0,9.7 L918.0,20.7 L917.0,22.0 L639.0,22.0 L638.7,22.3 L451.7,22.0 L451.3,22.3 L362.3,22.3 L362.0,22.7 L358.3,21.7 L353.7,22.3 L240.3,22.3 L239.3,21.3 L239.3,8.7 L239.7,8.0"/>
+<path class="sec" d="M267.3,41.7 L269.3,41.3 L270.7,42.7 L316.3,42.7 L319.3,43.3 L320.7,45.7 L321.3,49.3 L321.3,52.7 L323.0,59.3 L324.3,60.0 L327.7,60.0 L328.0,60.3 L328.0,68.7 L327.3,70.7 L326.0,72.0 L325.7,74.0 L324.3,76.3 L324.0,78.0 L324.3,80.3 L325.0,80.7 L332.3,80.3 L333.0,81.0 L332.0,83.7 L330.3,84.3 L329.3,85.3 L328.7,87.0 L328.7,131.7 L329.3,133.7 L331.3,135.0 L332.7,137.3 L331.7,138.3 L325.0,138.3 L324.0,139.3 L324.7,143.7 L325.7,145.0 L326.0,147.0 L327.7,148.7 L328.0,150.3 L328.0,224.7 L329.0,227.7 L329.0,230.7 L328.0,233.7 L328.0,308.0 L327.7,309.7 L326.0,311.7 L326.0,312.7 L324.7,315.0 L324.0,319.0 L324.7,320.0 L326.0,320.3 L334.0,319.7 L335.0,320.7 L333.7,322.7 L331.0,323.3 L329.0,325.3 L328.7,327.0 L328.7,371.3 L329.3,373.3 L330.3,374.3 L333.0,375.0 L334.3,377.3 L333.0,378.3 L326.0,377.7 L324.7,378.0 L324.0,379.0 L324.7,383.3 L325.7,384.7 L326.0,386.7 L327.3,387.7 L328.0,390.0 L328.0,403.3 L326.7,405.0 L325.7,405.3 L324.0,407.0 L322.3,405.7 L320.7,405.3 L314.3,405.3 L313.7,405.7 L312.7,404.7 L309.3,404.3 L304.3,404.7 L304.0,405.3 L304.3,408.0 L305.7,408.3 L313.7,408.3 L314.0,408.0 L314.7,409.3 L316.0,410.0 L322.7,410.0 L324.0,408.7 L324.7,409.7 L326.3,410.7 L327.7,413.7 L328.7,414.0 L331.0,416.3 L331.7,417.7 L331.7,420.0 L330.3,422.3 L327.7,424.7 L324.7,424.7 L322.7,423.7 L318.7,423.7 L316.7,424.7 L312.7,424.7 L306.7,417.7 L304.3,417.3 L303.3,418.3 L303.0,420.0 L303.0,431.0 L302.7,431.3 L296.0,431.3 L295.0,431.7 L294.3,433.0 L294.7,435.7 L299.3,436.0 L301.0,437.0 L301.7,438.3 L301.7,441.7 L300.3,443.7 L215.0,443.7 L213.7,441.3 L213.7,438.3 L214.3,437.0 L216.0,436.0 L219.7,436.0 L220.7,435.0 L220.7,432.7 L220.0,431.7 L216.3,431.3 L214.7,429.7 L214.7,425.0 L213.7,420.3 L214.3,419.0 L215.0,411.3 L216.7,410.3 L218.3,410.0 L247.0,410.0 L248.3,409.7 L249.0,408.7 L249.0,389.7 L252.0,385.0 L252.7,381.7 L253.3,381.0 L253.3,378.3 L251.0,377.7 L244.3,378.3 L243.3,377.3 L244.3,375.3 L246.7,374.3 L248.3,372.3 L248.3,325.7 L246.3,323.3 L243.3,322.7 L242.3,320.7 L243.3,319.7 L251.3,320.3 L253.3,319.3 L253.3,316.7 L252.3,315.3 L252.0,313.3 L249.0,308.7 L249.0,232.0 L248.3,230.0 L249.0,226.7 L249.0,150.0 L252.0,145.3 L253.3,140.0 L253.0,139.0 L252.0,138.3 L245.3,138.3 L244.7,137.7 L245.7,135.3 L248.3,132.7 L248.3,86.3 L247.0,84.3 L245.0,83.3 L244.0,81.0 L245.0,80.3 L252.0,80.7 L253.0,80.0 L253.3,78.7 L252.0,73.7 L249.0,69.0 L249.0,58.7 L250.0,57.3 L251.3,56.7 L261.7,56.7 L262.7,56.3 L263.7,54.7 L263.7,49.0 L261.7,47.3 L262.0,44.0 L263.3,42.0 L267.0,41.7"/>
+<path class="sec" d="M556.0,435.0 L557.3,434.7 L558.7,436.0 L568.7,435.7 L570.0,436.3 L916.3,436.3 L917.3,437.0 L918.0,438.7 L918.0,449.7 L917.0,451.0 L828.7,451.0 L828.3,451.3 L825.0,451.3 L823.7,450.0 L823.3,447.0 L815.3,447.0 L814.3,448.0 L814.3,450.7 L813.7,451.3 L810.0,451.3 L809.7,451.0 L367.7,451.0 L364.3,451.3 L363.0,450.7 L362.3,449.7 L362.0,438.3 L363.3,436.0 L524.7,436.3 L525.0,436.0 L555.0,436.0 L555.7,435.3"/>
+<path class="sec" d="M38.0,377.7 L38.7,377.3 L43.0,378.7 L44.0,380.7 L41.3,383.7 L40.7,386.7 L41.0,389.7 L40.3,392.0 L40.3,394.0 L41.3,394.7 L61.0,394.7 L62.0,393.7 L62.0,391.7 L61.3,389.7 L59.0,386.0 L58.3,383.3 L59.0,382.7 L67.0,382.7 L68.7,383.7 L70.0,385.7 L71.0,386.3 L73.0,390.3 L75.3,393.3 L77.7,394.7 L81.7,394.7 L82.0,395.0 L200.0,395.0 L203.3,394.7 L205.7,393.3 L209.3,388.3 L211.0,385.0 L214.0,382.7 L222.0,382.7 L222.7,383.3 L222.3,385.7 L219.0,391.3 L219.0,394.0 L220.0,394.7 L239.7,394.7 L240.7,393.7 L240.3,390.3 L239.7,389.0 L240.3,387.0 L239.7,383.7 L238.3,382.0 L238.3,379.0 L239.0,378.3 L243.3,377.3 L244.3,378.3 L251.0,377.7 L253.3,378.7 L253.3,381.0 L252.7,381.7 L252.0,385.0 L249.0,389.7 L249.0,408.7 L248.0,409.7 L247.0,410.0 L218.3,410.0 L216.7,410.3 L215.0,411.3 L214.3,419.0 L213.7,420.3 L214.7,425.0 L214.7,429.7 L215.3,431.0 L220.0,431.7 L220.7,432.7 L220.7,435.0 L219.7,436.0 L214.7,436.3 L213.7,438.3 L213.7,441.3 L215.0,443.7 L300.3,443.7 L301.7,441.7 L301.7,438.3 L301.0,436.7 L299.3,436.0 L295.3,436.0 L294.3,434.7 L294.3,433.0 L296.0,431.3 L302.7,431.3 L303.3,431.0 L306.7,431.7 L311.7,431.3 L312.7,432.7 L312.7,436.0 L312.3,436.3 L308.7,436.7 L307.0,437.7 L306.7,442.0 L307.7,444.0 L313.3,444.0 L314.0,443.3 L316.3,443.7 L327.3,443.3 L328.0,444.0 L329.3,444.0 L331.3,443.3 L331.7,440.7 L330.3,439.3 L330.0,437.3 L328.3,436.0 L328.7,432.0 L329.0,431.7 L336.3,431.3 L337.3,432.0 L337.7,433.3 L337.7,449.0 L336.3,451.0 L335.0,451.3 L333.0,451.0 L9.3,451.0 L7.3,449.7 L7.3,435.3 L10.0,433.0 L12.3,432.7 L13.7,431.7 L16.0,431.7 L17.0,433.3 L17.3,439.3 L17.7,440.3 L18.7,441.0 L28.3,441.3 L31.7,440.3 L32.0,422.3 L33.0,419.0 L32.0,415.7 L32.0,389.0 L29.3,385.3 L28.7,382.3 L27.7,381.0 L27.7,379.0 L28.3,378.0 L30.0,377.7 L36.7,378.3 L37.7,378.0"/>
+<path class="sec" d="M362.0,22.7 L362.3,22.3 L450.7,22.3 L451.3,23.7 L451.7,26.7 L452.3,27.3 L454.3,27.7 L460.0,27.7 L460.3,27.3 L520.0,27.3 L523.3,27.7 L525.0,26.3 L525.0,23.3 L525.7,22.3 L638.3,22.3 L638.7,25.3 L639.3,27.0 L640.0,27.3 L691.3,27.7 L692.3,28.3 L693.0,30.0 L692.7,41.7 L691.3,43.3 L686.3,43.0 L685.7,42.3 L685.7,41.3 L687.0,39.3 L687.0,34.3 L684.0,33.0 L640.3,33.0 L637.7,34.0 L637.3,34.7 L637.3,39.0 L638.7,40.7 L639.0,41.7 L638.7,42.7 L637.7,43.3 L630.3,43.3 L628.7,41.3 L628.7,40.3 L630.3,37.7 L630.3,34.3 L630.0,33.0 L629.0,32.3 L535.0,32.3 L533.7,33.3 L533.0,36.3 L532.7,53.0 L533.0,54.0 L535.0,55.3 L541.3,55.0 L543.3,55.3 L544.7,56.3 L545.3,69.0 L546.0,71.0 L547.3,72.0 L547.7,73.7 L549.0,76.0 L549.3,79.3 L548.3,80.7 L541.3,80.3 L540.0,81.0 L538.3,81.0 L534.0,79.7 L533.3,78.3 L534.7,77.0 L535.0,75.7 L536.3,74.0 L536.7,70.0 L536.0,69.3 L536.3,64.7 L535.3,63.7 L516.3,63.7 L515.7,64.0 L515.3,65.0 L515.7,68.0 L517.7,71.3 L518.7,75.0 L517.7,76.0 L512.0,76.0 L508.3,74.7 L506.3,72.3 L506.0,71.3 L505.3,71.0 L503.0,66.3 L501.0,64.3 L499.3,63.7 L374.0,63.7 L372.7,64.3 L370.0,67.0 L368.0,71.0 L364.7,75.0 L361.7,76.0 L355.7,76.0 L354.7,75.3 L354.7,74.3 L356.0,70.7 L357.3,69.3 L358.0,67.0 L357.7,64.0 L357.0,63.7 L338.0,63.7 L337.0,64.3 L336.7,65.3 L337.0,67.0 L336.7,71.7 L337.3,74.7 L338.3,75.3 L338.3,76.3 L340.0,78.0 L339.3,79.3 L338.0,80.3 L333.7,81.3 L332.3,80.3 L325.0,80.7 L324.0,79.3 L324.3,76.3 L325.7,74.3 L326.0,72.3 L327.0,71.3 L328.0,68.7 L328.0,51.7 L329.0,50.3 L332.0,50.0 L333.7,51.7 L336.3,52.3 L344.0,52.0 L346.0,53.3 L359.3,53.3 L361.3,53.0 L362.3,52.0 L362.7,48.0 L362.0,45.7 L362.0,23.0"/>
+<path class="sec" d="M36.3,137.7 L36.7,137.3 L40.3,138.3 L42.0,138.3 L44.0,141.0 L41.7,143.7 L40.7,147.0 L41.0,150.3 L40.3,152.0 L40.3,154.7 L41.0,155.3 L59.7,155.3 L61.3,155.0 L62.3,153.7 L62.3,152.7 L60.0,147.7 L59.0,147.0 L58.3,143.3 L58.7,143.0 L66.0,143.0 L69.3,144.7 L76.3,155.7 L78.3,156.7 L80.3,157.0 L200.7,157.0 L204.3,156.0 L207.7,151.3 L208.0,150.0 L209.3,148.7 L209.7,147.3 L211.3,145.0 L213.0,143.7 L215.3,143.0 L222.3,143.0 L222.7,143.3 L222.0,146.7 L219.0,151.7 L219.3,154.7 L221.3,155.3 L239.7,155.3 L240.7,154.3 L240.7,152.3 L239.7,149.0 L240.3,148.3 L240.0,144.7 L238.3,142.7 L238.7,139.0 L239.3,138.3 L242.7,137.7 L244.7,137.7 L245.3,138.3 L252.0,138.3 L253.3,140.0 L253.0,142.0 L252.3,143.0 L252.0,145.3 L249.0,150.0 L249.0,226.7 L248.3,230.0 L249.0,232.0 L249.0,308.7 L252.0,313.3 L252.3,315.7 L253.3,317.0 L253.3,319.0 L251.3,320.3 L243.3,319.7 L242.0,320.7 L239.3,320.0 L238.7,319.3 L238.3,316.0 L240.0,314.0 L240.3,310.3 L239.7,309.7 L240.7,306.0 L240.3,303.7 L238.7,303.0 L221.7,303.0 L219.7,303.7 L219.0,304.3 L219.0,307.0 L222.0,312.0 L222.7,315.0 L222.0,315.7 L215.7,315.7 L213.0,315.0 L211.0,313.0 L205.0,303.3 L204.0,302.3 L203.0,302.3 L202.0,301.7 L198.3,301.7 L198.0,301.3 L83.7,301.3 L83.3,301.7 L79.0,301.7 L76.7,302.7 L75.0,304.7 L74.3,306.3 L71.3,310.7 L71.3,311.3 L69.3,314.0 L68.0,315.0 L65.0,315.7 L59.0,315.7 L58.3,315.0 L59.0,312.0 L61.7,308.0 L62.0,304.7 L61.0,303.3 L59.3,303.0 L42.0,303.0 L40.7,303.3 L40.3,304.0 L40.3,306.7 L41.0,308.3 L40.7,312.0 L41.7,315.0 L44.3,317.7 L42.0,320.0 L38.7,320.7 L37.7,319.7 L31.0,320.3 L28.0,319.7 L27.7,317.3 L28.7,316.0 L29.3,312.7 L32.0,309.0 L32.0,232.7 L33.0,229.3 L32.0,226.0 L32.0,149.3 L29.3,146.0 L29.0,143.7 L27.7,141.3 L27.7,139.7 L28.7,138.7 L30.3,138.0 L30.7,138.3 L35.7,138.3 L36.0,138.0"/>
+<path class="sec" d="M332.3,138.0 L335.0,137.7 L338.0,138.3 L339.3,139.3 L340.0,141.0 L337.0,144.7 L336.7,154.0 L337.7,155.3 L356.0,155.3 L357.7,154.7 L358.0,151.7 L357.3,149.7 L355.3,146.7 L354.7,143.3 L355.0,143.0 L362.0,143.0 L364.3,143.7 L366.3,145.7 L366.7,146.7 L368.0,148.0 L368.3,149.3 L369.7,150.7 L371.7,154.7 L373.7,156.3 L376.7,157.0 L497.0,157.0 L500.3,156.0 L501.7,154.7 L503.7,151.0 L504.7,150.0 L505.0,148.7 L508.0,144.7 L511.3,143.0 L518.3,143.0 L518.7,143.3 L518.3,146.3 L516.7,148.7 L515.0,152.7 L515.0,153.7 L515.7,154.7 L517.3,155.3 L535.7,155.3 L536.7,154.3 L536.7,151.7 L536.0,149.7 L536.7,149.0 L536.3,144.7 L535.0,143.3 L534.7,142.0 L533.7,141.0 L533.7,140.0 L535.7,138.3 L538.7,137.7 L541.0,137.7 L541.7,138.3 L548.3,138.3 L549.3,139.7 L549.0,143.0 L547.7,145.3 L547.3,147.0 L546.3,147.7 L545.0,151.7 L545.0,226.3 L544.3,230.0 L545.0,232.3 L545.0,307.0 L545.7,309.7 L547.3,311.7 L547.7,313.3 L548.7,314.7 L549.7,318.7 L549.3,319.3 L547.7,320.3 L539.7,319.7 L538.0,320.7 L535.3,320.0 L533.7,318.3 L535.0,315.3 L536.3,314.0 L536.7,309.7 L536.0,309.0 L536.7,307.0 L536.7,304.3 L536.0,303.3 L535.0,303.0 L518.0,303.0 L516.0,303.7 L515.3,304.7 L515.3,306.3 L516.0,308.7 L518.3,312.3 L518.7,315.0 L517.7,315.7 L512.3,315.7 L509.3,315.0 L505.0,310.0 L504.7,308.7 L503.7,307.7 L501.7,304.0 L500.0,302.3 L498.3,301.7 L495.0,301.7 L494.7,301.3 L381.7,301.3 L381.3,301.7 L375.3,301.7 L373.0,302.7 L370.0,306.3 L369.3,308.3 L368.3,309.3 L368.3,310.0 L366.3,313.0 L364.7,314.7 L361.0,315.7 L355.7,315.7 L354.7,315.0 L355.0,312.7 L357.7,308.0 L358.3,305.3 L357.7,303.7 L355.7,303.0 L338.7,303.0 L337.3,303.3 L336.7,304.7 L337.0,314.0 L340.3,317.3 L339.7,318.7 L337.3,320.3 L335.3,320.7 L334.0,319.7 L327.3,320.0 L327.0,320.3 L325.0,320.0 L324.0,319.0 L324.3,316.0 L325.7,313.7 L326.3,311.3 L327.7,309.7 L328.0,308.0 L328.0,233.7 L329.0,230.7 L329.0,227.7 L328.0,224.7 L328.0,150.3 L327.7,148.7 L326.0,146.7 L325.7,145.0 L324.7,143.7 L324.0,139.3 L325.3,138.3 L332.0,138.3"/>
+<path class="sec" d="M8.7,7.7 L9.0,7.3 L213.0,7.3 L214.0,8.0 L214.7,10.7 L214.7,46.7 L215.7,48.0 L238.3,48.0 L240.0,48.7 L243.0,48.7 L243.7,49.3 L257.3,50.0 L259.7,52.7 L263.3,52.7 L263.7,54.7 L261.7,56.7 L251.3,56.7 L249.3,57.7 L249.0,58.3 L249.0,69.0 L252.0,73.7 L253.3,78.7 L253.0,80.0 L252.0,80.7 L245.0,80.3 L243.7,81.0 L239.3,80.3 L238.7,79.7 L238.3,76.3 L240.0,74.3 L240.3,70.7 L239.7,70.0 L240.3,68.3 L240.7,65.0 L239.7,63.7 L220.3,63.7 L219.0,64.7 L219.0,67.3 L222.0,72.3 L222.7,75.0 L222.0,76.0 L215.3,76.0 L211.7,74.3 L206.0,65.3 L203.3,63.7 L77.7,63.7 L74.3,66.3 L71.3,71.7 L70.0,73.0 L69.7,74.0 L68.0,75.3 L65.3,76.0 L59.0,76.0 L58.3,75.3 L59.0,72.3 L61.7,68.3 L62.0,66.7 L61.7,64.0 L61.0,63.7 L41.7,63.7 L40.7,64.3 L40.3,65.3 L41.0,68.0 L40.7,72.0 L41.3,74.7 L44.0,77.7 L43.3,79.3 L42.0,80.3 L37.3,81.3 L36.0,80.3 L28.7,80.7 L27.7,79.7 L27.7,77.7 L28.7,76.3 L29.0,73.7 L32.0,69.7 L32.0,19.0 L31.3,18.0 L30.0,17.3 L27.3,17.0 L19.0,17.3 L17.3,19.0 L16.7,26.0 L15.7,26.7 L11.7,26.0 L8.0,24.0 L7.3,23.0 L7.3,9.0 L8.3,8.0"/>
+<path class="sec" d="M334.3,377.7 L334.7,377.3 L338.3,378.3 L340.0,379.7 L340.3,380.7 L337.0,384.7 L336.7,393.3 L338.0,394.7 L357.0,394.7 L358.0,394.0 L358.0,391.3 L357.3,389.3 L355.7,387.0 L354.7,383.3 L355.3,382.7 L363.0,382.7 L364.0,383.0 L366.7,385.7 L371.3,393.3 L373.7,394.7 L381.3,394.7 L381.7,395.0 L491.3,395.0 L491.7,394.7 L499.7,394.7 L502.0,393.3 L507.3,385.0 L510.3,382.7 L518.3,382.7 L518.7,383.0 L518.7,385.0 L517.3,388.0 L516.0,389.7 L515.3,392.0 L515.3,393.3 L516.3,394.7 L535.7,394.7 L536.3,394.0 L536.7,387.0 L536.0,383.7 L533.3,380.7 L534.0,379.0 L539.0,377.3 L540.3,378.3 L547.0,377.7 L548.7,378.0 L549.3,379.0 L549.0,382.7 L547.0,387.0 L545.7,388.3 L545.0,391.3 L545.0,400.3 L544.7,401.0 L543.0,402.3 L534.7,402.3 L533.3,403.0 L532.7,404.0 L532.3,405.7 L532.3,423.7 L532.7,425.3 L533.7,426.7 L543.7,427.0 L546.3,430.7 L552.7,431.3 L556.0,434.7 L554.7,436.0 L525.7,436.0 L525.0,434.3 L525.0,432.3 L523.0,431.0 L461.7,430.7 L461.3,431.0 L452.3,431.3 L451.3,432.7 L450.7,436.0 L363.0,436.0 L362.7,435.7 L362.7,421.3 L363.3,420.3 L363.3,416.0 L362.7,414.3 L362.3,411.3 L361.7,410.7 L359.3,410.0 L334.7,410.0 L334.0,410.7 L330.0,410.0 L325.7,410.3 L324.0,408.7 L324.0,407.3 L326.3,405.0 L327.3,404.7 L328.0,403.3 L328.0,390.0 L327.7,388.3 L326.0,386.3 L325.7,384.7 L324.3,382.3 L324.0,379.0 L326.0,377.7 L332.7,378.3 L334.0,378.0"/>
+<path class="sec" d="M46.0,166.7 L43.0,167.3 L41.7,168.7 L41.7,289.7 L42.7,291.3 L44.3,291.7 L237.3,291.7 L238.7,291.0 L239.3,288.3 L239.3,170.7 L239.0,168.0 L238.3,167.3 L235.0,166.7 L46.3,166.7"/>
+<path class="sec" d="M341.7,167.0 L342.0,166.7 L531.7,166.7 L534.3,167.3 L535.0,168.0 L535.3,169.7 L535.3,289.0 L535.0,290.7 L534.0,291.7 L339.7,291.7 L339.0,291.3 L338.0,289.3 L338.0,169.0 L339.0,167.3 L341.3,167.0"/>
+<path class="sec" d="M342.0,166.7 L339.0,167.3 L338.0,169.0 L338.0,289.3 L339.0,291.3 L339.7,291.7 L534.0,291.7 L535.0,290.7 L535.3,289.0 L535.3,169.7 L535.0,168.0 L534.3,167.3 L531.7,166.7 L342.3,166.7"/>
+<path class="sec" d="M45.7,167.0 L46.0,166.7 L235.0,166.7 L238.0,167.3 L239.0,168.3 L239.3,170.7 L239.3,288.3 L239.0,290.3 L237.3,291.7 L44.3,291.7 L43.0,291.3 L41.7,289.7 L41.7,168.7 L44.0,167.0 L45.3,167.0"/>
+<path class="sec" d="M381.3,301.7 L381.7,301.3 L494.7,301.3 L495.0,301.7 L498.3,301.7 L501.3,303.7 L502.0,305.3 L503.0,306.0 L505.0,309.3 L505.0,310.0 L506.3,311.3 L506.7,312.7 L508.7,314.7 L512.3,315.7 L519.0,315.3 L520.3,316.3 L520.7,317.0 L520.7,325.3 L523.0,327.3 L525.3,327.7 L527.3,329.0 L529.7,329.3 L531.0,330.3 L533.3,331.0 L534.7,332.7 L534.7,365.7 L534.0,366.7 L531.3,368.3 L529.0,368.7 L527.7,369.7 L524.3,370.3 L521.7,371.7 L520.7,373.0 L520.3,382.0 L519.3,383.0 L510.3,382.7 L509.0,383.3 L506.7,385.7 L505.0,389.0 L502.0,393.0 L499.7,394.7 L491.7,394.7 L491.3,395.0 L381.7,395.0 L381.3,394.7 L373.7,394.7 L371.0,392.7 L366.3,385.0 L363.3,382.7 L354.3,383.0 L353.0,381.7 L352.7,373.3 L352.0,372.0 L349.0,370.3 L346.7,370.0 L344.3,368.7 L342.0,368.3 L339.0,366.0 L338.3,362.0 L338.7,358.7 L338.7,336.7 L338.3,335.7 L338.7,333.0 L340.0,331.0 L342.3,330.3 L343.7,329.3 L346.0,329.0 L347.3,328.0 L350.3,327.3 L352.7,325.3 L352.7,317.7 L353.0,316.7 L354.3,315.3 L361.0,315.7 L364.7,314.7 L366.3,313.3 L370.0,306.7 L373.7,302.3 L375.3,301.7 L381.0,301.7"/>
+<path class="sec" d="M374.0,64.0 L374.3,63.7 L499.3,63.7 L500.3,64.0 L503.3,67.0 L505.3,71.0 L508.3,74.7 L510.0,75.7 L512.0,76.0 L519.3,75.7 L520.3,76.7 L521.0,86.3 L525.7,88.7 L528.0,89.0 L529.3,90.0 L532.3,90.7 L534.7,92.7 L534.7,126.0 L532.7,128.0 L531.0,128.3 L528.7,129.7 L526.3,130.0 L521.7,132.3 L520.7,133.3 L520.3,136.3 L520.7,141.3 L520.0,142.7 L519.0,143.3 L518.3,143.0 L511.3,143.0 L510.3,143.7 L508.3,144.0 L506.7,146.0 L506.3,147.3 L505.0,148.7 L503.3,152.0 L502.0,153.3 L502.0,154.0 L499.0,156.7 L497.0,157.0 L376.7,157.0 L373.7,156.3 L371.3,154.0 L369.3,150.0 L368.3,149.3 L368.0,148.0 L365.0,144.0 L362.3,143.0 L355.0,143.0 L354.7,143.3 L353.7,142.7 L352.7,141.0 L352.7,133.3 L350.3,131.3 L346.0,129.7 L344.7,129.7 L342.7,128.3 L340.7,128.0 L339.0,126.3 L338.3,124.7 L338.7,122.0 L338.7,96.7 L338.3,95.3 L338.7,93.0 L340.7,91.0 L342.0,90.3 L343.3,90.3 L346.7,88.7 L348.0,88.7 L351.3,87.0 L352.7,85.3 L352.7,78.0 L353.7,76.0 L354.3,75.7 L361.7,76.0 L364.7,75.0 L366.3,73.7 L368.3,69.7 L371.0,66.0 L372.7,64.3 L373.7,64.0"/>
+<path class="sec" d="M83.3,301.7 L83.7,301.3 L198.0,301.3 L198.3,301.7 L202.0,301.7 L203.7,302.3 L206.0,304.7 L208.0,308.7 L209.7,310.7 L210.0,312.0 L213.0,315.0 L215.7,315.7 L223.0,315.3 L224.0,316.3 L224.3,324.3 L224.7,325.3 L226.3,327.0 L230.0,328.0 L231.3,329.0 L233.7,329.3 L237.7,331.3 L238.7,333.7 L238.7,364.3 L238.3,365.7 L236.3,367.7 L233.0,368.7 L231.3,369.7 L228.3,370.3 L225.0,372.3 L224.3,374.0 L224.0,382.0 L223.0,383.0 L222.0,382.7 L214.0,382.7 L210.0,386.3 L208.0,390.3 L204.3,394.3 L200.0,395.0 L82.0,395.0 L77.0,394.3 L75.0,393.0 L69.7,384.3 L67.3,382.7 L58.7,382.7 L58.0,383.0 L57.0,382.0 L56.7,374.0 L55.0,371.3 L49.7,369.7 L48.3,368.7 L46.0,368.3 L43.0,366.3 L42.3,364.0 L42.3,334.3 L43.0,332.0 L44.0,331.0 L46.3,330.3 L47.7,329.3 L54.0,327.3 L56.3,325.3 L56.7,317.3 L58.0,315.3 L65.0,315.7 L68.0,315.0 L69.7,313.7 L74.7,305.3 L77.0,302.7 L79.0,301.7 L83.0,301.7"/>
+<path class="sec" d="M77.3,64.0 L77.7,63.7 L203.0,63.7 L204.3,64.0 L208.0,68.3 L208.0,69.0 L209.3,70.3 L211.0,73.7 L213.7,75.7 L215.3,76.0 L223.0,75.7 L224.0,76.7 L224.3,85.0 L226.0,87.0 L229.3,88.7 L232.0,89.0 L234.0,90.3 L235.3,90.3 L238.0,92.3 L238.7,94.3 L238.7,125.0 L238.0,126.7 L237.0,127.7 L234.7,128.3 L233.3,129.3 L230.3,130.0 L228.7,131.0 L226.7,131.3 L225.0,133.0 L224.3,134.3 L224.3,140.3 L224.0,142.3 L222.7,143.3 L222.3,143.0 L215.0,143.0 L211.7,144.3 L206.3,153.3 L204.0,156.0 L202.7,156.7 L200.7,157.0 L80.3,157.0 L78.3,156.7 L77.0,156.0 L73.0,150.7 L72.7,149.3 L71.3,148.0 L71.0,146.7 L69.0,144.0 L66.0,143.0 L58.7,143.0 L58.0,143.3 L56.7,141.3 L56.7,134.7 L55.3,132.0 L54.3,131.3 L52.3,131.0 L51.0,130.0 L48.7,129.7 L46.3,128.3 L44.7,128.0 L43.3,127.0 L42.3,124.3 L42.3,95.0 L43.0,92.3 L45.7,90.3 L47.0,90.3 L49.3,89.0 L51.7,88.7 L53.7,87.3 L55.3,87.0 L56.7,84.3 L56.7,77.3 L58.0,75.7 L59.0,76.0 L67.3,75.7 L69.7,74.3 L69.7,73.7 L71.0,72.3 L73.0,68.3 L74.3,67.0 L74.7,66.0 L77.0,64.0"/>
+<path class="sec" d="M44.0,404.7 L43.0,405.0 L41.7,406.7 L41.7,439.7 L42.3,440.7 L44.3,441.3 L202.3,441.3 L204.7,440.3 L204.7,406.0 L204.3,405.3 L202.7,404.7 L44.3,404.7"/>
+<path class="sec" d="M45.7,17.0 L42.7,17.7 L41.7,19.0 L41.7,52.0 L42.3,53.0 L43.7,53.7 L203.0,53.7 L204.7,52.7 L204.7,18.3 L202.7,17.3 L200.0,17.0 L46.0,17.0"/>
+<path class="sec" d="M43.7,405.0 L44.0,404.7 L202.7,404.7 L204.7,406.0 L204.7,440.0 L202.3,441.3 L44.3,441.3 L42.7,440.7 L41.7,439.7 L41.7,406.7 L43.3,405.0"/>
+<path class="sec" d="M45.3,17.3 L45.7,17.0 L200.0,17.0 L204.0,17.7 L204.7,18.7 L204.7,52.3 L203.0,53.7 L43.7,53.7 L41.7,52.0 L41.7,19.0 L42.7,17.7 L45.0,17.3"/>
+<path class="sec" d="M373.0,30.0 L370.3,31.0 L370.0,31.7 L370.0,54.0 L370.3,55.3 L371.3,56.0 L374.3,56.3 L521.0,56.3 L524.3,55.7 L525.0,54.0 L525.0,36.0 L523.3,34.7 L521.3,34.3 L446.0,34.3 L444.0,33.3 L443.3,30.7 L440.7,30.0 L373.3,30.0"/>
+<path class="sec" d="M372.3,402.3 L370.3,403.3 L370.0,404.3 L370.0,426.3 L370.3,427.7 L371.7,428.3 L442.3,428.3 L443.7,427.3 L444.0,425.3 L446.7,424.0 L522.3,424.0 L524.0,423.7 L525.0,422.3 L525.0,404.3 L524.7,403.3 L523.0,402.3 L372.7,402.3"/>
+<path class="sec" d="M372.7,30.3 L373.0,30.0 L440.7,30.0 L443.0,30.7 L443.7,31.3 L444.0,33.3 L446.0,34.3 L521.3,34.3 L523.3,34.7 L525.0,36.3 L525.0,54.0 L523.7,56.0 L521.0,56.3 L374.3,56.3 L371.7,56.0 L370.3,55.3 L370.0,54.0 L370.0,31.7 L371.0,30.7 L372.3,30.3"/>
+<path class="sec" d="M372.3,402.7 L372.7,402.3 L523.0,402.3 L525.0,404.3 L525.0,422.3 L523.7,423.7 L522.3,424.0 L446.7,424.0 L444.7,424.7 L444.0,425.3 L443.7,427.3 L442.0,428.3 L372.0,428.3 L371.0,428.0 L370.0,426.3 L370.0,404.7 L370.3,403.7 L372.0,402.7"/>
+<path class="sec" d="M41.7,303.3 L42.0,303.0 L59.3,303.0 L61.0,303.3 L62.0,304.7 L61.7,308.0 L59.3,311.3 L58.3,315.0 L57.7,315.3 L56.7,317.3 L56.3,325.3 L54.0,327.3 L52.0,327.7 L49.7,329.0 L47.3,329.3 L45.3,330.7 L43.7,331.0 L43.0,331.7 L42.3,334.3 L42.3,364.0 L43.0,366.3 L45.7,368.3 L47.0,368.3 L50.3,370.0 L52.7,370.3 L54.7,371.3 L56.0,372.7 L56.7,374.0 L56.7,381.0 L57.7,383.0 L58.3,383.3 L59.0,386.3 L60.3,388.0 L62.0,391.7 L62.0,393.7 L61.0,394.7 L41.3,394.7 L40.3,394.0 L41.0,388.7 L44.3,387.0 L45.3,385.0 L45.7,381.7 L43.7,380.3 L43.0,378.7 L38.0,377.3 L37.0,375.3 L34.3,374.3 L32.7,372.0 L32.7,355.7 L32.3,353.7 L31.3,352.7 L27.3,352.7 L27.0,352.3 L18.7,352.7 L17.3,354.7 L17.0,360.3 L16.3,361.7 L13.0,361.7 L12.0,361.0 L10.0,360.7 L7.3,358.3 L7.3,347.0 L9.7,345.0 L31.3,345.0 L32.3,344.0 L32.7,342.3 L32.7,326.3 L35.0,323.3 L37.0,323.0 L38.0,322.3 L39.0,320.7 L42.3,320.0 L44.0,318.0 L45.0,318.3 L45.0,317.7 L44.3,317.3 L45.3,316.7 L45.7,315.7 L44.3,311.0 L41.0,309.3 L40.3,306.7 L40.3,304.3 L41.3,303.3"/>
+<path class="sec" d="M41.3,64.0 L41.7,63.7 L61.0,63.7 L62.0,65.0 L61.7,68.3 L59.0,72.3 L58.3,75.3 L57.0,76.3 L56.7,77.3 L56.7,84.3 L56.0,86.0 L55.0,87.0 L51.7,88.7 L50.3,88.7 L47.0,90.3 L45.0,90.7 L43.0,92.3 L42.3,95.0 L42.3,124.3 L43.3,127.3 L46.3,128.3 L47.3,129.3 L50.0,129.7 L52.3,131.0 L54.3,131.3 L56.3,133.3 L56.7,141.3 L57.0,142.3 L58.3,143.7 L59.0,147.0 L60.3,148.3 L62.3,152.7 L62.3,153.7 L61.3,155.0 L59.7,155.3 L41.0,155.3 L40.3,154.7 L40.3,152.0 L41.0,149.0 L44.7,147.0 L45.7,142.3 L44.0,141.3 L43.3,139.3 L42.0,138.3 L36.3,137.3 L35.0,134.7 L33.3,133.7 L32.7,132.3 L32.7,116.7 L32.3,114.7 L31.3,113.7 L30.0,113.3 L9.7,113.3 L7.3,111.7 L7.3,100.3 L8.7,98.7 L11.0,98.0 L13.3,96.7 L16.0,96.7 L17.0,97.7 L17.3,104.0 L18.0,105.3 L19.0,106.0 L31.3,106.0 L32.0,105.3 L32.7,103.0 L32.7,86.7 L33.3,85.3 L36.0,83.3 L37.0,81.3 L42.0,80.3 L43.3,79.7 L43.7,78.3 L44.7,77.3 L45.3,77.3 L45.7,76.3 L44.3,71.3 L41.0,69.7 L40.3,65.7 L41.0,64.3"/>
+<path class="sec" d="M517.7,303.3 L518.0,303.0 L535.0,303.0 L536.3,303.7 L536.7,304.3 L536.3,308.7 L535.3,309.7 L534.0,310.0 L533.3,311.3 L532.0,312.3 L531.0,317.0 L533.3,317.7 L534.7,319.7 L538.3,320.7 L539.7,322.7 L542.0,323.0 L544.3,325.3 L544.7,343.7 L545.0,344.3 L546.3,345.0 L567.7,345.0 L569.0,345.7 L570.0,348.7 L569.7,358.3 L568.0,360.3 L564.3,361.7 L562.0,362.0 L560.3,361.0 L560.0,360.3 L560.0,354.0 L559.3,353.0 L556.7,352.3 L548.7,352.3 L546.3,352.7 L545.0,353.7 L544.7,354.3 L544.3,373.0 L543.0,374.3 L540.7,375.0 L539.3,377.3 L534.3,378.7 L532.7,381.0 L531.3,381.3 L531.7,385.3 L533.3,386.7 L533.3,387.7 L534.0,388.3 L535.3,388.7 L536.3,389.7 L536.3,393.7 L535.3,394.7 L516.3,394.7 L515.3,393.3 L515.7,390.7 L518.3,386.0 L518.7,383.3 L520.3,382.0 L521.0,372.7 L522.0,371.7 L524.7,370.3 L527.0,370.0 L529.3,368.7 L532.0,368.0 L534.0,366.7 L534.7,365.7 L534.7,332.7 L533.7,331.0 L532.0,330.7 L530.0,329.3 L527.7,329.0 L525.3,327.7 L524.0,327.7 L521.0,325.7 L520.7,325.0 L520.7,317.0 L518.7,315.0 L518.3,312.3 L517.0,309.7 L516.0,308.7 L515.3,306.3 L515.7,304.3 L517.3,303.3"/>
+<path class="sec" d="M358.0,22.0 L359.3,21.7 L362.0,22.7 L362.0,45.3 L360.3,46.7 L358.7,46.7 L356.7,47.7 L351.3,48.3 L347.7,49.7 L345.7,49.7 L344.0,52.0 L342.7,52.3 L336.3,52.3 L334.0,51.7 L332.0,50.0 L329.0,50.3 L328.0,51.3 L328.0,59.7 L327.7,60.0 L324.3,60.0 L323.0,59.3 L321.3,52.7 L321.3,49.3 L320.3,44.3 L318.7,43.0 L316.3,42.7 L270.7,42.7 L269.7,41.3 L271.0,40.0 L272.0,37.7 L272.0,29.7 L270.7,27.7 L249.3,27.7 L248.3,28.7 L248.3,30.0 L249.7,34.7 L249.3,35.0 L248.3,34.7 L249.0,36.0 L247.3,37.3 L246.0,35.7 L245.3,32.7 L244.0,31.3 L242.3,27.7 L241.3,26.7 L240.3,23.3 L240.7,22.3 L353.7,22.3 L354.0,22.0 L357.7,22.0"/>
+<path class="sec" d="M220.0,64.0 L220.3,63.7 L239.7,63.7 L240.7,65.0 L240.0,69.7 L236.7,71.7 L236.0,74.7 L235.0,75.0 L234.3,77.0 L234.7,79.0 L236.7,80.0 L239.0,80.0 L240.7,80.7 L243.7,81.0 L245.3,84.0 L246.3,84.0 L248.3,86.3 L248.3,132.7 L245.7,135.3 L244.3,137.7 L240.7,138.0 L235.3,139.3 L234.3,141.3 L235.0,144.3 L236.0,145.0 L236.7,147.3 L239.0,148.3 L240.0,149.3 L240.7,154.3 L239.7,155.3 L221.3,155.3 L219.0,154.3 L219.0,151.7 L220.3,150.0 L221.0,148.0 L222.0,147.0 L222.7,143.7 L224.0,142.3 L224.3,134.7 L225.0,133.0 L226.7,131.3 L229.0,131.0 L230.3,130.0 L233.7,129.3 L235.0,128.3 L237.3,127.7 L238.7,125.0 L238.7,94.3 L238.3,92.7 L236.3,90.7 L234.3,90.3 L232.0,89.0 L229.3,88.7 L226.0,87.0 L224.3,85.0 L224.0,76.7 L222.7,75.3 L222.0,72.0 L221.0,71.0 L220.3,69.0 L219.7,68.7 L219.0,67.3 L219.0,64.7 L219.7,64.0"/>
+<path class="sec" d="M221.3,303.3 L221.7,303.0 L238.7,303.0 L240.0,303.3 L240.7,304.3 L240.0,309.3 L236.3,311.7 L236.3,313.0 L235.0,314.3 L234.3,317.0 L234.7,319.0 L236.0,319.7 L238.7,319.7 L241.3,320.3 L242.7,321.3 L243.3,322.7 L246.0,323.3 L248.3,325.7 L248.3,372.3 L246.7,374.3 L244.7,375.0 L243.3,377.3 L235.3,379.3 L234.3,380.7 L235.0,384.0 L235.7,384.3 L236.7,387.0 L239.0,388.0 L240.0,389.3 L240.7,393.7 L239.7,394.7 L220.0,394.7 L219.0,393.7 L219.0,391.3 L222.3,386.0 L222.7,383.3 L224.0,382.0 L224.3,374.0 L225.0,372.7 L226.3,371.3 L229.3,370.0 L230.7,370.0 L233.3,368.7 L235.3,368.3 L237.0,367.0 L237.7,367.0 L238.7,364.3 L238.7,333.7 L237.0,330.7 L235.7,330.7 L234.0,329.3 L232.7,329.3 L230.0,328.0 L227.0,327.3 L225.0,325.7 L224.3,324.3 L224.0,316.3 L222.7,315.0 L222.0,311.7 L221.0,310.7 L220.3,308.7 L219.0,307.0 L219.0,304.3 L221.0,303.3"/>
+<path class="sec" d="M516.0,64.0 L516.3,63.7 L535.3,63.7 L536.3,64.7 L536.3,68.7 L535.3,70.0 L534.0,70.3 L532.0,73.0 L531.0,77.3 L533.0,78.0 L534.3,80.0 L540.0,81.0 L541.7,84.0 L542.7,84.0 L544.3,86.0 L544.7,88.0 L544.7,131.0 L544.3,133.3 L542.3,134.7 L540.7,137.7 L535.3,138.3 L534.3,139.0 L533.0,141.0 L531.0,141.7 L532.0,146.0 L533.3,147.3 L533.7,148.3 L536.0,149.3 L536.7,151.7 L536.7,154.3 L535.7,155.3 L517.3,155.3 L515.7,154.7 L515.0,153.7 L516.0,150.0 L517.7,148.0 L518.3,146.3 L518.7,143.7 L520.0,142.7 L520.7,141.3 L520.3,136.3 L521.0,133.0 L523.0,131.3 L525.0,131.0 L526.3,130.0 L528.7,129.7 L531.0,128.3 L533.3,127.7 L534.7,126.0 L534.7,92.7 L532.3,90.7 L530.3,90.3 L528.0,89.0 L525.7,88.7 L521.0,86.0 L520.7,85.3 L520.7,77.3 L520.0,76.0 L518.7,75.3 L517.3,70.3 L516.0,69.0 L515.3,66.7 L515.7,64.3"/>
+<path class="sec" d="M337.7,64.0 L338.0,63.7 L357.0,63.7 L358.0,64.7 L358.0,67.0 L357.3,69.0 L355.7,71.3 L354.7,75.3 L353.3,76.0 L352.7,78.0 L352.7,85.3 L351.3,87.0 L348.0,88.7 L346.7,88.7 L340.7,91.0 L339.0,92.3 L338.3,95.3 L338.7,96.7 L338.7,122.0 L338.3,124.7 L339.0,126.3 L340.7,128.0 L342.3,128.3 L344.7,129.7 L347.0,130.0 L348.3,131.0 L350.3,131.3 L352.7,133.3 L352.7,141.0 L353.0,142.0 L354.7,143.3 L355.3,146.7 L358.0,151.7 L358.0,154.3 L356.0,155.3 L337.7,155.3 L336.7,154.0 L337.0,150.3 L339.3,149.0 L340.3,147.0 L341.3,146.3 L342.0,142.0 L340.3,141.3 L338.3,138.3 L333.0,137.7 L332.0,136.7 L331.3,135.0 L329.3,133.7 L328.7,131.7 L328.7,87.0 L329.3,85.3 L330.3,84.3 L331.7,84.0 L333.3,81.3 L339.0,80.0 L340.3,77.7 L342.0,77.3 L341.7,73.7 L341.0,72.3 L340.3,72.0 L339.7,70.0 L337.0,68.7 L336.7,65.3 L337.3,64.3"/>
+<path class="sec" d="M338.3,303.3 L338.7,303.0 L355.7,303.0 L357.3,303.7 L358.3,305.3 L357.7,308.0 L355.0,312.7 L354.7,315.0 L353.3,316.0 L352.7,317.7 L352.7,325.3 L350.3,327.3 L347.3,328.0 L340.0,331.0 L338.7,333.0 L338.3,335.7 L338.7,336.7 L338.7,358.7 L338.3,359.0 L338.7,365.3 L339.0,366.3 L341.3,368.0 L344.0,368.7 L346.3,370.0 L349.0,370.3 L350.0,371.3 L352.3,372.3 L352.7,380.7 L353.3,382.3 L354.7,383.3 L356.0,388.0 L357.3,389.3 L357.3,390.3 L358.0,391.3 L358.0,393.7 L357.0,394.7 L338.0,394.7 L337.3,394.3 L336.7,393.3 L337.0,390.0 L340.0,388.0 L340.3,386.7 L341.7,385.0 L342.0,381.7 L340.7,381.0 L339.0,378.7 L334.3,377.3 L333.0,375.0 L330.3,374.3 L329.3,373.3 L328.7,371.3 L328.7,327.0 L329.0,325.3 L332.0,323.0 L333.7,322.7 L335.0,320.7 L338.3,320.0 L339.7,319.0 L341.0,317.0 L342.0,316.7 L341.3,312.3 L339.3,309.7 L337.0,308.7 L336.7,304.7 L338.0,303.3"/>
+<path class="sec" d="M534.7,32.7 L535.0,32.3 L629.0,32.3 L630.3,34.3 L630.3,37.7 L630.0,38.7 L628.3,40.3 L625.7,38.7 L541.7,38.7 L540.3,39.3 L539.3,41.0 L539.0,48.7 L538.0,49.7 L534.3,50.0 L533.0,49.0 L533.0,36.3 L533.3,34.0 L534.3,33.0"/>
+<path class="sec" d="M451.3,22.3 L451.7,22.0 L524.7,22.0 L525.3,23.0 L525.0,26.0 L523.0,27.7 L520.0,27.3 L460.3,27.3 L460.0,27.7 L454.3,27.7 L452.3,27.3 L451.7,26.7 L451.0,22.7"/>
+<path class="sec" d="M461.3,431.0 L461.7,430.7 L523.0,431.0 L524.7,432.0 L525.3,435.7 L524.7,436.3 L451.3,436.3 L451.0,436.0 L451.3,432.7 L452.3,431.3 L461.0,431.0"/>
+<path class="sec" d="M326.3,410.3 L326.7,410.0 L330.0,410.0 L333.3,410.7 L334.3,412.0 L334.7,413.7 L336.3,414.7 L337.7,418.3 L337.3,431.3 L337.0,431.7 L336.3,431.3 L329.0,431.7 L328.3,432.3 L328.3,436.0 L330.0,437.3 L330.3,439.7 L328.3,441.3 L327.3,443.3 L325.7,443.7 L314.0,443.3 L313.0,442.3 L313.0,441.3 L311.7,440.3 L311.0,438.3 L311.0,437.0 L312.7,436.0 L312.7,432.3 L311.7,431.3 L306.7,431.7 L303.7,431.3 L303.0,430.7 L303.3,418.3 L304.3,417.3 L306.3,417.7 L312.7,424.7 L316.7,424.7 L318.7,423.7 L322.7,423.7 L324.7,424.7 L327.7,424.7 L330.3,422.7 L331.7,420.3 L331.7,417.3 L330.3,415.3 L327.3,413.0 L326.3,410.7"/>
+<path class="sec" d="M249.0,28.0 L249.3,27.7 L270.3,27.7 L271.3,28.3 L272.0,29.7 L271.7,38.7 L269.3,41.3 L263.3,42.0 L262.0,44.0 L261.7,47.3 L260.3,48.7 L258.7,48.7 L257.3,50.0 L243.7,49.3 L243.3,47.0 L244.0,45.7 L244.0,44.0 L246.3,40.3 L247.3,37.3 L248.7,36.7 L249.0,35.3 L249.7,35.0 L249.7,33.7 L248.3,30.0 L248.7,28.3"/>
+<path class="sec" d="M327.0,28.7 L326.0,29.0 L325.3,30.0 L325.0,32.0 L325.0,41.3 L325.3,43.0 L326.3,44.7 L332.0,44.7 L334.3,45.0 L336.3,46.3 L340.0,46.3 L343.0,45.0 L345.7,45.0 L349.3,43.7 L353.3,43.3 L355.3,42.7 L356.0,41.7 L356.3,31.0 L356.0,29.7 L354.7,28.7 L327.3,28.7"/>
+<path class="sec" d="M326.7,29.0 L327.0,28.7 L354.7,28.7 L355.7,29.3 L356.3,31.0 L356.3,40.3 L356.0,41.3 L354.3,43.0 L349.3,43.7 L347.3,44.7 L343.0,45.0 L340.0,46.3 L336.3,46.3 L334.3,45.0 L332.0,44.7 L326.7,44.7 L325.7,43.7 L325.0,41.3 L325.0,32.0 L325.3,30.0 L326.3,29.0"/>
+<path class="sec" d="M302.3,28.7 L301.0,29.3 L300.3,32.0 L300.7,36.3 L302.0,37.7 L303.0,38.0 L317.7,38.0 L320.0,36.7 L320.3,31.3 L319.7,29.3 L318.7,28.7 L302.7,28.7"/>
+<path class="sec" d="M277.7,28.7 L276.0,29.7 L275.7,31.0 L275.7,35.0 L276.0,36.7 L276.7,37.3 L277.7,37.3 L278.7,38.0 L293.3,38.0 L295.3,36.7 L295.7,30.7 L295.3,29.7 L293.7,28.7 L278.0,28.7"/>
+<path class="sec" d="M302.0,29.0 L302.3,28.7 L318.7,28.7 L320.0,30.0 L320.3,31.3 L320.0,36.3 L317.7,38.0 L303.0,38.0 L302.0,37.7 L300.7,36.3 L300.7,33.0 L300.3,32.7 L300.7,30.0 L301.7,29.0"/>
+<path class="sec" d="M277.3,29.0 L277.7,28.7 L293.7,28.7 L295.0,29.3 L295.7,30.7 L295.3,36.7 L293.3,38.0 L278.7,38.0 L277.0,37.3 L276.0,36.3 L275.7,35.0 L275.7,31.0 L277.0,29.0"/>
+<path class="sec" d="M361.7,46.0 L362.0,45.7 L362.3,46.0 L362.7,50.7 L362.3,52.0 L361.3,53.0 L346.0,53.3 L344.0,52.0 L345.7,49.7 L348.0,49.7 L351.3,48.3 L355.3,48.0 L358.7,46.7 L360.3,46.7 L361.3,46.0"/>
+<path class="sec" d="M815.7,27.3 L814.3,28.7 L814.3,36.0 L814.7,36.7 L815.3,37.0 L818.7,36.7 L823.3,37.0 L824.0,36.3 L823.7,33.0 L824.0,28.3 L823.7,27.7 L816.0,27.3"/>
+<path class="sec" d="M815.3,27.7 L815.7,27.3 L822.7,27.3 L824.0,28.3 L823.7,31.7 L824.0,36.3 L823.3,37.0 L820.0,36.7 L815.3,37.0 L814.3,36.0 L814.3,28.7 L815.0,27.7"/>
+<path class="sec" d="M815.0,447.3 L815.3,447.0 L823.3,447.0 L824.0,450.3 L823.7,456.0 L823.3,456.3 L815.0,456.3 L814.3,455.3 L814.3,448.0 L814.7,447.7"/>
+<path class="sec" d="M314.3,405.7 L314.7,405.3 L322.3,405.7 L324.0,407.3 L324.0,408.3 L322.3,410.0 L316.0,410.0 L314.3,408.7 L314.0,406.0"/>
+<path class="sec" d="M560.3,431.7 L560.7,431.3 L564.3,431.7 L565.3,432.7 L567.0,433.0 L568.0,435.3 L567.3,436.0 L558.7,436.0 L557.7,434.7 L560.0,432.0"/>
+<path class="sec" d="M308.3,437.0 L308.7,436.7 L311.0,437.0 L311.7,440.7 L313.0,441.3 L313.0,442.3 L313.7,443.0 L313.0,444.0 L307.7,444.0 L307.0,443.3 L306.7,438.7 L307.0,437.7 L308.0,437.0"/>
+<path class="sec" d="M306.3,404.7 L306.7,404.3 L312.7,404.7 L314.0,406.0 L314.0,407.7 L313.3,408.3 L304.7,408.0 L304.0,407.3 L304.0,405.3 L304.7,404.7 L306.0,404.7"/>
+<path class="sec" d="M336.7,69.0 L337.0,68.7 L339.0,69.7 L341.3,73.0 L342.0,75.3 L342.0,77.0 L341.3,77.7 L340.0,78.0 L338.3,76.3 L338.3,75.3 L337.3,74.7 L336.7,69.3"/>
+<path class="sec" d="M339.7,141.7 L341.0,141.3 L342.0,142.0 L341.7,145.3 L340.3,147.0 L340.0,148.3 L337.0,150.0 L336.7,149.7 L337.0,144.7 L338.3,143.7 L338.3,143.0 L339.3,142.0"/>
+<path class="sec" d="M533.0,141.0 L533.3,140.7 L534.7,142.0 L535.0,143.3 L536.3,144.7 L536.7,148.7 L536.0,149.3 L534.3,148.7 L531.7,145.3 L531.0,142.0 L532.7,141.0"/>
+<path class="sec" d="M340.0,381.3 L341.0,381.0 L342.0,381.7 L341.7,385.0 L340.3,386.3 L340.0,388.0 L337.0,389.7 L336.7,389.3 L337.0,384.7 L339.7,381.7"/>
+<path class="sec" d="M532.7,381.0 L533.3,380.7 L535.0,382.3 L536.3,384.7 L536.7,387.0 L536.3,389.3 L534.0,388.3 L533.3,387.7 L533.3,386.7 L531.7,385.0 L531.3,381.7 L532.3,381.0"/>
+<path class="sec" d="M535.7,309.7 L536.0,309.3 L536.7,309.7 L536.3,314.0 L533.3,317.7 L531.7,317.3 L531.0,316.3 L532.0,312.7 L534.0,310.0 L535.3,309.7"/>
+<path class="sec" d="M535.3,70.0 L535.7,69.7 L536.7,70.0 L536.3,74.0 L535.3,75.0 L535.0,76.3 L533.3,78.0 L531.7,77.7 L531.0,77.0 L531.7,73.7 L533.3,71.0 L535.0,70.0"/>
+<path class="sec" d="M336.7,309.3 L337.7,309.0 L340.0,310.3 L340.3,311.7 L341.7,313.3 L342.0,316.3 L341.3,317.0 L340.3,317.3 L337.0,314.0 L336.7,309.7"/>
+<path class="sec" d="M319.7,431.3 L318.7,431.7 L317.7,433.0 L318.0,437.0 L319.0,437.7 L322.0,437.7 L322.7,437.3 L323.3,435.3 L323.0,432.3 L321.7,431.3 L320.0,431.3"/>
+<path class="sec" d="M319.3,431.7 L321.7,431.3 L323.0,432.7 L323.3,435.3 L323.0,436.7 L322.0,437.7 L319.0,437.7 L318.0,436.7 L317.7,433.0 L319.0,431.7"/>
+<path class="sec" d="M41.0,70.3 L41.3,70.0 L44.3,71.7 L45.7,76.0 L45.0,77.3 L44.0,77.7 L41.3,74.7 L40.7,72.0 L41.0,70.7"/>
+<path class="sec" d="M43.7,381.3 L44.7,381.0 L45.7,381.7 L45.3,385.0 L44.0,387.3 L41.0,388.3 L40.7,386.7 L41.3,383.7 L43.3,381.7"/>
+<path class="sec" d="M41.0,310.0 L41.3,309.7 L44.3,311.3 L45.7,315.3 L45.0,316.7 L44.0,317.0 L41.3,314.3 L40.7,312.0 L41.0,310.3"/>
+<path class="sec" d="M43.7,142.0 L44.7,141.7 L45.7,142.3 L45.0,146.0 L44.0,147.7 L41.3,148.7 L40.7,147.7 L41.3,144.3 L43.3,142.3"/>
+<path class="sec" d="M261.3,48.0 L262.0,47.7 L263.7,49.3 L263.3,52.7 L259.7,52.7 L257.7,50.3 L259.0,48.7 L261.0,48.3"/>
+<path class="sec" d="M235.3,314.0 L236.0,313.7 L238.3,315.7 L238.7,319.0 L238.3,319.7 L236.0,319.7 L234.7,318.7 L234.3,317.0 L235.0,314.3"/>
+<path class="sec" d="M238.0,382.3 L238.3,382.0 L239.7,383.7 L240.3,387.0 L239.7,388.3 L237.3,387.3 L236.0,385.7 L235.7,384.3 L237.7,382.7"/>
+<path class="sec" d="M239.3,70.3 L239.7,70.0 L240.3,70.7 L240.0,74.3 L238.3,76.0 L237.3,75.3 L236.3,75.3 L236.0,73.7 L236.7,71.7 L239.0,70.3"/>
+<path class="sec" d="M239.3,310.0 L239.7,309.7 L240.3,310.3 L240.0,314.0 L238.3,315.7 L236.0,313.3 L236.3,311.7 L239.0,310.0"/>
+<path class="sec" d="M237.7,143.0 L238.3,142.7 L240.0,144.7 L240.3,148.0 L239.7,148.7 L237.3,147.7 L236.3,146.7 L236.0,145.0 L237.7,143.3"/>
+<path class="sec" d="M235.0,75.3 L236.0,75.0 L238.3,76.0 L238.7,79.3 L238.3,80.0 L235.7,79.7 L234.7,78.7 L234.3,77.7 L234.7,75.7"/>
+<path class="sec" d="M237.3,379.0 L237.7,378.7 L238.3,379.0 L238.3,381.7 L236.3,383.7 L235.3,384.0 L234.7,383.0 L234.3,380.7 L235.3,379.3 L237.0,379.0"/>
+<path class="sec" d="M237.3,139.0 L237.7,138.7 L238.7,139.0 L238.3,142.3 L235.0,142.7 L234.3,141.7 L234.7,140.0 L235.3,139.3 L237.0,139.0"/>
+<path class="sec" d="M330.3,440.0 L330.7,439.7 L331.7,440.7 L331.3,443.0 L330.7,443.7 L328.0,444.0 L327.3,443.3 L328.3,441.3 L330.0,440.3"/>
+<path class="sec" d="M234.7,143.0 L235.0,142.7 L237.7,143.0 L236.0,144.7 L235.0,144.3 L235.0,143.3"/>
+              </g>
+              <g id="dimV" opacity="0">
+                <line class="dim" x1="24" y1="264.2" x2="40" y2="264.2"/>
+                <line class="dim" x1="24" y1="406.8" x2="40" y2="406.8"/>
+                <line class="dim" id="dimVline" x1="30" y1="264.2" x2="30" y2="406.8"/>
+                <path class="dim" d="M28,269.2 L30,264.2 L32,269.2 M28,401.8 L30,406.8 L32,401.8"/>
+                <text x="27" y="345" transform="rotate(-90 27 345)">— мм</text>
+              </g>
+              <g id="dimH" opacity="0">
+                <line class="dim" x1="46.2" y1="244" x2="46.2" y2="259"/>
+                <line class="dim" x1="152.6" y1="244" x2="152.6" y2="259"/>
+                <line class="dim" x1="46.2" y1="250" x2="152.6" y2="250"/>
+                <path class="dim" d="M51.2,248 L46.2,250 L51.2,252 M147.6,248 L152.6,250 L147.6,252"/>
+                <text x="88" y="245">— мм</text>
+              </g>
+              <g id="ptr1" opacity="0">
+                <circle class="dot" cx="89.2" cy="373.5" r="1.6"/>
+                <path class="dim" id="ptr1l" d="M89.2,373.5 L89.2,446"/>
+                <text class="lbl" x="84" y="458">камеры профиля</text>
+              </g>
+              <g id="ptr2" opacity="0">
+                <circle class="dot" cx="184" cy="335" r="1.6"/>
+                <path class="dim" id="ptr2l" d="M184,335 L246,335"/>
+                <text class="lbl" x="250" y="337.5">изоляционная</text>
+                <text class="lbl" x="250" y="348">зона</text>
+              </g>
+              <g id="stamp" opacity="0">
+                <line class="dim" x1="214" y1="566" x2="342" y2="566"/>
+                <text x="214" y="560">VIKING 90 · СЕЧЕНИЕ</text>
+              </g>
+            </svg>
+            <div class="wtop" aria-hidden="true"><span id="w1">и инновационной</span> <span id="w2">изоляционной зоной</span></div>
+            <div class="spec" id="spec" aria-hidden="true" style="opacity:0">
+              <span>Система</span><b>VIKING 90</b>
+              <span>Материал</span><b>алюминий</b>
+              <span>Конструкция</span><b>многокамерная</b>
+            </div>
+            <div class="mark" id="mark"><span>THERMINAL</span><img src="assets/logo.png" alt=""></div>
+          </div>
+          <div class="s1" id="s1">
+            <div class="door" id="door"><img src="assets/viking90_door_corner.png" alt=""><div class="sweep" id="sweep"></div></div>
+            <div class="fadeb"></div><div class="fadeb2"></div>
+            <div class="cap" aria-hidden="true"><span id="c1">Это</span><span id="c2">дверная</span><span id="c3">система</span><span id="c4">VIKING 90</span></div>
+            <svg class="arrow" viewBox="0 0 360 640" aria-hidden="true">
+              <path id="arw" d="M58,206 C40,236 60,262 140,262" fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/>
+              <path id="arwh" d="M132,256 L141,262 L132,268" fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+            </svg>
+            <div class="small" id="small" style="opacity:0">с многокамерными<br>профилями</div>
+          </div>
+          <div class="tc" id="tc">00.00</div>
+        </div>
+      </div>
+      <div class="ctrl">
+        <button type="button" id="play" aria-label="Пауза">Пауза</button>
+        <input type="range" id="scrub" min="0" max="6600" step="10" value="0" aria-label="Позиция на таймлайне">
+        <span class="mono" id="time">0,00 с</span>
+      </div>
+      <div class="jump">
+        <button type="button" data-t="0">0,0 · начало</button>
+        <button type="button" data-t="2100">2,1 · VIKING 90</button>
+        <button type="button" data-t="3150">3,15 · переход</button>
+        <button type="button" data-t="6000">6,0 · финал</button>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3>Текст на экране</h3>
+      <p class="muted">Фраза собрана из формулировки на сайте THERMINAL о дверной системе VIKING 90: «Благодаря сложной конструкции с современными многокамерными профилями и инновационной изоляционной зоной...». Других цифр и свойств в кадре нет.</p>
+      <div class="script"><ul>
+        <li><span class="t">0,70–2,40</span><q class="up">Это / дверная / система / VIKING 90</q><span class="chip ok">с сайта</span></li>
+        <li><span class="t">1,70–2,40</span><span>Тонкая белая стрелка рисуется от подписи к торцу полотна</span><span></span></li>
+        <li><span class="t">2,45–3,10</span><q>с многокамерными профилями</q><span class="chip ok">с сайта</span></li>
+        <li><span class="t">3,05–3,35</span><span>Наезд и засветка в белый, как в референсе</span><span></span></li>
+        <li><span class="t">3,35–4,50</span><span>Контур сечения прорисовывается линиями, длинные контуры первыми</span><span class="chip ok">чертёж с сайта</span></li>
+        <li><span class="t">3,55–6,60</span><q>и инновационной изоляционной зоной</q><span class="chip ok">с сайта</span></li>
+        <li><span class="t">4,40–5,00</span><span>Размерные линии, значения «— мм» ждут чертёж</span><span class="chip warn">нужны размеры</span></li>
+        <li><span class="t">4,80–5,30</span><span>Выноски «камеры профиля» и «изоляционная зона»</span><span class="chip warn">подтвердить зону</span></li>
+        <li><span class="t">5,20–5,80</span><span>Табличка: система VIKING 90, материал алюминий, конструкция многокамерная. Знак THERMINAL</span><span class="chip ok">с сайта</span></li>
+      </ul></div>
+      <p class="note">Голос за кадром, если нужен, читает ту же фразу: «Это дверная система VIKING 90 с многокамерными профилями и инновационной изоляционной зоной». Ровно 6 с в темпе референса.</p>
+      <p class="note">Тёмная сцена в прототипе собрана из рендера с сайта (1080 px, белый фон вырезан). Для чистовой версии нужна макросъёмка реального образца или рендер в 4K, см. список материалов.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-board">
+  <h2 id="h-board">Раскадровка: референс и THERMINAL</h2>
+  <div class="board">
+    <article class="shot">
+      <div class="pair">
+        <figure><img src="assets/ref/ref_1.1.jpg" alt="Кадр референса, 1,1 с" loading="lazy"><figcaption>референс 1,1 с</figcaption></figure>
+        <figure><img src="assets/frames/f_1.20.jpg" alt="Кадр прототипа THERMINAL, 1,2 с" loading="lazy"><figcaption>THERMINAL 1,2 с</figcaption></figure>
+      </div>
+      <h3><span>1. Предмет в темноте</span><span class="mono">0,0–1,4</span></h3>
+      <p>Тёмный фон с мягким световым пятном. Угол полотна VIKING 90 медленно наезжает, по структуре покрытия проходит блик. Слова появляются по одному, капителями.</p>
+    </article>
+<article class="shot">
+      <div class="pair">
+        <figure><img src="assets/ref/ref_2.1.jpg" alt="Кадр референса, 2,1 с" loading="lazy"><figcaption>референс 2,1 с</figcaption></figure>
+        <figure><img src="assets/frames/f_2.20.jpg" alt="Кадр прототипа THERMINAL, 2,2 с" loading="lazy"><figcaption>THERMINAL 2,2 с</figcaption></figure>
+      </div>
+      <h3><span>2. Подпись и стрелка</span><span class="mono">1,4–2,4</span></h3>
+      <p>«VIKING 90» завершает фразу. Тонкая рукописная стрелка тянется к торцу полотна, где видны слои профиля.</p>
+    </article>
+<article class="shot">
+      <div class="pair">
+        <figure><img src="assets/ref/ref_2.6.jpg" alt="Кадр референса, 2,6 с" loading="lazy"><figcaption>референс 2,6 с</figcaption></figure>
+        <figure><img src="assets/frames/f_2.80.jpg" alt="Кадр прототипа THERMINAL, 2,8 с" loading="lazy"><figcaption>THERMINAL 2,8 с</figcaption></figure>
+      </div>
+      <h3><span>3. Второстепенная подпись</span><span class="mono">2,45–3,1</span></h3>
+      <p>Крупный текст уходит, справа снизу мелкий строчный «с многокамерными профилями», как «со строго выверенной» в референсе.</p>
+    </article>
+<article class="shot">
+      <div class="pair">
+        <figure><img src="assets/ref/ref_3.1.jpg" alt="Кадр референса, 3,1 с" loading="lazy"><figcaption>референс 3,1 с</figcaption></figure>
+        <figure><img src="assets/frames/f_3.15.jpg" alt="Кадр прототипа THERMINAL, 3,15 с" loading="lazy"><figcaption>THERMINAL 3,15 с</figcaption></figure>
+      </div>
+      <h3><span>4. Переход в белый</span><span class="mono">3,05–3,35</span></h3>
+      <p>Быстрый наезд с лёгким размытием и засветка в белый лист.</p>
+    </article>
+<article class="shot">
+      <div class="pair">
+        <figure><img src="assets/ref/ref_3.6.jpg" alt="Кадр референса, 3,6 с" loading="lazy"><figcaption>референс 3,6 с</figcaption></figure>
+        <figure><img src="assets/frames/f_3.80.jpg" alt="Кадр прототипа THERMINAL, 3,8 с" loading="lazy"><figcaption>THERMINAL 3,8 с</figcaption></figure>
+      </div>
+      <h3><span>5. Построение сечения</span><span class="mono">3,35–4,5</span></h3>
+      <p>Рамки листа и контур сечения прорисовываются линиями. Сверху набирается «и инновационной изоляционной зоной».</p>
+    </article>
+<article class="shot">
+      <div class="pair">
+        <figure><img src="assets/ref/ref_5.0.jpg" alt="Кадр референса, 5,0 с" loading="lazy"><figcaption>референс 5,0 с</figcaption></figure>
+        <figure><img src="assets/frames/f_5.10.jpg" alt="Кадр прототипа THERMINAL, 5,1 с" loading="lazy"><figcaption>THERMINAL 5,1 с</figcaption></figure>
+      </div>
+      <h3><span>6. Размеры и выноски</span><span class="mono">4,4–5,3</span></h3>
+      <p>Размерные линии с засечками и значениями «— мм» до получения чертежа. Выноски к камерам и к изоляционной зоне.</p>
+    </article>
+<article class="shot">
+      <div class="pair">
+        <figure><img src="assets/ref/ref_6.0.jpg" alt="Кадр референса, 6,0 с" loading="lazy"><figcaption>референс 6,0 с</figcaption></figure>
+        <figure><img src="assets/frames/f_6.00.jpg" alt="Кадр прототипа THERMINAL, 6,0 с" loading="lazy"><figcaption>THERMINAL 6,0 с</figcaption></figure>
+      </div>
+      <h3><span>7. Табличка и знак</span><span class="mono">5,2–6,6</span></h3>
+      <p>Табличка как в штампе чертежа: система, материал, конструкция. Знак THERMINAL справа внизу, единственный цветной элемент. Затем склейка в основной ролик.</p>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="h-obj">
+  <h2 id="h-obj">Объект интро</h2>
+  <div class="obj">
+    <div class="figs">
+      <figure><img src="assets/src/viking90_door_corner.jpg" alt="Рендер угла дверного полотна VIKING 90, антрацит"><figcaption>Угол полотна VIKING 90 «вклейка». Основа тёмной сцены</figcaption></figure>
+      <figure><img src="assets/src/viking90_door_full.jpg" alt="Дверь VIKING 90 со вклейкой и вертикальной ручкой"><figcaption>Та же дверь целиком, рендер с сайта</figcaption></figure>
+      <figure class="wide"><div class="overlay">
+        <img src="assets/src/viking90_door_section_drawing.jpg" alt="" style="left:-8.23%;top:-69.11%;width:116.88%;height:233.26%">
+        <svg viewBox="0 0 924 463" role="img" aria-label="Векторный контур сечения VIKING 90, наложенный на оригинальный чертёж"><g><path d="M9.0,7.3 L7.3,9.0 L7.3,23.0 L8.3,24.3 L10.0,25.3 L15.0,26.7 L16.3,26.3 L17.0,25.0 L17.3,19.0 L19.3,17.3 L21.7,17.0 L30.0,17.3 L32.0,19.0 L32.0,69.3 L29.0,73.7 L29.0,75.3 L27.7,77.7 L27.7,79.7 L28.3,80.7 L36.0,80.3 L36.7,81.0 L36.0,83.3 L35.3,84.0 L34.3,84.0 L32.7,86.7 L32.7,103.0 L32.3,104.7 L31.0,106.0 L19.0,106.0 L18.0,105.3 L17.3,104.0 L17.0,97.3 L16.3,96.7 L13.3,96.7 L8.7,98.7 L7.3,100.3 L7.3,111.7 L7.7,112.3 L9.7,113.3 L30.0,113.3 L31.7,114.0 L32.3,114.7 L32.7,116.7 L32.7,132.3 L33.3,133.7 L35.0,135.0 L36.3,137.3 L35.3,138.3 L30.7,138.3 L30.3,138.0 L27.7,139.3 L27.7,141.3 L29.0,143.7 L29.3,146.0 L32.0,149.7 L32.0,226.0 L33.0,229.3 L32.0,232.7 L32.0,309.0 L29.3,312.7 L29.0,315.0 L27.7,317.3 L27.7,319.3 L28.3,320.0 L30.0,320.3 L37.7,319.7 L38.7,320.7 L37.3,322.7 L34.7,323.3 L32.7,326.3 L32.7,342.3 L32.3,344.0 L31.3,345.0 L9.7,345.0 L7.3,346.7 L7.3,358.3 L9.0,360.3 L12.0,361.0 L12.7,361.7 L16.3,361.7 L16.7,361.3 L17.0,356.0 L17.7,353.7 L18.7,352.7 L21.0,352.3 L31.3,352.7 L32.3,353.7 L32.7,355.7 L32.7,372.0 L34.0,374.3 L36.7,375.0 L38.0,377.3 L37.0,378.3 L30.3,378.0 L30.0,377.7 L28.3,378.0 L27.7,379.0 L27.7,381.0 L29.0,383.3 L29.3,385.3 L32.0,389.3 L32.0,415.7 L33.0,419.0 L32.0,422.3 L31.7,440.0 L30.3,441.0 L28.3,441.3 L18.7,441.0 L17.3,439.3 L17.0,433.3 L16.0,431.7 L13.7,431.7 L12.3,432.7 L10.0,433.0 L8.7,433.7 L7.3,435.3 L7.3,449.7 L8.3,450.7 L9.3,451.0 L333.0,451.0 L335.0,451.3 L336.3,451.0 L337.7,449.0 L337.7,433.3 L337.0,431.7 L337.7,429.3 L337.7,418.3 L336.3,414.7 L334.7,413.3 L333.7,411.3 L335.0,410.0 L359.3,410.0 L361.0,410.3 L362.3,411.7 L363.3,416.0 L363.3,420.3 L362.7,421.0 L362.7,435.7 L363.0,436.3 L362.0,438.3 L362.3,450.0 L364.3,451.3 L367.7,451.0 L809.7,451.0 L810.0,451.3 L813.7,451.3 L814.0,451.0 L814.3,451.3 L814.3,455.7 L815.0,456.3 L823.3,456.3 L824.0,455.3 L823.7,452.0 L824.3,451.0 L828.3,451.3 L828.7,451.0 L917.3,451.0 L918.0,449.7 L918.0,438.7 L917.3,436.7 L916.3,436.3 L570.0,436.3 L568.0,435.3 L567.0,433.0 L563.7,431.3 L560.7,431.3 L557.3,434.7 L556.0,434.7 L553.0,431.3 L546.7,430.7 L543.7,427.0 L533.7,426.7 L532.7,425.3 L532.3,423.7 L532.3,405.7 L532.7,404.0 L534.7,402.3 L543.0,402.3 L544.7,401.3 L545.3,389.7 L545.7,388.3 L547.0,387.0 L549.0,382.7 L549.3,379.0 L548.7,378.0 L547.0,377.7 L540.3,378.3 L539.7,377.7 L540.0,376.0 L541.3,374.7 L543.3,374.3 L544.3,373.0 L544.7,354.3 L545.0,353.7 L546.3,352.7 L548.7,352.3 L556.7,352.3 L559.3,353.0 L560.0,354.0 L560.0,360.3 L560.7,361.7 L562.0,362.0 L564.3,361.7 L568.7,360.0 L569.7,358.7 L570.0,356.7 L570.0,348.7 L569.7,346.7 L568.7,345.3 L567.7,345.0 L546.3,345.0 L544.7,343.7 L544.3,325.3 L542.0,323.0 L539.7,322.7 L538.7,321.0 L539.7,319.7 L547.7,320.3 L548.7,320.0 L549.7,318.7 L548.7,314.7 L547.0,311.0 L545.7,309.7 L545.0,307.0 L545.0,232.3 L544.3,230.0 L545.0,226.3 L545.0,151.7 L545.7,149.0 L547.3,147.0 L548.7,144.0 L549.3,139.7 L548.3,138.3 L541.7,138.3 L541.0,137.7 L542.0,135.3 L544.0,134.0 L544.7,131.0 L544.7,88.0 L543.7,84.7 L542.0,84.0 L540.3,81.3 L541.3,80.3 L548.7,80.7 L549.3,78.7 L548.7,75.0 L545.3,69.0 L544.7,56.3 L543.3,55.3 L541.3,55.0 L535.0,55.3 L533.7,54.7 L532.7,53.0 L532.7,49.7 L533.0,49.3 L534.3,50.0 L538.0,49.7 L539.0,49.0 L539.3,41.0 L540.0,39.7 L541.7,38.7 L625.7,38.7 L628.7,40.7 L630.0,43.3 L637.7,43.3 L638.7,43.0 L639.0,41.7 L638.3,40.0 L637.3,39.0 L637.3,34.7 L639.0,33.3 L640.3,33.0 L684.0,33.0 L686.0,33.7 L687.0,34.7 L687.0,39.3 L685.7,41.0 L686.0,43.0 L691.3,43.3 L692.3,42.7 L692.7,41.7 L692.7,33.7 L693.0,33.3 L693.0,30.0 L692.3,28.0 L691.7,27.7 L640.0,27.3 L638.7,25.3 L638.7,22.3 L639.0,22.0 L917.3,22.0 L918.0,20.7 L918.0,9.7 L917.7,8.0 L916.7,7.3 L240.3,7.3 L239.3,8.7 L239.3,21.3 L240.3,22.3 L241.0,26.0 L245.3,33.0 L246.3,36.3 L247.3,37.3 L247.0,39.0 L244.0,44.0 L244.0,45.7 L243.0,48.7 L240.0,48.7 L238.3,48.0 L216.0,48.0 L215.0,47.3 L214.7,46.7 L214.7,10.7 L214.3,8.3 L213.0,7.3 L9.3,7.3"/><path d="M240.0,7.7 L240.3,7.3 L916.7,7.3 L917.7,8.3 L918.0,9.7 L918.0,20.7 L917.0,22.0 L639.0,22.0 L638.7,22.3 L451.7,22.0 L451.3,22.3 L362.3,22.3 L362.0,22.7 L358.3,21.7 L353.7,22.3 L240.3,22.3 L239.3,21.3 L239.3,8.7 L239.7,8.0"/><path d="M267.3,41.7 L269.3,41.3 L270.7,42.7 L316.3,42.7 L319.3,43.3 L320.7,45.7 L321.3,49.3 L321.3,52.7 L323.0,59.3 L324.3,60.0 L327.7,60.0 L328.0,60.3 L328.0,68.7 L327.3,70.7 L326.0,72.0 L325.7,74.0 L324.3,76.3 L324.0,78.0 L324.3,80.3 L325.0,80.7 L332.3,80.3 L333.0,81.0 L332.0,83.7 L330.3,84.3 L329.3,85.3 L328.7,87.0 L328.7,131.7 L329.3,133.7 L331.3,135.0 L332.7,137.3 L331.7,138.3 L325.0,138.3 L324.0,139.3 L324.7,143.7 L325.7,145.0 L326.0,147.0 L327.7,148.7 L328.0,150.3 L328.0,224.7 L329.0,227.7 L329.0,230.7 L328.0,233.7 L328.0,308.0 L327.7,309.7 L326.0,311.7 L326.0,312.7 L324.7,315.0 L324.0,319.0 L324.7,320.0 L326.0,320.3 L334.0,319.7 L335.0,320.7 L333.7,322.7 L331.0,323.3 L329.0,325.3 L328.7,327.0 L328.7,371.3 L329.3,373.3 L330.3,374.3 L333.0,375.0 L334.3,377.3 L333.0,378.3 L326.0,377.7 L324.7,378.0 L324.0,379.0 L324.7,383.3 L325.7,384.7 L326.0,386.7 L327.3,387.7 L328.0,390.0 L328.0,403.3 L326.7,405.0 L325.7,405.3 L324.0,407.0 L322.3,405.7 L320.7,405.3 L314.3,405.3 L313.7,405.7 L312.7,404.7 L309.3,404.3 L304.3,404.7 L304.0,405.3 L304.3,408.0 L305.7,408.3 L313.7,408.3 L314.0,408.0 L314.7,409.3 L316.0,410.0 L322.7,410.0 L324.0,408.7 L324.7,409.7 L326.3,410.7 L327.7,413.7 L328.7,414.0 L331.0,416.3 L331.7,417.7 L331.7,420.0 L330.3,422.3 L327.7,424.7 L324.7,424.7 L322.7,423.7 L318.7,423.7 L316.7,424.7 L312.7,424.7 L306.7,417.7 L304.3,417.3 L303.3,418.3 L303.0,420.0 L303.0,431.0 L302.7,431.3 L296.0,431.3 L295.0,431.7 L294.3,433.0 L294.7,435.7 L299.3,436.0 L301.0,437.0 L301.7,438.3 L301.7,441.7 L300.3,443.7 L215.0,443.7 L213.7,441.3 L213.7,438.3 L214.3,437.0 L216.0,436.0 L219.7,436.0 L220.7,435.0 L220.7,432.7 L220.0,431.7 L216.3,431.3 L214.7,429.7 L214.7,425.0 L213.7,420.3 L214.3,419.0 L215.0,411.3 L216.7,410.3 L218.3,410.0 L247.0,410.0 L248.3,409.7 L249.0,408.7 L249.0,389.7 L252.0,385.0 L252.7,381.7 L253.3,381.0 L253.3,378.3 L251.0,377.7 L244.3,378.3 L243.3,377.3 L244.3,375.3 L246.7,374.3 L248.3,372.3 L248.3,325.7 L246.3,323.3 L243.3,322.7 L242.3,320.7 L243.3,319.7 L251.3,320.3 L253.3,319.3 L253.3,316.7 L252.3,315.3 L252.0,313.3 L249.0,308.7 L249.0,232.0 L248.3,230.0 L249.0,226.7 L249.0,150.0 L252.0,145.3 L253.3,140.0 L253.0,139.0 L252.0,138.3 L245.3,138.3 L244.7,137.7 L245.7,135.3 L248.3,132.7 L248.3,86.3 L247.0,84.3 L245.0,83.3 L244.0,81.0 L245.0,80.3 L252.0,80.7 L253.0,80.0 L253.3,78.7 L252.0,73.7 L249.0,69.0 L249.0,58.7 L250.0,57.3 L251.3,56.7 L261.7,56.7 L262.7,56.3 L263.7,54.7 L263.7,49.0 L261.7,47.3 L262.0,44.0 L263.3,42.0 L267.0,41.7"/><path d="M556.0,435.0 L557.3,434.7 L558.7,436.0 L568.7,435.7 L570.0,436.3 L916.3,436.3 L917.3,437.0 L918.0,438.7 L918.0,449.7 L917.0,451.0 L828.7,451.0 L828.3,451.3 L825.0,451.3 L823.7,450.0 L823.3,447.0 L815.3,447.0 L814.3,448.0 L814.3,450.7 L813.7,451.3 L810.0,451.3 L809.7,451.0 L367.7,451.0 L364.3,451.3 L363.0,450.7 L362.3,449.7 L362.0,438.3 L363.3,436.0 L524.7,436.3 L525.0,436.0 L555.0,436.0 L555.7,435.3"/><path d="M38.0,377.7 L38.7,377.3 L43.0,378.7 L44.0,380.7 L41.3,383.7 L40.7,386.7 L41.0,389.7 L40.3,392.0 L40.3,394.0 L41.3,394.7 L61.0,394.7 L62.0,393.7 L62.0,391.7 L61.3,389.7 L59.0,386.0 L58.3,383.3 L59.0,382.7 L67.0,382.7 L68.7,383.7 L70.0,385.7 L71.0,386.3 L73.0,390.3 L75.3,393.3 L77.7,394.7 L81.7,394.7 L82.0,395.0 L200.0,395.0 L203.3,394.7 L205.7,393.3 L209.3,388.3 L211.0,385.0 L214.0,382.7 L222.0,382.7 L222.7,383.3 L222.3,385.7 L219.0,391.3 L219.0,394.0 L220.0,394.7 L239.7,394.7 L240.7,393.7 L240.3,390.3 L239.7,389.0 L240.3,387.0 L239.7,383.7 L238.3,382.0 L238.3,379.0 L239.0,378.3 L243.3,377.3 L244.3,378.3 L251.0,377.7 L253.3,378.7 L253.3,381.0 L252.7,381.7 L252.0,385.0 L249.0,389.7 L249.0,408.7 L248.0,409.7 L247.0,410.0 L218.3,410.0 L216.7,410.3 L215.0,411.3 L214.3,419.0 L213.7,420.3 L214.7,425.0 L214.7,429.7 L215.3,431.0 L220.0,431.7 L220.7,432.7 L220.7,435.0 L219.7,436.0 L214.7,436.3 L213.7,438.3 L213.7,441.3 L215.0,443.7 L300.3,443.7 L301.7,441.7 L301.7,438.3 L301.0,436.7 L299.3,436.0 L295.3,436.0 L294.3,434.7 L294.3,433.0 L296.0,431.3 L302.7,431.3 L303.3,431.0 L306.7,431.7 L311.7,431.3 L312.7,432.7 L312.7,436.0 L312.3,436.3 L308.7,436.7 L307.0,437.7 L306.7,442.0 L307.7,444.0 L313.3,444.0 L314.0,443.3 L316.3,443.7 L327.3,443.3 L328.0,444.0 L329.3,444.0 L331.3,443.3 L331.7,440.7 L330.3,439.3 L330.0,437.3 L328.3,436.0 L328.7,432.0 L329.0,431.7 L336.3,431.3 L337.3,432.0 L337.7,433.3 L337.7,449.0 L336.3,451.0 L335.0,451.3 L333.0,451.0 L9.3,451.0 L7.3,449.7 L7.3,435.3 L10.0,433.0 L12.3,432.7 L13.7,431.7 L16.0,431.7 L17.0,433.3 L17.3,439.3 L17.7,440.3 L18.7,441.0 L28.3,441.3 L31.7,440.3 L32.0,422.3 L33.0,419.0 L32.0,415.7 L32.0,389.0 L29.3,385.3 L28.7,382.3 L27.7,381.0 L27.7,379.0 L28.3,378.0 L30.0,377.7 L36.7,378.3 L37.7,378.0"/><path d="M362.0,22.7 L362.3,22.3 L450.7,22.3 L451.3,23.7 L451.7,26.7 L452.3,27.3 L454.3,27.7 L460.0,27.7 L460.3,27.3 L520.0,27.3 L523.3,27.7 L525.0,26.3 L525.0,23.3 L525.7,22.3 L638.3,22.3 L638.7,25.3 L639.3,27.0 L640.0,27.3 L691.3,27.7 L692.3,28.3 L693.0,30.0 L692.7,41.7 L691.3,43.3 L686.3,43.0 L685.7,42.3 L685.7,41.3 L687.0,39.3 L687.0,34.3 L684.0,33.0 L640.3,33.0 L637.7,34.0 L637.3,34.7 L637.3,39.0 L638.7,40.7 L639.0,41.7 L638.7,42.7 L637.7,43.3 L630.3,43.3 L628.7,41.3 L628.7,40.3 L630.3,37.7 L630.3,34.3 L630.0,33.0 L629.0,32.3 L535.0,32.3 L533.7,33.3 L533.0,36.3 L532.7,53.0 L533.0,54.0 L535.0,55.3 L541.3,55.0 L543.3,55.3 L544.7,56.3 L545.3,69.0 L546.0,71.0 L547.3,72.0 L547.7,73.7 L549.0,76.0 L549.3,79.3 L548.3,80.7 L541.3,80.3 L540.0,81.0 L538.3,81.0 L534.0,79.7 L533.3,78.3 L534.7,77.0 L535.0,75.7 L536.3,74.0 L536.7,70.0 L536.0,69.3 L536.3,64.7 L535.3,63.7 L516.3,63.7 L515.7,64.0 L515.3,65.0 L515.7,68.0 L517.7,71.3 L518.7,75.0 L517.7,76.0 L512.0,76.0 L508.3,74.7 L506.3,72.3 L506.0,71.3 L505.3,71.0 L503.0,66.3 L501.0,64.3 L499.3,63.7 L374.0,63.7 L372.7,64.3 L370.0,67.0 L368.0,71.0 L364.7,75.0 L361.7,76.0 L355.7,76.0 L354.7,75.3 L354.7,74.3 L356.0,70.7 L357.3,69.3 L358.0,67.0 L357.7,64.0 L357.0,63.7 L338.0,63.7 L337.0,64.3 L336.7,65.3 L337.0,67.0 L336.7,71.7 L337.3,74.7 L338.3,75.3 L338.3,76.3 L340.0,78.0 L339.3,79.3 L338.0,80.3 L333.7,81.3 L332.3,80.3 L325.0,80.7 L324.0,79.3 L324.3,76.3 L325.7,74.3 L326.0,72.3 L327.0,71.3 L328.0,68.7 L328.0,51.7 L329.0,50.3 L332.0,50.0 L333.7,51.7 L336.3,52.3 L344.0,52.0 L346.0,53.3 L359.3,53.3 L361.3,53.0 L362.3,52.0 L362.7,48.0 L362.0,45.7 L362.0,23.0"/><path d="M36.3,137.7 L36.7,137.3 L40.3,138.3 L42.0,138.3 L44.0,141.0 L41.7,143.7 L40.7,147.0 L41.0,150.3 L40.3,152.0 L40.3,154.7 L41.0,155.3 L59.7,155.3 L61.3,155.0 L62.3,153.7 L62.3,152.7 L60.0,147.7 L59.0,147.0 L58.3,143.3 L58.7,143.0 L66.0,143.0 L69.3,144.7 L76.3,155.7 L78.3,156.7 L80.3,157.0 L200.7,157.0 L204.3,156.0 L207.7,151.3 L208.0,150.0 L209.3,148.7 L209.7,147.3 L211.3,145.0 L213.0,143.7 L215.3,143.0 L222.3,143.0 L222.7,143.3 L222.0,146.7 L219.0,151.7 L219.3,154.7 L221.3,155.3 L239.7,155.3 L240.7,154.3 L240.7,152.3 L239.7,149.0 L240.3,148.3 L240.0,144.7 L238.3,142.7 L238.7,139.0 L239.3,138.3 L242.7,137.7 L244.7,137.7 L245.3,138.3 L252.0,138.3 L253.3,140.0 L253.0,142.0 L252.3,143.0 L252.0,145.3 L249.0,150.0 L249.0,226.7 L248.3,230.0 L249.0,232.0 L249.0,308.7 L252.0,313.3 L252.3,315.7 L253.3,317.0 L253.3,319.0 L251.3,320.3 L243.3,319.7 L242.0,320.7 L239.3,320.0 L238.7,319.3 L238.3,316.0 L240.0,314.0 L240.3,310.3 L239.7,309.7 L240.7,306.0 L240.3,303.7 L238.7,303.0 L221.7,303.0 L219.7,303.7 L219.0,304.3 L219.0,307.0 L222.0,312.0 L222.7,315.0 L222.0,315.7 L215.7,315.7 L213.0,315.0 L211.0,313.0 L205.0,303.3 L204.0,302.3 L203.0,302.3 L202.0,301.7 L198.3,301.7 L198.0,301.3 L83.7,301.3 L83.3,301.7 L79.0,301.7 L76.7,302.7 L75.0,304.7 L74.3,306.3 L71.3,310.7 L71.3,311.3 L69.3,314.0 L68.0,315.0 L65.0,315.7 L59.0,315.7 L58.3,315.0 L59.0,312.0 L61.7,308.0 L62.0,304.7 L61.0,303.3 L59.3,303.0 L42.0,303.0 L40.7,303.3 L40.3,304.0 L40.3,306.7 L41.0,308.3 L40.7,312.0 L41.7,315.0 L44.3,317.7 L42.0,320.0 L38.7,320.7 L37.7,319.7 L31.0,320.3 L28.0,319.7 L27.7,317.3 L28.7,316.0 L29.3,312.7 L32.0,309.0 L32.0,232.7 L33.0,229.3 L32.0,226.0 L32.0,149.3 L29.3,146.0 L29.0,143.7 L27.7,141.3 L27.7,139.7 L28.7,138.7 L30.3,138.0 L30.7,138.3 L35.7,138.3 L36.0,138.0"/><path d="M332.3,138.0 L335.0,137.7 L338.0,138.3 L339.3,139.3 L340.0,141.0 L337.0,144.7 L336.7,154.0 L337.7,155.3 L356.0,155.3 L357.7,154.7 L358.0,151.7 L357.3,149.7 L355.3,146.7 L354.7,143.3 L355.0,143.0 L362.0,143.0 L364.3,143.7 L366.3,145.7 L366.7,146.7 L368.0,148.0 L368.3,149.3 L369.7,150.7 L371.7,154.7 L373.7,156.3 L376.7,157.0 L497.0,157.0 L500.3,156.0 L501.7,154.7 L503.7,151.0 L504.7,150.0 L505.0,148.7 L508.0,144.7 L511.3,143.0 L518.3,143.0 L518.7,143.3 L518.3,146.3 L516.7,148.7 L515.0,152.7 L515.0,153.7 L515.7,154.7 L517.3,155.3 L535.7,155.3 L536.7,154.3 L536.7,151.7 L536.0,149.7 L536.7,149.0 L536.3,144.7 L535.0,143.3 L534.7,142.0 L533.7,141.0 L533.7,140.0 L535.7,138.3 L538.7,137.7 L541.0,137.7 L541.7,138.3 L548.3,138.3 L549.3,139.7 L549.0,143.0 L547.7,145.3 L547.3,147.0 L546.3,147.7 L545.0,151.7 L545.0,226.3 L544.3,230.0 L545.0,232.3 L545.0,307.0 L545.7,309.7 L547.3,311.7 L547.7,313.3 L548.7,314.7 L549.7,318.7 L549.3,319.3 L547.7,320.3 L539.7,319.7 L538.0,320.7 L535.3,320.0 L533.7,318.3 L535.0,315.3 L536.3,314.0 L536.7,309.7 L536.0,309.0 L536.7,307.0 L536.7,304.3 L536.0,303.3 L535.0,303.0 L518.0,303.0 L516.0,303.7 L515.3,304.7 L515.3,306.3 L516.0,308.7 L518.3,312.3 L518.7,315.0 L517.7,315.7 L512.3,315.7 L509.3,315.0 L505.0,310.0 L504.7,308.7 L503.7,307.7 L501.7,304.0 L500.0,302.3 L498.3,301.7 L495.0,301.7 L494.7,301.3 L381.7,301.3 L381.3,301.7 L375.3,301.7 L373.0,302.7 L370.0,306.3 L369.3,308.3 L368.3,309.3 L368.3,310.0 L366.3,313.0 L364.7,314.7 L361.0,315.7 L355.7,315.7 L354.7,315.0 L355.0,312.7 L357.7,308.0 L358.3,305.3 L357.7,303.7 L355.7,303.0 L338.7,303.0 L337.3,303.3 L336.7,304.7 L337.0,314.0 L340.3,317.3 L339.7,318.7 L337.3,320.3 L335.3,320.7 L334.0,319.7 L327.3,320.0 L327.0,320.3 L325.0,320.0 L324.0,319.0 L324.3,316.0 L325.7,313.7 L326.3,311.3 L327.7,309.7 L328.0,308.0 L328.0,233.7 L329.0,230.7 L329.0,227.7 L328.0,224.7 L328.0,150.3 L327.7,148.7 L326.0,146.7 L325.7,145.0 L324.7,143.7 L324.0,139.3 L325.3,138.3 L332.0,138.3"/><path d="M8.7,7.7 L9.0,7.3 L213.0,7.3 L214.0,8.0 L214.7,10.7 L214.7,46.7 L215.7,48.0 L238.3,48.0 L240.0,48.7 L243.0,48.7 L243.7,49.3 L257.3,50.0 L259.7,52.7 L263.3,52.7 L263.7,54.7 L261.7,56.7 L251.3,56.7 L249.3,57.7 L249.0,58.3 L249.0,69.0 L252.0,73.7 L253.3,78.7 L253.0,80.0 L252.0,80.7 L245.0,80.3 L243.7,81.0 L239.3,80.3 L238.7,79.7 L238.3,76.3 L240.0,74.3 L240.3,70.7 L239.7,70.0 L240.3,68.3 L240.7,65.0 L239.7,63.7 L220.3,63.7 L219.0,64.7 L219.0,67.3 L222.0,72.3 L222.7,75.0 L222.0,76.0 L215.3,76.0 L211.7,74.3 L206.0,65.3 L203.3,63.7 L77.7,63.7 L74.3,66.3 L71.3,71.7 L70.0,73.0 L69.7,74.0 L68.0,75.3 L65.3,76.0 L59.0,76.0 L58.3,75.3 L59.0,72.3 L61.7,68.3 L62.0,66.7 L61.7,64.0 L61.0,63.7 L41.7,63.7 L40.7,64.3 L40.3,65.3 L41.0,68.0 L40.7,72.0 L41.3,74.7 L44.0,77.7 L43.3,79.3 L42.0,80.3 L37.3,81.3 L36.0,80.3 L28.7,80.7 L27.7,79.7 L27.7,77.7 L28.7,76.3 L29.0,73.7 L32.0,69.7 L32.0,19.0 L31.3,18.0 L30.0,17.3 L27.3,17.0 L19.0,17.3 L17.3,19.0 L16.7,26.0 L15.7,26.7 L11.7,26.0 L8.0,24.0 L7.3,23.0 L7.3,9.0 L8.3,8.0"/><path d="M334.3,377.7 L334.7,377.3 L338.3,378.3 L340.0,379.7 L340.3,380.7 L337.0,384.7 L336.7,393.3 L338.0,394.7 L357.0,394.7 L358.0,394.0 L358.0,391.3 L357.3,389.3 L355.7,387.0 L354.7,383.3 L355.3,382.7 L363.0,382.7 L364.0,383.0 L366.7,385.7 L371.3,393.3 L373.7,394.7 L381.3,394.7 L381.7,395.0 L491.3,395.0 L491.7,394.7 L499.7,394.7 L502.0,393.3 L507.3,385.0 L510.3,382.7 L518.3,382.7 L518.7,383.0 L518.7,385.0 L517.3,388.0 L516.0,389.7 L515.3,392.0 L515.3,393.3 L516.3,394.7 L535.7,394.7 L536.3,394.0 L536.7,387.0 L536.0,383.7 L533.3,380.7 L534.0,379.0 L539.0,377.3 L540.3,378.3 L547.0,377.7 L548.7,378.0 L549.3,379.0 L549.0,382.7 L547.0,387.0 L545.7,388.3 L545.0,391.3 L545.0,400.3 L544.7,401.0 L543.0,402.3 L534.7,402.3 L533.3,403.0 L532.7,404.0 L532.3,405.7 L532.3,423.7 L532.7,425.3 L533.7,426.7 L543.7,427.0 L546.3,430.7 L552.7,431.3 L556.0,434.7 L554.7,436.0 L525.7,436.0 L525.0,434.3 L525.0,432.3 L523.0,431.0 L461.7,430.7 L461.3,431.0 L452.3,431.3 L451.3,432.7 L450.7,436.0 L363.0,436.0 L362.7,435.7 L362.7,421.3 L363.3,420.3 L363.3,416.0 L362.7,414.3 L362.3,411.3 L361.7,410.7 L359.3,410.0 L334.7,410.0 L334.0,410.7 L330.0,410.0 L325.7,410.3 L324.0,408.7 L324.0,407.3 L326.3,405.0 L327.3,404.7 L328.0,403.3 L328.0,390.0 L327.7,388.3 L326.0,386.3 L325.7,384.7 L324.3,382.3 L324.0,379.0 L326.0,377.7 L332.7,378.3 L334.0,378.0"/><path d="M46.0,166.7 L43.0,167.3 L41.7,168.7 L41.7,289.7 L42.7,291.3 L44.3,291.7 L237.3,291.7 L238.7,291.0 L239.3,288.3 L239.3,170.7 L239.0,168.0 L238.3,167.3 L235.0,166.7 L46.3,166.7"/><path d="M341.7,167.0 L342.0,166.7 L531.7,166.7 L534.3,167.3 L535.0,168.0 L535.3,169.7 L535.3,289.0 L535.0,290.7 L534.0,291.7 L339.7,291.7 L339.0,291.3 L338.0,289.3 L338.0,169.0 L339.0,167.3 L341.3,167.0"/><path d="M342.0,166.7 L339.0,167.3 L338.0,169.0 L338.0,289.3 L339.0,291.3 L339.7,291.7 L534.0,291.7 L535.0,290.7 L535.3,289.0 L535.3,169.7 L535.0,168.0 L534.3,167.3 L531.7,166.7 L342.3,166.7"/><path d="M45.7,167.0 L46.0,166.7 L235.0,166.7 L238.0,167.3 L239.0,168.3 L239.3,170.7 L239.3,288.3 L239.0,290.3 L237.3,291.7 L44.3,291.7 L43.0,291.3 L41.7,289.7 L41.7,168.7 L44.0,167.0 L45.3,167.0"/><path d="M381.3,301.7 L381.7,301.3 L494.7,301.3 L495.0,301.7 L498.3,301.7 L501.3,303.7 L502.0,305.3 L503.0,306.0 L505.0,309.3 L505.0,310.0 L506.3,311.3 L506.7,312.7 L508.7,314.7 L512.3,315.7 L519.0,315.3 L520.3,316.3 L520.7,317.0 L520.7,325.3 L523.0,327.3 L525.3,327.7 L527.3,329.0 L529.7,329.3 L531.0,330.3 L533.3,331.0 L534.7,332.7 L534.7,365.7 L534.0,366.7 L531.3,368.3 L529.0,368.7 L527.7,369.7 L524.3,370.3 L521.7,371.7 L520.7,373.0 L520.3,382.0 L519.3,383.0 L510.3,382.7 L509.0,383.3 L506.7,385.7 L505.0,389.0 L502.0,393.0 L499.7,394.7 L491.7,394.7 L491.3,395.0 L381.7,395.0 L381.3,394.7 L373.7,394.7 L371.0,392.7 L366.3,385.0 L363.3,382.7 L354.3,383.0 L353.0,381.7 L352.7,373.3 L352.0,372.0 L349.0,370.3 L346.7,370.0 L344.3,368.7 L342.0,368.3 L339.0,366.0 L338.3,362.0 L338.7,358.7 L338.7,336.7 L338.3,335.7 L338.7,333.0 L340.0,331.0 L342.3,330.3 L343.7,329.3 L346.0,329.0 L347.3,328.0 L350.3,327.3 L352.7,325.3 L352.7,317.7 L353.0,316.7 L354.3,315.3 L361.0,315.7 L364.7,314.7 L366.3,313.3 L370.0,306.7 L373.7,302.3 L375.3,301.7 L381.0,301.7"/><path d="M374.0,64.0 L374.3,63.7 L499.3,63.7 L500.3,64.0 L503.3,67.0 L505.3,71.0 L508.3,74.7 L510.0,75.7 L512.0,76.0 L519.3,75.7 L520.3,76.7 L521.0,86.3 L525.7,88.7 L528.0,89.0 L529.3,90.0 L532.3,90.7 L534.7,92.7 L534.7,126.0 L532.7,128.0 L531.0,128.3 L528.7,129.7 L526.3,130.0 L521.7,132.3 L520.7,133.3 L520.3,136.3 L520.7,141.3 L520.0,142.7 L519.0,143.3 L518.3,143.0 L511.3,143.0 L510.3,143.7 L508.3,144.0 L506.7,146.0 L506.3,147.3 L505.0,148.7 L503.3,152.0 L502.0,153.3 L502.0,154.0 L499.0,156.7 L497.0,157.0 L376.7,157.0 L373.7,156.3 L371.3,154.0 L369.3,150.0 L368.3,149.3 L368.0,148.0 L365.0,144.0 L362.3,143.0 L355.0,143.0 L354.7,143.3 L353.7,142.7 L352.7,141.0 L352.7,133.3 L350.3,131.3 L346.0,129.7 L344.7,129.7 L342.7,128.3 L340.7,128.0 L339.0,126.3 L338.3,124.7 L338.7,122.0 L338.7,96.7 L338.3,95.3 L338.7,93.0 L340.7,91.0 L342.0,90.3 L343.3,90.3 L346.7,88.7 L348.0,88.7 L351.3,87.0 L352.7,85.3 L352.7,78.0 L353.7,76.0 L354.3,75.7 L361.7,76.0 L364.7,75.0 L366.3,73.7 L368.3,69.7 L371.0,66.0 L372.7,64.3 L373.7,64.0"/><path d="M83.3,301.7 L83.7,301.3 L198.0,301.3 L198.3,301.7 L202.0,301.7 L203.7,302.3 L206.0,304.7 L208.0,308.7 L209.7,310.7 L210.0,312.0 L213.0,315.0 L215.7,315.7 L223.0,315.3 L224.0,316.3 L224.3,324.3 L224.7,325.3 L226.3,327.0 L230.0,328.0 L231.3,329.0 L233.7,329.3 L237.7,331.3 L238.7,333.7 L238.7,364.3 L238.3,365.7 L236.3,367.7 L233.0,368.7 L231.3,369.7 L228.3,370.3 L225.0,372.3 L224.3,374.0 L224.0,382.0 L223.0,383.0 L222.0,382.7 L214.0,382.7 L210.0,386.3 L208.0,390.3 L204.3,394.3 L200.0,395.0 L82.0,395.0 L77.0,394.3 L75.0,393.0 L69.7,384.3 L67.3,382.7 L58.7,382.7 L58.0,383.0 L57.0,382.0 L56.7,374.0 L55.0,371.3 L49.7,369.7 L48.3,368.7 L46.0,368.3 L43.0,366.3 L42.3,364.0 L42.3,334.3 L43.0,332.0 L44.0,331.0 L46.3,330.3 L47.7,329.3 L54.0,327.3 L56.3,325.3 L56.7,317.3 L58.0,315.3 L65.0,315.7 L68.0,315.0 L69.7,313.7 L74.7,305.3 L77.0,302.7 L79.0,301.7 L83.0,301.7"/><path d="M77.3,64.0 L77.7,63.7 L203.0,63.7 L204.3,64.0 L208.0,68.3 L208.0,69.0 L209.3,70.3 L211.0,73.7 L213.7,75.7 L215.3,76.0 L223.0,75.7 L224.0,76.7 L224.3,85.0 L226.0,87.0 L229.3,88.7 L232.0,89.0 L234.0,90.3 L235.3,90.3 L238.0,92.3 L238.7,94.3 L238.7,125.0 L238.0,126.7 L237.0,127.7 L234.7,128.3 L233.3,129.3 L230.3,130.0 L228.7,131.0 L226.7,131.3 L225.0,133.0 L224.3,134.3 L224.3,140.3 L224.0,142.3 L222.7,143.3 L222.3,143.0 L215.0,143.0 L211.7,144.3 L206.3,153.3 L204.0,156.0 L202.7,156.7 L200.7,157.0 L80.3,157.0 L78.3,156.7 L77.0,156.0 L73.0,150.7 L72.7,149.3 L71.3,148.0 L71.0,146.7 L69.0,144.0 L66.0,143.0 L58.7,143.0 L58.0,143.3 L56.7,141.3 L56.7,134.7 L55.3,132.0 L54.3,131.3 L52.3,131.0 L51.0,130.0 L48.7,129.7 L46.3,128.3 L44.7,128.0 L43.3,127.0 L42.3,124.3 L42.3,95.0 L43.0,92.3 L45.7,90.3 L47.0,90.3 L49.3,89.0 L51.7,88.7 L53.7,87.3 L55.3,87.0 L56.7,84.3 L56.7,77.3 L58.0,75.7 L59.0,76.0 L67.3,75.7 L69.7,74.3 L69.7,73.7 L71.0,72.3 L73.0,68.3 L74.3,67.0 L74.7,66.0 L77.0,64.0"/><path d="M44.0,404.7 L43.0,405.0 L41.7,406.7 L41.7,439.7 L42.3,440.7 L44.3,441.3 L202.3,441.3 L204.7,440.3 L204.7,406.0 L204.3,405.3 L202.7,404.7 L44.3,404.7"/><path d="M45.7,17.0 L42.7,17.7 L41.7,19.0 L41.7,52.0 L42.3,53.0 L43.7,53.7 L203.0,53.7 L204.7,52.7 L204.7,18.3 L202.7,17.3 L200.0,17.0 L46.0,17.0"/><path d="M43.7,405.0 L44.0,404.7 L202.7,404.7 L204.7,406.0 L204.7,440.0 L202.3,441.3 L44.3,441.3 L42.7,440.7 L41.7,439.7 L41.7,406.7 L43.3,405.0"/><path d="M45.3,17.3 L45.7,17.0 L200.0,17.0 L204.0,17.7 L204.7,18.7 L204.7,52.3 L203.0,53.7 L43.7,53.7 L41.7,52.0 L41.7,19.0 L42.7,17.7 L45.0,17.3"/><path d="M373.0,30.0 L370.3,31.0 L370.0,31.7 L370.0,54.0 L370.3,55.3 L371.3,56.0 L374.3,56.3 L521.0,56.3 L524.3,55.7 L525.0,54.0 L525.0,36.0 L523.3,34.7 L521.3,34.3 L446.0,34.3 L444.0,33.3 L443.3,30.7 L440.7,30.0 L373.3,30.0"/><path d="M372.3,402.3 L370.3,403.3 L370.0,404.3 L370.0,426.3 L370.3,427.7 L371.7,428.3 L442.3,428.3 L443.7,427.3 L444.0,425.3 L446.7,424.0 L522.3,424.0 L524.0,423.7 L525.0,422.3 L525.0,404.3 L524.7,403.3 L523.0,402.3 L372.7,402.3"/><path d="M372.7,30.3 L373.0,30.0 L440.7,30.0 L443.0,30.7 L443.7,31.3 L444.0,33.3 L446.0,34.3 L521.3,34.3 L523.3,34.7 L525.0,36.3 L525.0,54.0 L523.7,56.0 L521.0,56.3 L374.3,56.3 L371.7,56.0 L370.3,55.3 L370.0,54.0 L370.0,31.7 L371.0,30.7 L372.3,30.3"/><path d="M372.3,402.7 L372.7,402.3 L523.0,402.3 L525.0,404.3 L525.0,422.3 L523.7,423.7 L522.3,424.0 L446.7,424.0 L444.7,424.7 L444.0,425.3 L443.7,427.3 L442.0,428.3 L372.0,428.3 L371.0,428.0 L370.0,426.3 L370.0,404.7 L370.3,403.7 L372.0,402.7"/><path d="M41.7,303.3 L42.0,303.0 L59.3,303.0 L61.0,303.3 L62.0,304.7 L61.7,308.0 L59.3,311.3 L58.3,315.0 L57.7,315.3 L56.7,317.3 L56.3,325.3 L54.0,327.3 L52.0,327.7 L49.7,329.0 L47.3,329.3 L45.3,330.7 L43.7,331.0 L43.0,331.7 L42.3,334.3 L42.3,364.0 L43.0,366.3 L45.7,368.3 L47.0,368.3 L50.3,370.0 L52.7,370.3 L54.7,371.3 L56.0,372.7 L56.7,374.0 L56.7,381.0 L57.7,383.0 L58.3,383.3 L59.0,386.3 L60.3,388.0 L62.0,391.7 L62.0,393.7 L61.0,394.7 L41.3,394.7 L40.3,394.0 L41.0,388.7 L44.3,387.0 L45.3,385.0 L45.7,381.7 L43.7,380.3 L43.0,378.7 L38.0,377.3 L37.0,375.3 L34.3,374.3 L32.7,372.0 L32.7,355.7 L32.3,353.7 L31.3,352.7 L27.3,352.7 L27.0,352.3 L18.7,352.7 L17.3,354.7 L17.0,360.3 L16.3,361.7 L13.0,361.7 L12.0,361.0 L10.0,360.7 L7.3,358.3 L7.3,347.0 L9.7,345.0 L31.3,345.0 L32.3,344.0 L32.7,342.3 L32.7,326.3 L35.0,323.3 L37.0,323.0 L38.0,322.3 L39.0,320.7 L42.3,320.0 L44.0,318.0 L45.0,318.3 L45.0,317.7 L44.3,317.3 L45.3,316.7 L45.7,315.7 L44.3,311.0 L41.0,309.3 L40.3,306.7 L40.3,304.3 L41.3,303.3"/><path d="M41.3,64.0 L41.7,63.7 L61.0,63.7 L62.0,65.0 L61.7,68.3 L59.0,72.3 L58.3,75.3 L57.0,76.3 L56.7,77.3 L56.7,84.3 L56.0,86.0 L55.0,87.0 L51.7,88.7 L50.3,88.7 L47.0,90.3 L45.0,90.7 L43.0,92.3 L42.3,95.0 L42.3,124.3 L43.3,127.3 L46.3,128.3 L47.3,129.3 L50.0,129.7 L52.3,131.0 L54.3,131.3 L56.3,133.3 L56.7,141.3 L57.0,142.3 L58.3,143.7 L59.0,147.0 L60.3,148.3 L62.3,152.7 L62.3,153.7 L61.3,155.0 L59.7,155.3 L41.0,155.3 L40.3,154.7 L40.3,152.0 L41.0,149.0 L44.7,147.0 L45.7,142.3 L44.0,141.3 L43.3,139.3 L42.0,138.3 L36.3,137.3 L35.0,134.7 L33.3,133.7 L32.7,132.3 L32.7,116.7 L32.3,114.7 L31.3,113.7 L30.0,113.3 L9.7,113.3 L7.3,111.7 L7.3,100.3 L8.7,98.7 L11.0,98.0 L13.3,96.7 L16.0,96.7 L17.0,97.7 L17.3,104.0 L18.0,105.3 L19.0,106.0 L31.3,106.0 L32.0,105.3 L32.7,103.0 L32.7,86.7 L33.3,85.3 L36.0,83.3 L37.0,81.3 L42.0,80.3 L43.3,79.7 L43.7,78.3 L44.7,77.3 L45.3,77.3 L45.7,76.3 L44.3,71.3 L41.0,69.7 L40.3,65.7 L41.0,64.3"/><path d="M517.7,303.3 L518.0,303.0 L535.0,303.0 L536.3,303.7 L536.7,304.3 L536.3,308.7 L535.3,309.7 L534.0,310.0 L533.3,311.3 L532.0,312.3 L531.0,317.0 L533.3,317.7 L534.7,319.7 L538.3,320.7 L539.7,322.7 L542.0,323.0 L544.3,325.3 L544.7,343.7 L545.0,344.3 L546.3,345.0 L567.7,345.0 L569.0,345.7 L570.0,348.7 L569.7,358.3 L568.0,360.3 L564.3,361.7 L562.0,362.0 L560.3,361.0 L560.0,360.3 L560.0,354.0 L559.3,353.0 L556.7,352.3 L548.7,352.3 L546.3,352.7 L545.0,353.7 L544.7,354.3 L544.3,373.0 L543.0,374.3 L540.7,375.0 L539.3,377.3 L534.3,378.7 L532.7,381.0 L531.3,381.3 L531.7,385.3 L533.3,386.7 L533.3,387.7 L534.0,388.3 L535.3,388.7 L536.3,389.7 L536.3,393.7 L535.3,394.7 L516.3,394.7 L515.3,393.3 L515.7,390.7 L518.3,386.0 L518.7,383.3 L520.3,382.0 L521.0,372.7 L522.0,371.7 L524.7,370.3 L527.0,370.0 L529.3,368.7 L532.0,368.0 L534.0,366.7 L534.7,365.7 L534.7,332.7 L533.7,331.0 L532.0,330.7 L530.0,329.3 L527.7,329.0 L525.3,327.7 L524.0,327.7 L521.0,325.7 L520.7,325.0 L520.7,317.0 L518.7,315.0 L518.3,312.3 L517.0,309.7 L516.0,308.7 L515.3,306.3 L515.7,304.3 L517.3,303.3"/><path d="M358.0,22.0 L359.3,21.7 L362.0,22.7 L362.0,45.3 L360.3,46.7 L358.7,46.7 L356.7,47.7 L351.3,48.3 L347.7,49.7 L345.7,49.7 L344.0,52.0 L342.7,52.3 L336.3,52.3 L334.0,51.7 L332.0,50.0 L329.0,50.3 L328.0,51.3 L328.0,59.7 L327.7,60.0 L324.3,60.0 L323.0,59.3 L321.3,52.7 L321.3,49.3 L320.3,44.3 L318.7,43.0 L316.3,42.7 L270.7,42.7 L269.7,41.3 L271.0,40.0 L272.0,37.7 L272.0,29.7 L270.7,27.7 L249.3,27.7 L248.3,28.7 L248.3,30.0 L249.7,34.7 L249.3,35.0 L248.3,34.7 L249.0,36.0 L247.3,37.3 L246.0,35.7 L245.3,32.7 L244.0,31.3 L242.3,27.7 L241.3,26.7 L240.3,23.3 L240.7,22.3 L353.7,22.3 L354.0,22.0 L357.7,22.0"/><path d="M220.0,64.0 L220.3,63.7 L239.7,63.7 L240.7,65.0 L240.0,69.7 L236.7,71.7 L236.0,74.7 L235.0,75.0 L234.3,77.0 L234.7,79.0 L236.7,80.0 L239.0,80.0 L240.7,80.7 L243.7,81.0 L245.3,84.0 L246.3,84.0 L248.3,86.3 L248.3,132.7 L245.7,135.3 L244.3,137.7 L240.7,138.0 L235.3,139.3 L234.3,141.3 L235.0,144.3 L236.0,145.0 L236.7,147.3 L239.0,148.3 L240.0,149.3 L240.7,154.3 L239.7,155.3 L221.3,155.3 L219.0,154.3 L219.0,151.7 L220.3,150.0 L221.0,148.0 L222.0,147.0 L222.7,143.7 L224.0,142.3 L224.3,134.7 L225.0,133.0 L226.7,131.3 L229.0,131.0 L230.3,130.0 L233.7,129.3 L235.0,128.3 L237.3,127.7 L238.7,125.0 L238.7,94.3 L238.3,92.7 L236.3,90.7 L234.3,90.3 L232.0,89.0 L229.3,88.7 L226.0,87.0 L224.3,85.0 L224.0,76.7 L222.7,75.3 L222.0,72.0 L221.0,71.0 L220.3,69.0 L219.7,68.7 L219.0,67.3 L219.0,64.7 L219.7,64.0"/><path d="M221.3,303.3 L221.7,303.0 L238.7,303.0 L240.0,303.3 L240.7,304.3 L240.0,309.3 L236.3,311.7 L236.3,313.0 L235.0,314.3 L234.3,317.0 L234.7,319.0 L236.0,319.7 L238.7,319.7 L241.3,320.3 L242.7,321.3 L243.3,322.7 L246.0,323.3 L248.3,325.7 L248.3,372.3 L246.7,374.3 L244.7,375.0 L243.3,377.3 L235.3,379.3 L234.3,380.7 L235.0,384.0 L235.7,384.3 L236.7,387.0 L239.0,388.0 L240.0,389.3 L240.7,393.7 L239.7,394.7 L220.0,394.7 L219.0,393.7 L219.0,391.3 L222.3,386.0 L222.7,383.3 L224.0,382.0 L224.3,374.0 L225.0,372.7 L226.3,371.3 L229.3,370.0 L230.7,370.0 L233.3,368.7 L235.3,368.3 L237.0,367.0 L237.7,367.0 L238.7,364.3 L238.7,333.7 L237.0,330.7 L235.7,330.7 L234.0,329.3 L232.7,329.3 L230.0,328.0 L227.0,327.3 L225.0,325.7 L224.3,324.3 L224.0,316.3 L222.7,315.0 L222.0,311.7 L221.0,310.7 L220.3,308.7 L219.0,307.0 L219.0,304.3 L221.0,303.3"/><path d="M516.0,64.0 L516.3,63.7 L535.3,63.7 L536.3,64.7 L536.3,68.7 L535.3,70.0 L534.0,70.3 L532.0,73.0 L531.0,77.3 L533.0,78.0 L534.3,80.0 L540.0,81.0 L541.7,84.0 L542.7,84.0 L544.3,86.0 L544.7,88.0 L544.7,131.0 L544.3,133.3 L542.3,134.7 L540.7,137.7 L535.3,138.3 L534.3,139.0 L533.0,141.0 L531.0,141.7 L532.0,146.0 L533.3,147.3 L533.7,148.3 L536.0,149.3 L536.7,151.7 L536.7,154.3 L535.7,155.3 L517.3,155.3 L515.7,154.7 L515.0,153.7 L516.0,150.0 L517.7,148.0 L518.3,146.3 L518.7,143.7 L520.0,142.7 L520.7,141.3 L520.3,136.3 L521.0,133.0 L523.0,131.3 L525.0,131.0 L526.3,130.0 L528.7,129.7 L531.0,128.3 L533.3,127.7 L534.7,126.0 L534.7,92.7 L532.3,90.7 L530.3,90.3 L528.0,89.0 L525.7,88.7 L521.0,86.0 L520.7,85.3 L520.7,77.3 L520.0,76.0 L518.7,75.3 L517.3,70.3 L516.0,69.0 L515.3,66.7 L515.7,64.3"/><path d="M337.7,64.0 L338.0,63.7 L357.0,63.7 L358.0,64.7 L358.0,67.0 L357.3,69.0 L355.7,71.3 L354.7,75.3 L353.3,76.0 L352.7,78.0 L352.7,85.3 L351.3,87.0 L348.0,88.7 L346.7,88.7 L340.7,91.0 L339.0,92.3 L338.3,95.3 L338.7,96.7 L338.7,122.0 L338.3,124.7 L339.0,126.3 L340.7,128.0 L342.3,128.3 L344.7,129.7 L347.0,130.0 L348.3,131.0 L350.3,131.3 L352.7,133.3 L352.7,141.0 L353.0,142.0 L354.7,143.3 L355.3,146.7 L358.0,151.7 L358.0,154.3 L356.0,155.3 L337.7,155.3 L336.7,154.0 L337.0,150.3 L339.3,149.0 L340.3,147.0 L341.3,146.3 L342.0,142.0 L340.3,141.3 L338.3,138.3 L333.0,137.7 L332.0,136.7 L331.3,135.0 L329.3,133.7 L328.7,131.7 L328.7,87.0 L329.3,85.3 L330.3,84.3 L331.7,84.0 L333.3,81.3 L339.0,80.0 L340.3,77.7 L342.0,77.3 L341.7,73.7 L341.0,72.3 L340.3,72.0 L339.7,70.0 L337.0,68.7 L336.7,65.3 L337.3,64.3"/><path d="M338.3,303.3 L338.7,303.0 L355.7,303.0 L357.3,303.7 L358.3,305.3 L357.7,308.0 L355.0,312.7 L354.7,315.0 L353.3,316.0 L352.7,317.7 L352.7,325.3 L350.3,327.3 L347.3,328.0 L340.0,331.0 L338.7,333.0 L338.3,335.7 L338.7,336.7 L338.7,358.7 L338.3,359.0 L338.7,365.3 L339.0,366.3 L341.3,368.0 L344.0,368.7 L346.3,370.0 L349.0,370.3 L350.0,371.3 L352.3,372.3 L352.7,380.7 L353.3,382.3 L354.7,383.3 L356.0,388.0 L357.3,389.3 L357.3,390.3 L358.0,391.3 L358.0,393.7 L357.0,394.7 L338.0,394.7 L337.3,394.3 L336.7,393.3 L337.0,390.0 L340.0,388.0 L340.3,386.7 L341.7,385.0 L342.0,381.7 L340.7,381.0 L339.0,378.7 L334.3,377.3 L333.0,375.0 L330.3,374.3 L329.3,373.3 L328.7,371.3 L328.7,327.0 L329.0,325.3 L332.0,323.0 L333.7,322.7 L335.0,320.7 L338.3,320.0 L339.7,319.0 L341.0,317.0 L342.0,316.7 L341.3,312.3 L339.3,309.7 L337.0,308.7 L336.7,304.7 L338.0,303.3"/><path d="M534.7,32.7 L535.0,32.3 L629.0,32.3 L630.3,34.3 L630.3,37.7 L630.0,38.7 L628.3,40.3 L625.7,38.7 L541.7,38.7 L540.3,39.3 L539.3,41.0 L539.0,48.7 L538.0,49.7 L534.3,50.0 L533.0,49.0 L533.0,36.3 L533.3,34.0 L534.3,33.0"/><path d="M451.3,22.3 L451.7,22.0 L524.7,22.0 L525.3,23.0 L525.0,26.0 L523.0,27.7 L520.0,27.3 L460.3,27.3 L460.0,27.7 L454.3,27.7 L452.3,27.3 L451.7,26.7 L451.0,22.7"/><path d="M461.3,431.0 L461.7,430.7 L523.0,431.0 L524.7,432.0 L525.3,435.7 L524.7,436.3 L451.3,436.3 L451.0,436.0 L451.3,432.7 L452.3,431.3 L461.0,431.0"/><path d="M326.3,410.3 L326.7,410.0 L330.0,410.0 L333.3,410.7 L334.3,412.0 L334.7,413.7 L336.3,414.7 L337.7,418.3 L337.3,431.3 L337.0,431.7 L336.3,431.3 L329.0,431.7 L328.3,432.3 L328.3,436.0 L330.0,437.3 L330.3,439.7 L328.3,441.3 L327.3,443.3 L325.7,443.7 L314.0,443.3 L313.0,442.3 L313.0,441.3 L311.7,440.3 L311.0,438.3 L311.0,437.0 L312.7,436.0 L312.7,432.3 L311.7,431.3 L306.7,431.7 L303.7,431.3 L303.0,430.7 L303.3,418.3 L304.3,417.3 L306.3,417.7 L312.7,424.7 L316.7,424.7 L318.7,423.7 L322.7,423.7 L324.7,424.7 L327.7,424.7 L330.3,422.7 L331.7,420.3 L331.7,417.3 L330.3,415.3 L327.3,413.0 L326.3,410.7"/><path d="M249.0,28.0 L249.3,27.7 L270.3,27.7 L271.3,28.3 L272.0,29.7 L271.7,38.7 L269.3,41.3 L263.3,42.0 L262.0,44.0 L261.7,47.3 L260.3,48.7 L258.7,48.7 L257.3,50.0 L243.7,49.3 L243.3,47.0 L244.0,45.7 L244.0,44.0 L246.3,40.3 L247.3,37.3 L248.7,36.7 L249.0,35.3 L249.7,35.0 L249.7,33.7 L248.3,30.0 L248.7,28.3"/><path d="M327.0,28.7 L326.0,29.0 L325.3,30.0 L325.0,32.0 L325.0,41.3 L325.3,43.0 L326.3,44.7 L332.0,44.7 L334.3,45.0 L336.3,46.3 L340.0,46.3 L343.0,45.0 L345.7,45.0 L349.3,43.7 L353.3,43.3 L355.3,42.7 L356.0,41.7 L356.3,31.0 L356.0,29.7 L354.7,28.7 L327.3,28.7"/><path d="M326.7,29.0 L327.0,28.7 L354.7,28.7 L355.7,29.3 L356.3,31.0 L356.3,40.3 L356.0,41.3 L354.3,43.0 L349.3,43.7 L347.3,44.7 L343.0,45.0 L340.0,46.3 L336.3,46.3 L334.3,45.0 L332.0,44.7 L326.7,44.7 L325.7,43.7 L325.0,41.3 L325.0,32.0 L325.3,30.0 L326.3,29.0"/><path d="M302.3,28.7 L301.0,29.3 L300.3,32.0 L300.7,36.3 L302.0,37.7 L303.0,38.0 L317.7,38.0 L320.0,36.7 L320.3,31.3 L319.7,29.3 L318.7,28.7 L302.7,28.7"/><path d="M277.7,28.7 L276.0,29.7 L275.7,31.0 L275.7,35.0 L276.0,36.7 L276.7,37.3 L277.7,37.3 L278.7,38.0 L293.3,38.0 L295.3,36.7 L295.7,30.7 L295.3,29.7 L293.7,28.7 L278.0,28.7"/><path d="M302.0,29.0 L302.3,28.7 L318.7,28.7 L320.0,30.0 L320.3,31.3 L320.0,36.3 L317.7,38.0 L303.0,38.0 L302.0,37.7 L300.7,36.3 L300.7,33.0 L300.3,32.7 L300.7,30.0 L301.7,29.0"/><path d="M277.3,29.0 L277.7,28.7 L293.7,28.7 L295.0,29.3 L295.7,30.7 L295.3,36.7 L293.3,38.0 L278.7,38.0 L277.0,37.3 L276.0,36.3 L275.7,35.0 L275.7,31.0 L277.0,29.0"/><path d="M361.7,46.0 L362.0,45.7 L362.3,46.0 L362.7,50.7 L362.3,52.0 L361.3,53.0 L346.0,53.3 L344.0,52.0 L345.7,49.7 L348.0,49.7 L351.3,48.3 L355.3,48.0 L358.7,46.7 L360.3,46.7 L361.3,46.0"/><path d="M815.7,27.3 L814.3,28.7 L814.3,36.0 L814.7,36.7 L815.3,37.0 L818.7,36.7 L823.3,37.0 L824.0,36.3 L823.7,33.0 L824.0,28.3 L823.7,27.7 L816.0,27.3"/><path d="M815.3,27.7 L815.7,27.3 L822.7,27.3 L824.0,28.3 L823.7,31.7 L824.0,36.3 L823.3,37.0 L820.0,36.7 L815.3,37.0 L814.3,36.0 L814.3,28.7 L815.0,27.7"/><path d="M815.0,447.3 L815.3,447.0 L823.3,447.0 L824.0,450.3 L823.7,456.0 L823.3,456.3 L815.0,456.3 L814.3,455.3 L814.3,448.0 L814.7,447.7"/><path d="M314.3,405.7 L314.7,405.3 L322.3,405.7 L324.0,407.3 L324.0,408.3 L322.3,410.0 L316.0,410.0 L314.3,408.7 L314.0,406.0"/><path d="M560.3,431.7 L560.7,431.3 L564.3,431.7 L565.3,432.7 L567.0,433.0 L568.0,435.3 L567.3,436.0 L558.7,436.0 L557.7,434.7 L560.0,432.0"/><path d="M308.3,437.0 L308.7,436.7 L311.0,437.0 L311.7,440.7 L313.0,441.3 L313.0,442.3 L313.7,443.0 L313.0,444.0 L307.7,444.0 L307.0,443.3 L306.7,438.7 L307.0,437.7 L308.0,437.0"/><path d="M306.3,404.7 L306.7,404.3 L312.7,404.7 L314.0,406.0 L314.0,407.7 L313.3,408.3 L304.7,408.0 L304.0,407.3 L304.0,405.3 L304.7,404.7 L306.0,404.7"/><path d="M336.7,69.0 L337.0,68.7 L339.0,69.7 L341.3,73.0 L342.0,75.3 L342.0,77.0 L341.3,77.7 L340.0,78.0 L338.3,76.3 L338.3,75.3 L337.3,74.7 L336.7,69.3"/><path d="M339.7,141.7 L341.0,141.3 L342.0,142.0 L341.7,145.3 L340.3,147.0 L340.0,148.3 L337.0,150.0 L336.7,149.7 L337.0,144.7 L338.3,143.7 L338.3,143.0 L339.3,142.0"/><path d="M533.0,141.0 L533.3,140.7 L534.7,142.0 L535.0,143.3 L536.3,144.7 L536.7,148.7 L536.0,149.3 L534.3,148.7 L531.7,145.3 L531.0,142.0 L532.7,141.0"/><path d="M340.0,381.3 L341.0,381.0 L342.0,381.7 L341.7,385.0 L340.3,386.3 L340.0,388.0 L337.0,389.7 L336.7,389.3 L337.0,384.7 L339.7,381.7"/><path d="M532.7,381.0 L533.3,380.7 L535.0,382.3 L536.3,384.7 L536.7,387.0 L536.3,389.3 L534.0,388.3 L533.3,387.7 L533.3,386.7 L531.7,385.0 L531.3,381.7 L532.3,381.0"/><path d="M535.7,309.7 L536.0,309.3 L536.7,309.7 L536.3,314.0 L533.3,317.7 L531.7,317.3 L531.0,316.3 L532.0,312.7 L534.0,310.0 L535.3,309.7"/><path d="M535.3,70.0 L535.7,69.7 L536.7,70.0 L536.3,74.0 L535.3,75.0 L535.0,76.3 L533.3,78.0 L531.7,77.7 L531.0,77.0 L531.7,73.7 L533.3,71.0 L535.0,70.0"/><path d="M336.7,309.3 L337.7,309.0 L340.0,310.3 L340.3,311.7 L341.7,313.3 L342.0,316.3 L341.3,317.0 L340.3,317.3 L337.0,314.0 L336.7,309.7"/><path d="M319.7,431.3 L318.7,431.7 L317.7,433.0 L318.0,437.0 L319.0,437.7 L322.0,437.7 L322.7,437.3 L323.3,435.3 L323.0,432.3 L321.7,431.3 L320.0,431.3"/><path d="M319.3,431.7 L321.7,431.3 L323.0,432.7 L323.3,435.3 L323.0,436.7 L322.0,437.7 L319.0,437.7 L318.0,436.7 L317.7,433.0 L319.0,431.7"/><path d="M41.0,70.3 L41.3,70.0 L44.3,71.7 L45.7,76.0 L45.0,77.3 L44.0,77.7 L41.3,74.7 L40.7,72.0 L41.0,70.7"/><path d="M43.7,381.3 L44.7,381.0 L45.7,381.7 L45.3,385.0 L44.0,387.3 L41.0,388.3 L40.7,386.7 L41.3,383.7 L43.3,381.7"/><path d="M41.0,310.0 L41.3,309.7 L44.3,311.3 L45.7,315.3 L45.0,316.7 L44.0,317.0 L41.3,314.3 L40.7,312.0 L41.0,310.3"/><path d="M43.7,142.0 L44.7,141.7 L45.7,142.3 L45.0,146.0 L44.0,147.7 L41.3,148.7 L40.7,147.7 L41.3,144.3 L43.3,142.3"/><path d="M261.3,48.0 L262.0,47.7 L263.7,49.3 L263.3,52.7 L259.7,52.7 L257.7,50.3 L259.0,48.7 L261.0,48.3"/><path d="M235.3,314.0 L236.0,313.7 L238.3,315.7 L238.7,319.0 L238.3,319.7 L236.0,319.7 L234.7,318.7 L234.3,317.0 L235.0,314.3"/><path d="M238.0,382.3 L238.3,382.0 L239.7,383.7 L240.3,387.0 L239.7,388.3 L237.3,387.3 L236.0,385.7 L235.7,384.3 L237.7,382.7"/><path d="M239.3,70.3 L239.7,70.0 L240.3,70.7 L240.0,74.3 L238.3,76.0 L237.3,75.3 L236.3,75.3 L236.0,73.7 L236.7,71.7 L239.0,70.3"/><path d="M239.3,310.0 L239.7,309.7 L240.3,310.3 L240.0,314.0 L238.3,315.7 L236.0,313.3 L236.3,311.7 L239.0,310.0"/><path d="M237.7,143.0 L238.3,142.7 L240.0,144.7 L240.3,148.0 L239.7,148.7 L237.3,147.7 L236.3,146.7 L236.0,145.0 L237.7,143.3"/><path d="M235.0,75.3 L236.0,75.0 L238.3,76.0 L238.7,79.3 L238.3,80.0 L235.7,79.7 L234.7,78.7 L234.3,77.7 L234.7,75.7"/><path d="M237.3,379.0 L237.7,378.7 L238.3,379.0 L238.3,381.7 L236.3,383.7 L235.3,384.0 L234.7,383.0 L234.3,380.7 L235.3,379.3 L237.0,379.0"/><path d="M237.3,139.0 L237.7,138.7 L238.7,139.0 L238.3,142.3 L235.0,142.7 L234.3,141.7 L234.7,140.0 L235.3,139.3 L237.0,139.0"/><path d="M330.3,440.0 L330.7,439.7 L331.7,440.7 L331.3,443.0 L330.7,443.7 L328.0,444.0 L327.3,443.3 L328.3,441.3 L330.0,440.3"/><path d="M234.7,143.0 L235.0,142.7 L237.7,143.0 L236.0,144.7 L235.0,144.3 L235.0,143.3"/></g></svg>
+      </div><figcaption>Сечение из того же набора на сайте (подпись блока «ВКЛЕЙКА VIKING 90»). Красным показан векторный контур поверх оригинала: 79 линий, геометрия не дорисовывалась</figcaption></figure>
+    </div>
+    <div class="stack">
+      <h3>Почему дверь VIKING 90, а не окно</h3>
+      <ol class="why">
+        <li>Для этой двери на сайте есть и предметный рендер, и плоский контурный чертёж сечения. Обе сцены показывают одно изделие, как в референсе.</li>
+        <li>В блоке VIKING 90 два разных сечения. Оконное (рендер на главной) с композитной изоляционной зоной. Дверное с камерами и центральной зоной между замковыми пазами. Чертёж есть только для дверного, поэтому окно в интро не смешиваем.</li>
+        <li>Текст про многокамерные профили и изоляционную зону на сайте относится именно к дверной системе VIKING 90.</li>
+      </ol>
+      <p class="note">Вариант Б: интро на оконном сечении VIKING 90 с главной страницы сайта. Он эффектнее (тройное остекление, чёрный фон), но для белой сцены нужен DXF/DWG этого сечения: нарисовать его по перспективному рендеру значило бы выдумать геометрию.</p>
+      <figure style="margin:0" class="figs"><img src="assets/src/viking90_window_section_hero.jpg" alt="Рендер оконного сечения VIKING 90 на чёрном фоне" style="aspect-ratio:auto;background:#0f0f0f"><figcaption>Оконное сечение VIKING 90, главная страница сайта</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-series">
+  <h2 id="h-series">Изучено: серии THERMINAL</h2>
+  <p class="muted">На сайте пять систем в меню: VIKING 90, HS110, складная Discovery Overdisk HG73, двери Hi-Therm, перегородки Aero. Ниже три серии из брифа. Все факты дословно с therminal.kz, включая всплывающие блоки «Подробнее».</p>
+  <div class="series">
+    <article class="card">
+      <header><h3>VIKING 90</h3><span class="chip red">в интро</span></header>
+      <div class="thumbs">
+        <img src="assets/src/viking90_window_section_front.jpg" alt="Фронтальное сечение VIKING 90">
+        <img src="assets/src/viking_section_foam.jpg" alt="Сечение VIKING с вспененной изоляцией в камерах">
+      </div>
+      <span class="k">Окна и двери, поворотное открывание</span>
+      <ul>
+        <li>«глубиной профиля 90 мм для окон, внутреннего открывания»</li>
+        <li>«стеклопакет толщиной до 58 мм»</li>
+        <li>«изоляционными перемычками из инновационных композитов»</li>
+        <li>Дверь: «узкими видимыми областями и большей глубиной профиля», «многокамерными профилями и инновационной изоляционной зоной»</li>
+        <li>Соответствие EnEV и стандартам пассивного дома (по тексту сайта)</li>
+      </ul>
+      <div class="tablewrap"><table class="specs">
+        <tr><td>Теплопроводность, EN ISO 10077-2</td><td>Uf ≥ 0,86 W/m²K*</td></tr>
+        <tr><td>Водопроницаемость, EN 12208</td><td>класс ≥ 9A</td></tr>
+        <tr><td>Воздухопроницаемость, EN 12207</td><td>класс 4</td></tr>
+        <tr><td>Ветровая нагрузка, EN 12210</td><td>C5 / B5</td></tr>
+        <tr><td>Механическое напряжение, EN 13115</td><td>класс 4</td></tr>
+        <tr><td>Антивандальность, EN 1627</td><td>RC1 N…RC3</td></tr>
+        <tr><td>Звукоизоляция, EN 10140</td><td>Rw 49 дБ*</td></tr>
+      </table></div>
+      <p class="muted" style="font-size:12.5px">* Таблица-картинка в блоке VIKING 90. В ней «Uf ≥», хотя для U-значения обычно пишут «≤», а по звуку в русской колонке «выше 49 дБ», в английской «up to 49 dB». Неясно, к окну или к двери относится таблица. В интро эти цифры не берём до подтверждения.</p>
+    </article>
+    <article class="card">
+      <header><h3>HS110</h3><span class="chip warn">не в интро</span></header>
+      <div class="thumbs">
+        <img src="assets/src/hs110_section_3d.jpg" alt="3D-сечение HS110 с вспененной изоляцией">
+        <img src="assets/src/hs110_sections_pair.jpg" alt="Сечения HS110, вид сверху">
+      </div>
+      <span class="k">Подъёмно-раздвижная система</span>
+      <ul>
+        <li>Терморазрыв включён в профиль; «специальное устройство T-REX» поддерживает тепловой разрыв и «исключает продольные потери тепла»</li>
+        <li>Демпфирующая пружина для «створок с весом более 150 кг»</li>
+        <li>Многоточечное запирание, порог с «опущенным» полом</li>
+        <li>На рендерах: антрацит, серые вспененные вставки в камерах</li>
+        <li>Не указаны: глубина профиля, Uw/Uf, классы, толщина стекла</li>
+      </ul>
+    </article>
+    <article class="card">
+      <header><h3>Hi-Therm</h3><span class="chip warn">не в интро</span></header>
+      <div class="thumbs">
+        <img src="assets/src/hitherm_corner_cleat.jpg" alt="Угловые соединители и сечение Hi-Therm">
+        <img src="assets/src/hitherm_threshold_curtain.jpg" alt="Порог Hi-Therm с красной конвекционной шторкой">
+      </div>
+      <span class="k">Двери, теплоизолированная серия</span>
+      <ul>
+        <li>«Глубина монтажа — 73 мм»</li>
+        <li>«За счёт усиления угловых соединений высота двери может быть до 3 м»</li>
+        <li>Конвекционная шторка и накладка, адаптер порога, запатентованное ложе замка и ответной планки</li>
+        <li>На рендерах: натуральный серебристый алюминий, декор под дерево, угловые соединители, надпись therminal на профиле</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="h-brand">
+  <h2 id="h-brand">Визуальная идентичность</h2>
+  <div class="brand">
+    <div class="stack">
+      <div class="logo-tile"><img src="assets/logo.png" alt="Знак THERMINAL: треугольник из трёх частей с вырезанной буквой T, правая часть красная"></div>
+      <p class="muted" style="font-size:13px">Знак: треугольник из трёх частей, две серебристые с градиентом и одна красная, в центре вырезана буква «Т». На тёмном фоне «Т» читается чёрной, на светлом белой. Вектора на сайте нет, есть растровые версии до 1680 px.</p>
+    </div>
+    <div class="stack">
+      <div class="sw">
+        <div><i style="background:#171717"></i><span class="mono">#171717</span><span class="muted">основной тёмный, 139 упоминаний в стилях</span></div>
+        <div><i style="background:#ffffff"></i><span class="mono">#FFFFFF</span><span class="muted">текст на тёмном</span></div>
+        <div><i style="background:#c81111"></i><span class="mono">#C81111</span><span class="muted">фирменный красный, кнопки</span></div>
+        <div><i style="background:#a92121"></i><span class="mono">#A92121</span><span class="muted">тёмный красный, акценты текста</span></div>
+        <div><i style="background:#0f0f0f"></i><span class="mono">#0F0F0F / #222</span><span class="muted">тёмные подложки секций</span></div>
+        <div><i style="background:#f6efef"></i><span class="mono">#F6EFEF</span><span class="muted">светлый тёплый</span></div>
+      </div>
+      <div class="facts">
+        <div><b>Шрифт</b><span>Montserrat на всём сайте (65 правил), запасной Arial. В интро используем Montserrat: он близок к широким капителям референса.</span></div>
+        <div><b>Покрытие профилей</b><span>VIKING 90 и HS110: антрацит с мелкой структурой порошковой окраски, срезы профиля серебристые. Hi-Therm: натуральное серебро и декор под дерево.</span></div>
+        <div><b>Стиль изображений</b><span>3D-рендеры изделий на белом или чёрном, сечения в разрезе, интерьеры с панорамным остеклением. Заголовки капителями, красный дозированно.</span></div>
+        <div><b>Тон</b><span>«СЛОВНО ДВЕРЬ ОТ СЕЙФА», «МЫ ДЕЛАЕМ КАЧЕСТВЕННО И НА ДОЛГО», «Алюминиевые окна и двери от производителя».</span></div>
+      </div>
+      <p class="note">В интро красный появляется только в знаке. Сцены остаются чёрно-белыми, как в референсе: так бренд узнаётся по финальной плашке и не спорит с изделием.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-need">
+  <h2 id="h-need">Нужно от THERMINAL для чистовой версии</h2>
+  <ol class="needs">
+    <li><div><b>DXF или DWG сечения двери VIKING 90 «вклейка» с размерами</b><p>Подтвердить, что это то же сечение, что на сайте. Нужны габарит по глубине (90 мм или другой), ширина рамы и створки, ширина терморазрыва.</p></div><span class="chip red">блокирует</span></li>
+    <li><div><b>Какая зона сечения изоляционная и из чего вставки</b><p>Полиамид или композит, сколько камер. Без этого выноска «изоляционная зона» остаётся в статусе гипотезы.</p></div><span class="chip red">блокирует</span></li>
+    <li><div><b>Образец профиля для макросъёмки</b><p>Отрезок рамы и створки VIKING 90 длиной 200–300 мм с чистым торцом, в покрытии антрацит. Альтернатива: рендер 4K на чёрном или STEP-модель.</p></div><span class="chip red">блокирует</span></li>
+    <li><div><b>Логотип в векторе и брендбук</b><p>SVG, AI или PDF знака и словесной части, точный фирменный красный (на сайте #C81111 и #A92121), правила отступов.</p></div><span class="chip warn">важно</span></li>
+    <li><div><b>Доступ к Instagram @therminalsystems или 10–15 скриншотов постов</b><p>Без входа Instagram отдаёт страницу логина. Выводы о стиле сейчас сделаны только по сайту.</p></div><span class="chip warn">важно</span></li>
+    <li><div><b>Таблица характеристик VIKING 90</b><p>К окну или к двери она относится, верно ли «Uf ≥ 0,86» и «Rw выше 49 дБ». Нужна, если цифры пойдут в основной ролик.</p></div><span class="chip warn">важно</span></li>
+    <li><div><b>Код RAL или название покрытия</b><p>Для образца на съёмке и цветокоррекции.</p></div><span class="chip">желательно</span></li>
+    <li><div><b>Утверждение текста на экране</b><p>«Это дверная система VIKING 90 с многокамерными профилями и инновационной изоляционной зоной».</p></div><span class="chip">желательно</span></li>
+  </ol>
+</section>
+
+<footer>
+  <span>Источники: therminal.kz, главная и всплывающие блоки «Подробнее», HTML и изображения получены 05.11.2026. Референс: видео IMG_2568, 0–6,5 с. Instagram @therminalsystems недоступен без входа.</span>
+  <span>Изображения изделий принадлежат THERMINAL и используются только для согласования концепции.</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  const D=6.6, stage=document.getElementById('stage'), screen=document.getElementById('screen');
+  const $=id=>document.getElementById(id);
+  const fit=()=>{stage.style.transform='scale('+(screen.clientWidth/360)+')'};
+  new ResizeObserver(fit).observe(screen); fit();
+  const ease=x=>x<=0?0:x>=1?1:1-Math.pow(1-x,3);
+  const io=(t,a,b)=>ease((t-a)/(b-a));
+  const secPaths=[...document.querySelectorAll('#section path')];
+  const L=secPaths.map(p=>{const l=p.getTotalLength();p.style.strokeDasharray=l;p.style.strokeDashoffset=l;return l});
+  const strokeLen=el=>{const l=el.getTotalLength();el.style.strokeDasharray=l;return l};
+  const arw=$('arw'),arwL=strokeLen(arw), p1=$('ptr1l'),p1L=strokeLen(p1), p2=$('ptr2l'),p2L=strokeLen(p2);
+  const fl=[...document.querySelectorAll('#frameLines line')]; const flL=fl.map(strokeLen);
+  const caps=['c1','c2','c3','c4'].map($), capT=[0.7,1.05,1.4,1.75];
+  function render(t){
+    // scene 1
+    const out1=io(t,3.05,3.32);
+    $('s1').style.opacity=1-out1;
+    const push=io(t,0.3,3.1);
+    const door=$('door');
+    door.style.opacity=io(t,0.3,1.0);
+    door.style.transform=`translate(${-10*push}px,${-6*push}px) scale(${1.12-0.1*push+0.35*io(t,3.0,3.35)})`;
+    door.style.filter=`blur(${2*io(t,3.05,3.3)}px)`;
+    $('sweep').style.backgroundPosition=`${100-100*io(t,0.9,2.9)}% 0`;
+    const capOut=io(t,2.35,2.6);
+    caps.forEach((c,i)=>{const a=io(t,capT[i],capT[i]+0.35);c.style.opacity=a*(1-capOut);c.style.transform=`translateY(${6*(1-a)}px)`});
+    arw.style.strokeDashoffset=arwL*(1-io(t,1.75,2.2));
+    arw.style.opacity=1-capOut;
+    $('arwh').style.opacity=io(t,2.1,2.25)*(1-capOut);
+    $('small').style.opacity=io(t,2.45,2.75)*(1-io(t,2.95,3.1));
+    // scene 2
+    fl.forEach((l,i)=>{l.style.strokeDashoffset=flL[i]*(1-io(t,3.3+i*.05,3.9+i*.05))});
+    const n=secPaths.length;
+    secPaths.forEach((p,i)=>{const s=3.35+i*(0.55/n);p.style.strokeDashoffset=L[i]*(1-io(t,s,s+0.6))});
+    $('w1').style.opacity=io(t,3.55,3.8); $('w2').style.opacity=io(t,3.85,4.1);
+    $('dimV').setAttribute('opacity',io(t,4.4,4.75)); $('dimH').setAttribute('opacity',io(t,4.55,4.9));
+    $('ptr1').setAttribute('opacity',io(t,4.8,4.9)); p1.style.strokeDashoffset=p1L*(1-io(t,4.8,5.1));
+    $('ptr2').setAttribute('opacity',io(t,4.95,5.05)); p2.style.strokeDashoffset=p2L*(1-io(t,4.95,5.25));
+    $('spec').style.opacity=io(t,5.2,5.5);
+    $('mark').style.opacity=io(t,5.45,5.8); $('stamp').setAttribute('opacity',io(t,5.45,5.8));
+    $('tc').textContent=t.toFixed(2).padStart(5,'0');
+    $('time').textContent=t.toFixed(2).replace('.',',')+' с';
+    $('scrub').value=Math.round(t*1000);
+  }
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let t=reduce?5.9:2.1, playing=!reduce, last=null;
+  const btn=$('play');
+  const setPlaying=v=>{playing=v;btn.textContent=v?'Пауза':'Пуск';btn.setAttribute('aria-label',v?'Пауза':'Пуск');last=null};
+  setPlaying(playing);
+  btn.addEventListener('click',()=>setPlaying(!playing));
+  $('scrub').addEventListener('input',e=>{t=e.target.value/1000;setPlaying(false);render(t)});
+  document.querySelectorAll('.jump button').forEach(b=>b.addEventListener('click',()=>{t=b.dataset.t/1000;render(t);if(!playing)return;last=null}));
+  function tick(now){ if(playing){ if(last!=null){t+=(now-last)/1000; if(t>D+0.6)t=0;} last=now; render(Math.min(t,D)); } requestAnimationFrame(tick); }
+  render(t); requestAnimationFrame(tick);
+  window.__seek=v=>{setPlaying(false);t=v;render(v)};
+})();
+</script>

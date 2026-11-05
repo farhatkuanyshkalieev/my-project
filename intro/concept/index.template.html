@@ -1,0 +1,483 @@
+<meta charset="utf-8">
+<title>THERMINAL Intro VIKING 90</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: drawing-sheet page — narrow technical columns, the 9:16 player pinned beside the script, hairline rules like a profile catalogue */
+:root{
+  --paper:#f4f4f1; --sheet:#ffffff; --ink:#171717; --ink-2:#55585c; --rule:#d9d9d4;
+  --red:#c81111; --red-soft:#f6e3e1; --ok:#2f6b46; --ok-soft:#e3efe6; --warn:#8a5a00; --warn-soft:#f6ecd8;
+  --f-display:'Montserrat',Arial,sans-serif; --f-body:'IBM Plex Sans',Arial,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121314; --sheet:#1b1c1e; --ink:#ececea; --ink-2:#a3a6aa; --rule:#33353a;
+  --red:#ef3b3b; --red-soft:#3a1c1c; --ok:#7fc296; --ok-soft:#1c2d22; --warn:#e0b25c; --warn-soft:#352a16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121314; --sheet:#1b1c1e; --ink:#ececea; --ink-2:#a3a6aa; --rule:#33353a;
+  --red:#ef3b3b; --red-soft:#3a1c1c; --ok:#7fc296; --ok-soft:#1c2d22; --warn:#e0b25c; --warn-soft:#352a16; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,4.2vw,40px);letter-spacing:.14em;text-transform:uppercase;font-weight:500}
+h2{font-size:13px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;display:flex;gap:12px;align-items:center}
+h2::after{content:"";flex:1;height:1px;background:var(--rule)}
+h3{font-size:16px;letter-spacing:.06em;font-weight:600}
+p{margin:0;max-width:68ch}
+a{color:inherit;text-decoration-color:var(--red);text-underline-offset:3px}
+.mono{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.stack{display:flex;flex-direction:column;gap:14px}
+section{display:flex;flex-direction:column;gap:22px}
+
+/* header */
+.head{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:end;border-bottom:1px solid var(--rule);padding-bottom:22px}
+.head img{width:64px;height:auto}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+.meta span{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.meta b{font-weight:500;color:var(--ink)}
+.lede{font-size:17px;max-width:70ch}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11.5px;padding:2px 8px;border-radius:3px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+
+/* player */
+.proto{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:40px;align-items:start}
+.player{display:flex;flex-direction:column;gap:10px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.screen{position:relative;width:100%;aspect-ratio:9/16;max-width:100%;overflow:hidden;background:#0c0c0c;border-radius:6px;box-shadow:0 0 0 1px var(--rule)}
+.stage{position:absolute;left:0;top:0;width:360px;height:640px;transform-origin:0 0;overflow:hidden;font-family:var(--f-display)}
+.ctrl{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.ctrl button{font-family:var(--f-mono);font-size:12px;background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:6px 10px;cursor:pointer;min-width:74px}
+.ctrl button:focus-visible,.jump button:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+input[type=range]{width:100%;accent-color:var(--red)}
+.jump{display:flex;gap:6px;flex-wrap:wrap}
+.jump button{font-family:var(--f-mono);font-size:11.5px;background:none;border:1px solid var(--rule);color:var(--ink-2);border-radius:3px;padding:3px 8px;cursor:pointer}
+
+/* stage scenes */
+.s1,.s2{position:absolute;inset:0}
+.s2{background:#fff}
+.s1{background:radial-gradient(120% 70% at 60% 45%,#232323 0%,#0d0d0d 55%,#060606 100%)}
+.door{position:absolute;left:-40px;top:150px;width:430px;height:430px;will-change:transform;-webkit-mask:linear-gradient(180deg,transparent 19%,#000 33%);mask:linear-gradient(180deg,transparent 19%,#000 33%)}
+.door img{width:100%;height:100%;display:block}
+.sweep{position:absolute;inset:0;-webkit-mask:url(assets/viking90_door_corner.png) center/100% 100% no-repeat;mask:url(assets/viking90_door_corner.png) center/100% 100% no-repeat;
+  background:linear-gradient(105deg,transparent 0%,transparent 40%,rgba(255,255,255,.28) 50%,transparent 60%,transparent 100%);background-size:260% 100%;mix-blend-mode:screen}
+.fadeb{position:absolute;left:0;right:0;top:380px;height:140px;background:linear-gradient(transparent,#070707 78%)}
+.fadeb2{position:absolute;left:0;right:0;top:500px;bottom:0;background:#070707}
+.cap{position:absolute;left:46px;top:112px;color:#fff;font-size:15px;font-weight:500;letter-spacing:.24em;line-height:1.28;text-transform:uppercase}
+.cap span{display:block;opacity:0}
+.small{position:absolute;left:170px;top:448px;color:#e9e9e9;font-size:10px;font-weight:400;letter-spacing:.12em;line-height:1.5}
+.arrow{position:absolute;left:0;top:0;width:360px;height:640px;overflow:visible}
+.wtop{position:absolute;left:44px;right:30px;top:66px;color:#1e1e1e;font-size:10px;letter-spacing:.1em;line-height:1.5}
+.wtop span{opacity:0}
+.spec{position:absolute;left:44px;top:170px;display:grid;grid-template-columns:78px auto;gap:4px 10px;font-size:7.5px;letter-spacing:.1em;color:#8b8b8b;text-transform:uppercase}
+.spec b{font-weight:500;color:#2a2a2a;letter-spacing:.08em}
+.draw{position:absolute;left:0;top:0;width:360px;height:640px}
+.draw path.sec{fill:none;stroke:#2b2b2b;stroke-width:.8;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.draw .dim{stroke:#6d6d6d;stroke-width:.6;fill:none;vector-effect:non-scaling-stroke}
+.draw text{font-family:var(--f-display);fill:#4a4a4a;font-size:7.5px;letter-spacing:.08em}
+.draw .lbl{fill:#1e1e1e;font-size:8px;letter-spacing:.1em}
+.draw .dot{fill:#1e1e1e}
+.mark{position:absolute;right:28px;bottom:42px;display:flex;align-items:center;gap:8px;opacity:0}
+.mark img{width:24px;height:auto}
+.mark span{font-family:var(--f-display);font-weight:600;font-size:10px;letter-spacing:.32em;color:#8f8f8f}
+.tc{position:absolute;left:10px;top:8px;font-family:var(--f-mono);font-size:8px;color:rgba(160,160,160,.75);letter-spacing:.04em;pointer-events:none}
+
+/* script list */
+.script{display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.script li{list-style:none;display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:14px;padding:11px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.script ul{padding:0;margin:0}
+.script .t{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.script q{font-family:var(--f-display);quotes:none;letter-spacing:.06em}
+.script .up{text-transform:uppercase;letter-spacing:.16em}
+.note{border-left:2px solid var(--red);padding:2px 0 2px 14px;color:var(--ink-2);font-size:14px}
+
+/* storyboard */
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}
+.shot{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pair figure{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.pair img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:3px;box-shadow:0 0 0 1px var(--rule);display:block}
+.pair figcaption{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-2)}
+.shot h3{font-size:13px;letter-spacing:.08em;display:flex;justify-content:space-between;gap:8px}
+.shot h3 .mono{color:var(--ink-2);font-weight:400}
+.shot p{font-size:13.5px;color:var(--ink-2)}
+
+/* object block */
+.obj{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px}
+.figs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.figs figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.figs img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:3px;box-shadow:0 0 0 1px var(--rule);display:block}
+.figs figcaption{font-size:12px;color:var(--ink-2)}
+.figs .wide{grid-column:1/-1}
+.figs .wide img{aspect-ratio:auto}
+.overlay{position:relative;background:#fff;border-radius:3px;box-shadow:0 0 0 1px var(--rule);overflow:hidden}
+.overlay img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.55;box-shadow:none;aspect-ratio:auto;border-radius:0}
+.overlay svg{position:relative;display:block;width:100%;height:auto}
+.overlay path{fill:none;stroke:var(--red);stroke-width:1.1;vector-effect:non-scaling-stroke}
+ol.why{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+
+/* series */
+.series{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card .thumbs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.card .thumbs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;background:#fff;display:block}
+.card ul{margin:0;padding-left:18px;font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.card .k{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em}
+.card header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.specs{width:100%;border-collapse:collapse;font-size:13px}
+.specs td{border-top:1px solid var(--rule);padding:6px 4px;vertical-align:top}
+.specs td:last-child{font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+.tablewrap{overflow-x:auto}
+
+/* brand */
+.brand{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:32px}
+.logo-tile{background:#0f0f0f;border-radius:4px;padding:28px;display:flex;align-items:center;justify-content:center}
+.logo-tile img{width:100%;max-width:190px;height:auto}
+.sw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sw div{display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.sw i{display:block;height:54px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px 28px}
+.facts div{display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--rule);padding-top:10px}
+.facts b{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+
+/* needs */
+.needs{counter-reset:n;display:flex;flex-direction:column;border-top:1px solid var(--rule);margin:0;padding:0}
+.needs li{list-style:none;counter-increment:n;display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:14px;padding:13px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.needs li::before{content:counter(n,decimal-leading-zero);font-family:var(--f-mono);font-size:12px;color:var(--red)}
+.needs b{font-weight:600}
+.needs p{font-size:13.5px;color:var(--ink-2);margin-top:3px}
+footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+
+@media (max-width:860px){
+  .proto,.obj,.brand{grid-template-columns:minmax(0,1fr)}
+  .player{position:static;max-width:380px;width:100%;margin:0 auto}
+  .series{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:480px){
+  .script li{grid-template-columns:62px minmax(0,1fr)}
+  .script li .chip{grid-column:2}
+  .needs li{grid-template-columns:28px minmax(0,1fr)}
+  .needs li .chip{grid-column:2;justify-self:start}
+  .head{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){ .sweep{display:none} }
+</style>
+
+<div class="wrap">
+
+<header class="head">
+  <img src="assets/logo.png" alt="Знак THERMINAL">
+  <div>
+    <h1>THERMINAL · Intro</h1>
+    <div class="meta">
+      <span>Объект: <b>VIKING 90, дверь «вклейка»</b></span>
+      <span>Формат: <b>9:16, 1080×1920</b></span>
+      <span>Длительность: <b>6,6 с</b></span>
+      <span>Статус: <b>визуальная концепция v1, до монтажа</b></span>
+    </div>
+  </div>
+</header>
+
+<p class="lede">Интро повторяет ход референса: в тёмной сцене предметный макрокадр с белыми подписями, затем переход на белый лист, где строится техническое сечение того же изделия. Объект взят из реальных материалов THERMINAL: рендер двери VIKING 90 и контурный чертёж её сечения с сайта therminal.kz. Ниже работающий прототип, раскадровка, итоги изучения бренда и список материалов для чистовой версии.</p>
+
+<section id="proto" aria-labelledby="h-proto">
+  <h2 id="h-proto">Прототип</h2>
+  <div class="proto">
+    <div class="player">
+      <div class="screen" id="screen">
+        <div class="stage" id="stage">
+          <div class="s2" id="s2">
+            <svg class="draw" viewBox="0 0 360 640" aria-hidden="true">
+              <g id="frameLines" class="dim">
+                <line x1="18" y1="34" x2="18" y2="606"/>
+                <line x1="342" y1="34" x2="342" y2="606"/>
+              </g>
+              <g id="section" transform="translate(44 262) scale(.3203)">
+                {{SECTION_PATHS}}
+              </g>
+              <g id="dimV" opacity="0">
+                <line class="dim" x1="24" y1="264.2" x2="40" y2="264.2"/>
+                <line class="dim" x1="24" y1="406.8" x2="40" y2="406.8"/>
+                <line class="dim" id="dimVline" x1="30" y1="264.2" x2="30" y2="406.8"/>
+                <path class="dim" d="M28,269.2 L30,264.2 L32,269.2 M28,401.8 L30,406.8 L32,401.8"/>
+                <text x="27" y="345" transform="rotate(-90 27 345)">— мм</text>
+              </g>
+              <g id="dimH" opacity="0">
+                <line class="dim" x1="46.2" y1="244" x2="46.2" y2="259"/>
+                <line class="dim" x1="152.6" y1="244" x2="152.6" y2="259"/>
+                <line class="dim" x1="46.2" y1="250" x2="152.6" y2="250"/>
+                <path class="dim" d="M51.2,248 L46.2,250 L51.2,252 M147.6,248 L152.6,250 L147.6,252"/>
+                <text x="88" y="245">— мм</text>
+              </g>
+              <g id="ptr1" opacity="0">
+                <circle class="dot" cx="89.2" cy="373.5" r="1.6"/>
+                <path class="dim" id="ptr1l" d="M89.2,373.5 L89.2,446"/>
+                <text class="lbl" x="84" y="458">камеры профиля</text>
+              </g>
+              <g id="ptr2" opacity="0">
+                <circle class="dot" cx="184" cy="335" r="1.6"/>
+                <path class="dim" id="ptr2l" d="M184,335 L246,335"/>
+                <text class="lbl" x="250" y="337.5">изоляционная</text>
+                <text class="lbl" x="250" y="348">зона</text>
+              </g>
+              <g id="stamp" opacity="0">
+                <line class="dim" x1="214" y1="566" x2="342" y2="566"/>
+                <text x="214" y="560">VIKING 90 · СЕЧЕНИЕ</text>
+              </g>
+            </svg>
+            <div class="wtop" aria-hidden="true"><span id="w1">и инновационной</span> <span id="w2">изоляционной зоной</span></div>
+            <div class="spec" id="spec" aria-hidden="true" style="opacity:0">
+              <span>Система</span><b>VIKING 90</b>
+              <span>Материал</span><b>алюминий</b>
+              <span>Конструкция</span><b>многокамерная</b>
+            </div>
+            <div class="mark" id="mark"><span>THERMINAL</span><img src="assets/logo.png" alt=""></div>
+          </div>
+          <div class="s1" id="s1">
+            <div class="door" id="door"><img src="assets/viking90_door_corner.png" alt=""><div class="sweep" id="sweep"></div></div>
+            <div class="fadeb"></div><div class="fadeb2"></div>
+            <div class="cap" aria-hidden="true"><span id="c1">Это</span><span id="c2">дверная</span><span id="c3">система</span><span id="c4">VIKING 90</span></div>
+            <svg class="arrow" viewBox="0 0 360 640" aria-hidden="true">
+              <path id="arw" d="M58,206 C40,236 60,262 140,262" fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/>
+              <path id="arwh" d="M132,256 L141,262 L132,268" fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+            </svg>
+            <div class="small" id="small" style="opacity:0">с многокамерными<br>профилями</div>
+          </div>
+          <div class="tc" id="tc">00.00</div>
+        </div>
+      </div>
+      <div class="ctrl">
+        <button type="button" id="play" aria-label="Пауза">Пауза</button>
+        <input type="range" id="scrub" min="0" max="6600" step="10" value="0" aria-label="Позиция на таймлайне">
+        <span class="mono" id="time">0,00 с</span>
+      </div>
+      <div class="jump">
+        <button type="button" data-t="0">0,0 · начало</button>
+        <button type="button" data-t="2100">2,1 · VIKING 90</button>
+        <button type="button" data-t="3150">3,15 · переход</button>
+        <button type="button" data-t="6000">6,0 · финал</button>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3>Текст на экране</h3>
+      <p class="muted">Фраза собрана из формулировки на сайте THERMINAL о дверной системе VIKING 90: «Благодаря сложной конструкции с современными многокамерными профилями и инновационной изоляционной зоной...». Других цифр и свойств в кадре нет.</p>
+      <div class="script"><ul>
+        <li><span class="t">0,70–2,40</span><q class="up">Это / дверная / система / VIKING 90</q><span class="chip ok">с сайта</span></li>
+        <li><span class="t">1,70–2,40</span><span>Тонкая белая стрелка рисуется от подписи к торцу полотна</span><span></span></li>
+        <li><span class="t">2,45–3,10</span><q>с многокамерными профилями</q><span class="chip ok">с сайта</span></li>
+        <li><span class="t">3,05–3,35</span><span>Наезд и засветка в белый, как в референсе</span><span></span></li>
+        <li><span class="t">3,35–4,50</span><span>Контур сечения прорисовывается линиями, длинные контуры первыми</span><span class="chip ok">чертёж с сайта</span></li>
+        <li><span class="t">3,55–6,60</span><q>и инновационной изоляционной зоной</q><span class="chip ok">с сайта</span></li>
+        <li><span class="t">4,40–5,00</span><span>Размерные линии, значения «— мм» ждут чертёж</span><span class="chip warn">нужны размеры</span></li>
+        <li><span class="t">4,80–5,30</span><span>Выноски «камеры профиля» и «изоляционная зона»</span><span class="chip warn">подтвердить зону</span></li>
+        <li><span class="t">5,20–5,80</span><span>Табличка: система VIKING 90, материал алюминий, конструкция многокамерная. Знак THERMINAL</span><span class="chip ok">с сайта</span></li>
+      </ul></div>
+      <p class="note">Голос за кадром, если нужен, читает ту же фразу: «Это дверная система VIKING 90 с многокамерными профилями и инновационной изоляционной зоной». Ровно 6 с в темпе референса.</p>
+      <p class="note">Тёмная сцена в прототипе собрана из рендера с сайта (1080 px, белый фон вырезан). Для чистовой версии нужна макросъёмка реального образца или рендер в 4K, см. список материалов.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-board">
+  <h2 id="h-board">Раскадровка: референс и THERMINAL</h2>
+  <div class="board">
+    {{BOARD}}
+  </div>
+</section>
+
+<section aria-labelledby="h-obj">
+  <h2 id="h-obj">Объект интро</h2>
+  <div class="obj">
+    <div class="figs">
+      <figure><img src="assets/src/viking90_door_corner.jpg" alt="Рендер угла дверного полотна VIKING 90, антрацит"><figcaption>Угол полотна VIKING 90 «вклейка». Основа тёмной сцены</figcaption></figure>
+      <figure><img src="assets/src/viking90_door_full.jpg" alt="Дверь VIKING 90 со вклейкой и вертикальной ручкой"><figcaption>Та же дверь целиком, рендер с сайта</figcaption></figure>
+      <figure class="wide"><div class="overlay">
+        <img src="assets/src/viking90_door_section_drawing.jpg" alt="" style="left:-8.23%;top:-69.11%;width:116.88%;height:233.26%">
+        <svg viewBox="0 0 924 463" role="img" aria-label="Векторный контур сечения VIKING 90, наложенный на оригинальный чертёж"><g>{{SECTION_PATHS_PLAIN}}</g></svg>
+      </div><figcaption>Сечение из того же набора на сайте (подпись блока «ВКЛЕЙКА VIKING 90»). Красным показан векторный контур поверх оригинала: 79 линий, геометрия не дорисовывалась</figcaption></figure>
+    </div>
+    <div class="stack">
+      <h3>Почему дверь VIKING 90, а не окно</h3>
+      <ol class="why">
+        <li>Для этой двери на сайте есть и предметный рендер, и плоский контурный чертёж сечения. Обе сцены показывают одно изделие, как в референсе.</li>
+        <li>В блоке VIKING 90 два разных сечения. Оконное (рендер на главной) с композитной изоляционной зоной. Дверное с камерами и центральной зоной между замковыми пазами. Чертёж есть только для дверного, поэтому окно в интро не смешиваем.</li>
+        <li>Текст про многокамерные профили и изоляционную зону на сайте относится именно к дверной системе VIKING 90.</li>
+      </ol>
+      <p class="note">Вариант Б: интро на оконном сечении VIKING 90 с главной страницы сайта. Он эффектнее (тройное остекление, чёрный фон), но для белой сцены нужен DXF/DWG этого сечения: нарисовать его по перспективному рендеру значило бы выдумать геометрию.</p>
+      <figure style="margin:0" class="figs"><img src="assets/src/viking90_window_section_hero.jpg" alt="Рендер оконного сечения VIKING 90 на чёрном фоне" style="aspect-ratio:auto;background:#0f0f0f"><figcaption>Оконное сечение VIKING 90, главная страница сайта</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-series">
+  <h2 id="h-series">Изучено: серии THERMINAL</h2>
+  <p class="muted">На сайте пять систем в меню: VIKING 90, HS110, складная Discovery Overdisk HG73, двери Hi-Therm, перегородки Aero. Ниже три серии из брифа. Все факты дословно с therminal.kz, включая всплывающие блоки «Подробнее».</p>
+  <div class="series">
+    <article class="card">
+      <header><h3>VIKING 90</h3><span class="chip red">в интро</span></header>
+      <div class="thumbs">
+        <img src="assets/src/viking90_window_section_front.jpg" alt="Фронтальное сечение VIKING 90">
+        <img src="assets/src/viking_section_foam.jpg" alt="Сечение VIKING с вспененной изоляцией в камерах">
+      </div>
+      <span class="k">Окна и двери, поворотное открывание</span>
+      <ul>
+        <li>«глубиной профиля 90 мм для окон, внутреннего открывания»</li>
+        <li>«стеклопакет толщиной до 58 мм»</li>
+        <li>«изоляционными перемычками из инновационных композитов»</li>
+        <li>Дверь: «узкими видимыми областями и большей глубиной профиля», «многокамерными профилями и инновационной изоляционной зоной»</li>
+        <li>Соответствие EnEV и стандартам пассивного дома (по тексту сайта)</li>
+      </ul>
+      <div class="tablewrap"><table class="specs">
+        <tr><td>Теплопроводность, EN ISO 10077-2</td><td>Uf ≥ 0,86 W/m²K*</td></tr>
+        <tr><td>Водопроницаемость, EN 12208</td><td>класс ≥ 9A</td></tr>
+        <tr><td>Воздухопроницаемость, EN 12207</td><td>класс 4</td></tr>
+        <tr><td>Ветровая нагрузка, EN 12210</td><td>C5 / B5</td></tr>
+        <tr><td>Механическое напряжение, EN 13115</td><td>класс 4</td></tr>
+        <tr><td>Антивандальность, EN 1627</td><td>RC1 N…RC3</td></tr>
+        <tr><td>Звукоизоляция, EN 10140</td><td>Rw 49 дБ*</td></tr>
+      </table></div>
+      <p class="muted" style="font-size:12.5px">* Таблица-картинка в блоке VIKING 90. В ней «Uf ≥», хотя для U-значения обычно пишут «≤», а по звуку в русской колонке «выше 49 дБ», в английской «up to 49 dB». Неясно, к окну или к двери относится таблица. В интро эти цифры не берём до подтверждения.</p>
+    </article>
+    <article class="card">
+      <header><h3>HS110</h3><span class="chip warn">не в интро</span></header>
+      <div class="thumbs">
+        <img src="assets/src/hs110_section_3d.jpg" alt="3D-сечение HS110 с вспененной изоляцией">
+        <img src="assets/src/hs110_sections_pair.jpg" alt="Сечения HS110, вид сверху">
+      </div>
+      <span class="k">Подъёмно-раздвижная система</span>
+      <ul>
+        <li>Терморазрыв включён в профиль; «специальное устройство T-REX» поддерживает тепловой разрыв и «исключает продольные потери тепла»</li>
+        <li>Демпфирующая пружина для «створок с весом более 150 кг»</li>
+        <li>Многоточечное запирание, порог с «опущенным» полом</li>
+        <li>На рендерах: антрацит, серые вспененные вставки в камерах</li>
+        <li>Не указаны: глубина профиля, Uw/Uf, классы, толщина стекла</li>
+      </ul>
+    </article>
+    <article class="card">
+      <header><h3>Hi-Therm</h3><span class="chip warn">не в интро</span></header>
+      <div class="thumbs">
+        <img src="assets/src/hitherm_corner_cleat.jpg" alt="Угловые соединители и сечение Hi-Therm">
+        <img src="assets/src/hitherm_threshold_curtain.jpg" alt="Порог Hi-Therm с красной конвекционной шторкой">
+      </div>
+      <span class="k">Двери, теплоизолированная серия</span>
+      <ul>
+        <li>«Глубина монтажа — 73 мм»</li>
+        <li>«За счёт усиления угловых соединений высота двери может быть до 3 м»</li>
+        <li>Конвекционная шторка и накладка, адаптер порога, запатентованное ложе замка и ответной планки</li>
+        <li>На рендерах: натуральный серебристый алюминий, декор под дерево, угловые соединители, надпись therminal на профиле</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="h-brand">
+  <h2 id="h-brand">Визуальная идентичность</h2>
+  <div class="brand">
+    <div class="stack">
+      <div class="logo-tile"><img src="assets/logo.png" alt="Знак THERMINAL: треугольник из трёх частей с вырезанной буквой T, правая часть красная"></div>
+      <p class="muted" style="font-size:13px">Знак: треугольник из трёх частей, две серебристые с градиентом и одна красная, в центре вырезана буква «Т». На тёмном фоне «Т» читается чёрной, на светлом белой. Вектора на сайте нет, есть растровые версии до 1680 px.</p>
+    </div>
+    <div class="stack">
+      <div class="sw">
+        <div><i style="background:#171717"></i><span class="mono">#171717</span><span class="muted">основной тёмный, 139 упоминаний в стилях</span></div>
+        <div><i style="background:#ffffff"></i><span class="mono">#FFFFFF</span><span class="muted">текст на тёмном</span></div>
+        <div><i style="background:#c81111"></i><span class="mono">#C81111</span><span class="muted">фирменный красный, кнопки</span></div>
+        <div><i style="background:#a92121"></i><span class="mono">#A92121</span><span class="muted">тёмный красный, акценты текста</span></div>
+        <div><i style="background:#0f0f0f"></i><span class="mono">#0F0F0F / #222</span><span class="muted">тёмные подложки секций</span></div>
+        <div><i style="background:#f6efef"></i><span class="mono">#F6EFEF</span><span class="muted">светлый тёплый</span></div>
+      </div>
+      <div class="facts">
+        <div><b>Шрифт</b><span>Montserrat на всём сайте (65 правил), запасной Arial. В интро используем Montserrat: он близок к широким капителям референса.</span></div>
+        <div><b>Покрытие профилей</b><span>VIKING 90 и HS110: антрацит с мелкой структурой порошковой окраски, срезы профиля серебристые. Hi-Therm: натуральное серебро и декор под дерево.</span></div>
+        <div><b>Стиль изображений</b><span>3D-рендеры изделий на белом или чёрном, сечения в разрезе, интерьеры с панорамным остеклением. Заголовки капителями, красный дозированно.</span></div>
+        <div><b>Тон</b><span>«СЛОВНО ДВЕРЬ ОТ СЕЙФА», «МЫ ДЕЛАЕМ КАЧЕСТВЕННО И НА ДОЛГО», «Алюминиевые окна и двери от производителя».</span></div>
+      </div>
+      <p class="note">В интро красный появляется только в знаке. Сцены остаются чёрно-белыми, как в референсе: так бренд узнаётся по финальной плашке и не спорит с изделием.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-need">
+  <h2 id="h-need">Нужно от THERMINAL для чистовой версии</h2>
+  <ol class="needs">
+    <li><div><b>DXF или DWG сечения двери VIKING 90 «вклейка» с размерами</b><p>Подтвердить, что это то же сечение, что на сайте. Нужны габарит по глубине (90 мм или другой), ширина рамы и створки, ширина терморазрыва.</p></div><span class="chip red">блокирует</span></li>
+    <li><div><b>Какая зона сечения изоляционная и из чего вставки</b><p>Полиамид или композит, сколько камер. Без этого выноска «изоляционная зона» остаётся в статусе гипотезы.</p></div><span class="chip red">блокирует</span></li>
+    <li><div><b>Образец профиля для макросъёмки</b><p>Отрезок рамы и створки VIKING 90 длиной 200–300 мм с чистым торцом, в покрытии антрацит. Альтернатива: рендер 4K на чёрном или STEP-модель.</p></div><span class="chip red">блокирует</span></li>
+    <li><div><b>Логотип в векторе и брендбук</b><p>SVG, AI или PDF знака и словесной части, точный фирменный красный (на сайте #C81111 и #A92121), правила отступов.</p></div><span class="chip warn">важно</span></li>
+    <li><div><b>Доступ к Instagram @therminalsystems или 10–15 скриншотов постов</b><p>Без входа Instagram отдаёт страницу логина. Выводы о стиле сейчас сделаны только по сайту.</p></div><span class="chip warn">важно</span></li>
+    <li><div><b>Таблица характеристик VIKING 90</b><p>К окну или к двери она относится, верно ли «Uf ≥ 0,86» и «Rw выше 49 дБ». Нужна, если цифры пойдут в основной ролик.</p></div><span class="chip warn">важно</span></li>
+    <li><div><b>Код RAL или название покрытия</b><p>Для образца на съёмке и цветокоррекции.</p></div><span class="chip">желательно</span></li>
+    <li><div><b>Утверждение текста на экране</b><p>«Это дверная система VIKING 90 с многокамерными профилями и инновационной изоляционной зоной».</p></div><span class="chip">желательно</span></li>
+  </ol>
+</section>
+
+<footer>
+  <span>Источники: therminal.kz, главная и всплывающие блоки «Подробнее», HTML и изображения получены 05.11.2026. Референс: видео IMG_2568, 0–6,5 с. Instagram @therminalsystems недоступен без входа.</span>
+  <span>Изображения изделий принадлежат THERMINAL и используются только для согласования концепции.</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  const D=6.6, stage=document.getElementById('stage'), screen=document.getElementById('screen');
+  const $=id=>document.getElementById(id);
+  const fit=()=>{stage.style.transform='scale('+(screen.clientWidth/360)+')'};
+  new ResizeObserver(fit).observe(screen); fit();
+  const ease=x=>x<=0?0:x>=1?1:1-Math.pow(1-x,3);
+  const io=(t,a,b)=>ease((t-a)/(b-a));
+  const secPaths=[...document.querySelectorAll('#section path')];
+  const L=secPaths.map(p=>{const l=p.getTotalLength();p.style.strokeDasharray=l;p.style.strokeDashoffset=l;return l});
+  const strokeLen=el=>{const l=el.getTotalLength();el.style.strokeDasharray=l;return l};
+  const arw=$('arw'),arwL=strokeLen(arw), p1=$('ptr1l'),p1L=strokeLen(p1), p2=$('ptr2l'),p2L=strokeLen(p2);
+  const fl=[...document.querySelectorAll('#frameLines line')]; const flL=fl.map(strokeLen);
+  const caps=['c1','c2','c3','c4'].map($), capT=[0.7,1.05,1.4,1.75];
+  function render(t){
+    // scene 1
+    const out1=io(t,3.05,3.32);
+    $('s1').style.opacity=1-out1;
+    const push=io(t,0.3,3.1);
+    const door=$('door');
+    door.style.opacity=io(t,0.3,1.0);
+    door.style.transform=`translate(${-10*push}px,${-6*push}px) scale(${1.12-0.1*push+0.35*io(t,3.0,3.35)})`;
+    door.style.filter=`blur(${2*io(t,3.05,3.3)}px)`;
+    $('sweep').style.backgroundPosition=`${100-100*io(t,0.9,2.9)}% 0`;
+    const capOut=io(t,2.35,2.6);
+    caps.forEach((c,i)=>{const a=io(t,capT[i],capT[i]+0.35);c.style.opacity=a*(1-capOut);c.style.transform=`translateY(${6*(1-a)}px)`});
+    arw.style.strokeDashoffset=arwL*(1-io(t,1.75,2.2));
+    arw.style.opacity=1-capOut;
+    $('arwh').style.opacity=io(t,2.1,2.25)*(1-capOut);
+    $('small').style.opacity=io(t,2.45,2.75)*(1-io(t,2.95,3.1));
+    // scene 2
+    fl.forEach((l,i)=>{l.style.strokeDashoffset=flL[i]*(1-io(t,3.3+i*.05,3.9+i*.05))});
+    const n=secPaths.length;
+    secPaths.forEach((p,i)=>{const s=3.35+i*(0.55/n);p.style.strokeDashoffset=L[i]*(1-io(t,s,s+0.6))});
+    $('w1').style.opacity=io(t,3.55,3.8); $('w2').style.opacity=io(t,3.85,4.1);
+    $('dimV').setAttribute('opacity',io(t,4.4,4.75)); $('dimH').setAttribute('opacity',io(t,4.55,4.9));
+    $('ptr1').setAttribute('opacity',io(t,4.8,4.9)); p1.style.strokeDashoffset=p1L*(1-io(t,4.8,5.1));
+    $('ptr2').setAttribute('opacity',io(t,4.95,5.05)); p2.style.strokeDashoffset=p2L*(1-io(t,4.95,5.25));
+    $('spec').style.opacity=io(t,5.2,5.5);
+    $('mark').style.opacity=io(t,5.45,5.8); $('stamp').setAttribute('opacity',io(t,5.45,5.8));
+    $('tc').textContent=t.toFixed(2).padStart(5,'0');
+    $('time').textContent=t.toFixed(2).replace('.',',')+' с';
+    $('scrub').value=Math.round(t*1000);
+  }
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let t=reduce?5.9:2.1, playing=!reduce, last=null;
+  const btn=$('play');
+  const setPlaying=v=>{playing=v;btn.textContent=v?'Пауза':'Пуск';btn.setAttribute('aria-label',v?'Пауза':'Пуск');last=null};
+  setPlaying(playing);
+  btn.addEventListener('click',()=>setPlaying(!playing));
+  $('scrub').addEventListener('input',e=>{t=e.target.value/1000;setPlaying(false);render(t)});
+  document.querySelectorAll('.jump button').forEach(b=>b.addEventListener('click',()=>{t=b.dataset.t/1000;render(t);if(!playing)return;last=null}));
+  function tick(now){ if(playing){ if(last!=null){t+=(now-last)/1000; if(t>D+0.6)t=0;} last=now; render(Math.min(t,D)); } requestAnimationFrame(tick); }
+  render(t); requestAnimationFrame(tick);
+  window.__seek=v=>{setPlaying(false);t=v;render(v)};
+})();
+</script>
