@@ -100,112 +100,112 @@
   "stem": "text"
  },
  {
-  "t": 6.3,
+  "t": 6.6,
   "name": "Наезд в камеру: Zoom In",
   "stem": "transitions"
  },
  {
-  "t": 6.3,
+  "t": 6.6,
   "name": "Склейка по форме: Hard",
   "stem": "cuts"
  },
  {
-  "t": 6.36,
+  "t": 6.66,
   "name": "Рамка-прицел: четыре клика",
   "stem": "graphics"
  },
  {
-  "t": 7.2,
+  "t": 7.4,
   "name": "Склейка на хук: Whip Whoosh Large",
   "stem": "cuts"
  },
  {
-  "t": 7.48,
+  "t": 7.68,
   "name": "«от сейфа?»: Hard",
   "stem": "text"
  },
  {
-  "t": 8.4,
+  "t": 8.6,
   "name": "Склейка на «Почти.»: Soft Wipe",
   "stem": "cuts"
  },
  {
-  "t": 8.48,
+  "t": 8.68,
   "name": "«Почти.»: Pop Up",
   "stem": "text"
  },
  {
-  "t": 9.2,
+  "t": 9.5,
   "name": "Склейка в s6: Whoosh Fast Airy",
   "stem": "cuts"
  },
  {
-  "t": 9.22,
+  "t": 9.52,
   "name": "Въезд изделия 1: Fast Swipe",
   "stem": "graphics"
  },
  {
-  "t": 9.28,
+  "t": 9.58,
   "name": "Слово «Окна и двери»: Pop Up",
   "stem": "text"
  },
  {
-  "t": 9.34,
+  "t": 9.64,
   "name": "Въезд изделия 2: Fast Swipe",
   "stem": "graphics"
  },
  {
-  "t": 9.45,
+  "t": 9.75,
   "name": "Слово «VIKING 90»: Pop Up",
   "stem": "text"
  },
  {
-  "t": 9.75,
+  "t": 10.05,
   "name": "Выноска «дверь»: Pop Up",
   "stem": "graphics"
  },
  {
-  "t": 9.88,
+  "t": 10.18,
   "name": "Выноска «окно»: Pop Up",
   "stem": "graphics"
  },
  {
-  "t": 10.9,
+  "t": 12.0,
   "name": "Склейка в s7: Whoosh Slow Thick",
   "stem": "cuts"
  },
  {
-  "t": 10.98,
+  "t": 12.08,
   "name": "Строка «VIKING 90 · окно»: клик",
   "stem": "text"
  },
  {
-  "t": 11.15,
+  "t": 12.25,
   "name": "Выноска «стеклопакет до 58 мм»: Pop Up",
   "stem": "graphics"
  },
  {
-  "t": 11.55,
+  "t": 12.65,
   "name": "Выноска «глубина профиля 90 мм»: Pop Up",
   "stem": "graphics"
  },
  {
-  "t": 12.7,
+  "t": 14.1,
   "name": "Склейка на знак: Fast Swish",
   "stem": "cuts"
  },
  {
-  "t": 12.76,
+  "t": 14.16,
   "name": "Знак: Chimes",
   "stem": "logo"
  },
  {
-  "t": 12.86,
+  "t": 14.26,
   "name": "Слово «THERMINAL»: Pop Up",
   "stem": "text"
  },
  {
-  "t": 12.98,
+  "t": 14.38,
   "name": "Строка «окна и двери VIKING 90»: клик",
   "stem": "text"
  }
