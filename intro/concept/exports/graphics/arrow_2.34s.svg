@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" class="ovl" viewBox="0 0 360 640" aria-hidden="true" >
+              <path id="arw" fill="none" stroke="#ffffff" stroke-width="0.9" stroke-linecap="round" d="M100,240 C84,274 170.48933715904408,311.4581482640297 211.50,309.75" pathLength="1" ></path>
+              <path id="arwh" fill="none" stroke="#ffffff" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" d="M206.83,307.45 L211.50,309.75 L207.04,312.43" opacity="0.965"></path>
+            </svg>
