@@ -1,35 +1,29 @@
 import { continueRender, delayRender } from "remotion";
-import "./fonts/fonts.css";
+import "./typefaces/fonts.css";
 
-// Шрифты лежат локально (src/fonts), ждём их загрузки перед рендером кадра
+// Шрифты лежат локально (src/typefaces), ждём их загрузки перед рендером кадра
 const fontHandle = delayRender("fonts");
 Promise.all(
   [
-    "500 40px Montserrat",
     "600 40px Montserrat",
     "700 40px Montserrat",
     "800 40px Montserrat",
-    "700 40px 'Playfair Display'",
-    "900 40px 'Playfair Display'",
+    "700 40px Comfortaa",
   ].map((f) => document.fonts.load(f, "АБВ abc 0123")),
 ).then(() => continueRender(fontHandle));
 
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
-export const DURATION_S = 57.5;
+export const DURATION_S = 51.6;
+export const VO_END = 49.8;
 
+// Как в референсе: субтитры — Montserrat, крупные вставки — Comfortaa
 export const SANS = "Montserrat, sans-serif";
-export const SERIF = "'Playfair Display', serif";
+export const DISPLAY = "Comfortaa, sans-serif";
 
-// Тёплое золото — цвет акцентов (под позолоту рукописей и куполов)
-export const GOLD = "#F3C969";
-export const GOLD_DEEP = "#C9963A";
-export const IVORY = "#FFF8EC";
-
-export const goldGradient = `linear-gradient(180deg, #FFE7A8 0%, ${GOLD} 45%, ${GOLD_DEEP} 100%)`;
-
-export const softShadow =
-  "0 2px 3px rgba(0,0,0,0.55), 0 6px 22px rgba(0,0,0,0.55)";
+export const YELLOW = "#FFE01A";
+export const ORANGE = "#FF7A1A";
+export const WHITE = "#FFFFFF";
 
 export const sec = (s: number) => Math.round(s * FPS);
