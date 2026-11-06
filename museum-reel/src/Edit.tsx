@@ -15,12 +15,13 @@ import { CountFx, GridFx, OldFilmFx, QuranFx } from "./Effects";
 
 export type Shot = {
   id: string;
-  kind: "clip" | "photo" | "card" | "fx";
+  kind: "clip" | "photo" | "card" | "fx" | "collage";
   name: string;
   start: number;
   end: number;
   card: string | null;
   fx: string | null;
+  parts?: { top: string; mid: string; bottom: string };
   src: string;
   media: "video" | "image";
 };
@@ -142,6 +143,35 @@ const CardShot: React.FC<{ shot: Shot }> = ({ shot }) => {
   );
 };
 
+// Коллаж по пожеланию клиентки: сверху и снизу музей (9:16-кадры), посередине её видео
+// в исходном горизонтальном формате 16:9. Полосы въезжают с разных сторон.
+const CollageShot: React.FC<{ shot: Shot }> = ({ shot }) => {
+  const f = useCurrentFrame();
+  const dur = sec(shot.end - shot.start);
+  const parts = shot.parts!;
+  const band = (delay: number, from: number) =>
+    interpolate(f, [delay, delay + 7], [from, 0], { ...clamp, easing: ease });
+  const push = interpolate(f, [0, dur], [1, 1.06], clamp);
+  const rows: { key: keyof typeof parts; top: number; h: number; dx: number }[] = [
+    { key: "top", top: 0, h: 654, dx: band(0, -1080) },
+    { key: "mid", top: 658, h: 608, dx: band(2, 1080) },
+    { key: "bottom", top: 1270, h: 650, dx: band(4, -1080) },
+  ];
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      {rows.map((r) => (
+        <div key={r.key} style={{ position: "absolute", left: 0, top: r.top, width: 1080, height: r.h, overflow: "hidden", translate: `${r.dx}px 0px` }}>
+          <Video
+            src={staticFile(parts[r.key])}
+            muted
+            style={{ width: "100%", height: "100%", objectFit: "cover", scale: String(r.key === "mid" ? 1 : push) }}
+          />
+        </div>
+      ))}
+    </AbsoluteFill>
+  );
+};
+
 // Вставки с эффектами; atText — когда звучит ключевое слово
 const FxShot: React.FC<{ shot: Shot }> = ({ shot }) => {
   switch (shot.fx) {
@@ -170,6 +200,8 @@ export const EditTrack: React.FC = () => (
       >
         {s.kind === "card" ? (
           <CardShot shot={s} />
+        ) : s.kind === "collage" ? (
+          <CollageShot shot={s} />
         ) : s.kind === "fx" ? (
           <FxShot shot={s} />
         ) : (

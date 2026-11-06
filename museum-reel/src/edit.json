@@ -8,6 +8,7 @@
   "end": 0.963,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/01.mp4",
   "media": "video"
  },
@@ -20,6 +21,7 @@
   "end": 2.042,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/02.mp4",
   "media": "video"
  },
@@ -32,6 +34,7 @@
   "end": 2.762,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/03.mp4",
   "media": "video"
  },
@@ -44,6 +47,7 @@
   "end": 3.481,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/04.mp4",
   "media": "video"
  },
@@ -56,6 +60,7 @@
   "end": 4.201,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/05.mp4",
   "media": "video"
  },
@@ -68,6 +73,7 @@
   "end": 4.921,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/06.mp4",
   "media": "video"
  },
@@ -80,6 +86,7 @@
   "end": 6.0,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/07.mp4",
   "media": "video"
  },
@@ -92,6 +99,7 @@
   "end": 7.799,
   "card": null,
   "fx": "quran",
+  "collage": null,
   "src": "clips3/08.mp4",
   "media": "video"
  },
@@ -104,6 +112,7 @@
   "end": 9.238,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/09.mp4",
   "media": "video"
  },
@@ -116,6 +125,7 @@
   "end": 10.318,
   "card": null,
   "fx": "oldfilm",
+  "collage": null,
   "src": "clips3/10.mp4",
   "media": "video"
  },
@@ -128,6 +138,7 @@
   "end": 11.397,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/11.mp4",
   "media": "video"
  },
@@ -140,6 +151,7 @@
   "end": 12.117,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/12.mp4",
   "media": "video"
  },
@@ -152,6 +164,7 @@
   "end": 13.196,
   "card": null,
   "fx": "count1000",
+  "collage": null,
   "src": "clips3/13.mp4",
   "media": "video"
  },
@@ -164,6 +177,7 @@
   "end": 14.275,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/14.mp4",
   "media": "video"
  },
@@ -176,32 +190,45 @@
   "end": 14.995,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/15.mp4",
   "media": "video"
  },
  {
   "id": "16",
-  "kind": "photo",
-  "name": "IMG_1348",
+  "kind": "collage",
+  "name": "C1",
   "in": 0.0,
   "start": 14.995,
   "end": 16.794,
   "card": null,
   "fx": null,
-  "src": "photos/IMG_1348.jpg",
-  "media": "image"
+  "collage": "C1",
+  "parts": {
+   "top": "clips3/16_top.mp4",
+   "mid": "clips3/16_mid.mp4",
+   "bottom": "clips3/16_bottom.mp4"
+  },
+  "src": "clips3/16_mid.mp4",
+  "media": "video"
  },
  {
   "id": "17",
-  "kind": "photo",
-  "name": "IMG_1373",
+  "kind": "collage",
+  "name": "C2",
   "in": 0.0,
   "start": 16.794,
   "end": 18.593,
   "card": null,
   "fx": null,
-  "src": "photos/IMG_1373.jpg",
-  "media": "image"
+  "collage": "C2",
+  "parts": {
+   "top": "clips3/17_top.mp4",
+   "mid": "clips3/17_mid.mp4",
+   "bottom": "clips3/17_bottom.mp4"
+  },
+  "src": "clips3/17_mid.mp4",
+  "media": "video"
  },
  {
   "id": "18",
@@ -212,6 +239,7 @@
   "end": 20.032,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/18.mp4",
   "media": "video"
  },
@@ -224,6 +252,7 @@
   "end": 21.112,
   "card": null,
   "fx": "grid",
+  "collage": null,
   "src": "clips3/19.mp4",
   "media": "video"
  },
@@ -236,6 +265,7 @@
   "end": 21.831,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/20.mp4",
   "media": "video"
  },
@@ -248,6 +278,7 @@
   "end": 22.911,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/21.mp4",
   "media": "video"
  },
@@ -260,6 +291,7 @@
   "end": 23.99,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/22.mp4",
   "media": "video"
  },
@@ -272,6 +304,7 @@
   "end": 24.71,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/23.mp4",
   "media": "video"
  },
@@ -284,6 +317,7 @@
   "end": 25.789,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/24.mp4",
   "media": "video"
  },
@@ -296,6 +330,7 @@
   "end": 26.509,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/25.mp4",
   "media": "video"
  },
@@ -308,6 +343,7 @@
   "end": 27.228,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/26.mp4",
   "media": "video"
  },
@@ -320,6 +356,7 @@
   "end": 27.948,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/27.mp4",
   "media": "video"
  },
@@ -332,6 +369,7 @@
   "end": 28.667,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/28.mp4",
   "media": "video"
  },
@@ -344,6 +382,7 @@
   "end": 29.747,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/29.mp4",
   "media": "video"
  },
@@ -356,6 +395,7 @@
   "end": 30.826,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/30.mp4",
   "media": "video"
  },
@@ -368,6 +408,7 @@
   "end": 31.906,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/31.mp4",
   "media": "video"
  },
@@ -380,6 +421,7 @@
   "end": 32.625,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/32.mp4",
   "media": "video"
  },
@@ -392,6 +434,7 @@
   "end": 33.345,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/33.mp4",
   "media": "video"
  },
@@ -404,6 +447,7 @@
   "end": 34.24,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/34.mp4",
   "media": "video"
  },
@@ -416,6 +460,7 @@
   "end": 35.144,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/35.mp4",
   "media": "video"
  },
@@ -428,6 +473,7 @@
   "end": 36.223,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/36.mp4",
   "media": "video"
  },
@@ -440,6 +486,7 @@
   "end": 37.303,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "photos/IMG_1370.jpg",
   "media": "image"
  },
@@ -452,6 +499,7 @@
   "end": 38.022,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/38.mp4",
   "media": "video"
  },
@@ -464,6 +512,7 @@
   "end": 39.102,
   "card": "E",
   "fx": null,
+  "collage": null,
   "src": "photos/IMG_1187.jpg",
   "media": "image"
  },
@@ -476,6 +525,7 @@
   "end": 40.181,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/40.mp4",
   "media": "video"
  },
@@ -488,6 +538,7 @@
   "end": 41.26,
   "card": "F",
   "fx": null,
+  "collage": null,
   "src": "clips3/41.mp4",
   "media": "video"
  },
@@ -500,6 +551,7 @@
   "end": 42.34,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/42.mp4",
   "media": "video"
  },
@@ -512,6 +564,7 @@
   "end": 43.779,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/43.mp4",
   "media": "video"
  },
@@ -524,6 +577,7 @@
   "end": 44.858,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "photos/IMG_1381.jpg",
   "media": "image"
  },
@@ -536,6 +590,7 @@
   "end": 45.578,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "clips3/45.mp4",
   "media": "video"
  },
@@ -548,35 +603,30 @@
   "end": 46.657,
   "card": "G",
   "fx": null,
+  "collage": null,
   "src": "photos/IMG_1391.jpg",
   "media": "image"
  },
  {
   "id": "47",
-  "kind": "clip",
-  "name": "IMG_1346",
-  "in": 2.0,
+  "kind": "collage",
+  "name": "C3",
+  "in": 0.0,
   "start": 46.657,
-  "end": 47.737,
+  "end": 48.456,
   "card": null,
   "fx": null,
-  "src": "clips3/47.mp4",
+  "collage": "C3",
+  "parts": {
+   "top": "clips3/47_top.mp4",
+   "mid": "clips3/47_mid.mp4",
+   "bottom": "clips3/47_bottom.mp4"
+  },
+  "src": "clips3/47_mid.mp4",
   "media": "video"
  },
  {
   "id": "48",
-  "kind": "clip",
-  "name": "IMG_1288",
-  "in": 1.0,
-  "start": 47.737,
-  "end": 48.456,
-  "card": null,
-  "fx": null,
-  "src": "clips3/48.mp4",
-  "media": "video"
- },
- {
-  "id": "49",
   "kind": "photo",
   "name": "IMG_1383",
   "in": 0.0,
@@ -584,6 +634,7 @@
   "end": 51.6,
   "card": null,
   "fx": null,
+  "collage": null,
   "src": "photos/IMG_1383.jpg",
   "media": "image"
  }
