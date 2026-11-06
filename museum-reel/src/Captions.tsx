@@ -9,7 +9,7 @@ type Chunk = { hidden: boolean; start: number; end: number; words: Word[] };
 
 // Субтитры прячем, пока на экране карточка-вставка или крупные слова
 const hiddenRanges: [number, number][] = [
-  ...SHOTS.filter((s) => s.kind === "card").map((s) => [s.start, s.end] as [number, number]),
+  ...SHOTS.filter((s) => s.kind === "card" || s.kind === "fx").map((s) => [s.start, s.end] as [number, number]),
 ];
 
 const isHidden = (t: number) => hiddenRanges.some(([a, b]) => t >= a - 0.05 && t < b);
@@ -24,7 +24,7 @@ const ChunkView: React.FC<{ chunk: Chunk; startF: number }> = ({ chunk, startF }
         position: "absolute",
         left: 110,
         right: 110,
-        top: 1010,
+        top: 1330,
         textAlign: "center",
         fontFamily: SANS,
         fontWeight: 700,

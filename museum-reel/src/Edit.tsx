@@ -11,14 +11,16 @@ import {
 import { Video } from "@remotion/media";
 import edit from "./edit.json";
 import { DISPLAY, ORANGE, WHITE, sec } from "./theme";
+import { CountFx, GridFx, OldFilmFx, QuranFx } from "./Effects";
 
 export type Shot = {
   id: string;
-  kind: "clip" | "photo" | "card";
+  kind: "clip" | "photo" | "card" | "fx";
   name: string;
   start: number;
   end: number;
   card: string | null;
+  fx: string | null;
   src: string;
   media: "video" | "image";
 };
@@ -29,19 +31,6 @@ export const SHOTS = edit as Shot[];
 // at — секунда озвучки, когда строка появляется.
 type Line = { text: string; color: string; size: number; at: number };
 export const CARD_TEXT: Record<string, Line[]> = {
-  A: [
-    { text: "коран", color: ORANGE, size: 92, at: 6.5 },
-    { text: "усмана", color: WHITE, size: 128, at: 6.9 },
-  ],
-  B: [{ text: "VII век", color: ORANGE, size: 150, at: 9.4 }],
-  C: [
-    { text: "больше", color: WHITE, size: 80, at: 12.0 },
-    { text: "1000 лет", color: ORANGE, size: 140, at: 12.33 },
-  ],
-  D: [
-    { text: "3000+", color: ORANGE, size: 170, at: 19.9 },
-    { text: "артефактов", color: WHITE, size: 92, at: 20.6 },
-  ],
   E: [
     { text: "открылся", color: WHITE, size: 80, at: 38.11 },
     { text: "в 2026", color: ORANGE, size: 150, at: 38.28 },
@@ -153,6 +142,22 @@ const CardShot: React.FC<{ shot: Shot }> = ({ shot }) => {
   );
 };
 
+// Вставки с эффектами; atText — когда звучит ключевое слово
+const FxShot: React.FC<{ shot: Shot }> = ({ shot }) => {
+  switch (shot.fx) {
+    case "quran":
+      return <QuranFx shot={shot} atText={6.58} />;
+    case "oldfilm":
+      return <OldFilmFx shot={shot} atText={9.4} />;
+    case "count1000":
+      return <CountFx shot={shot} atText={12.33} to={1000} top="больше" bottom="лет" />;
+    case "grid":
+      return <GridFx shot={shot} atText={20.27} />;
+    default:
+      return null;
+  }
+};
+
 export const EditTrack: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: "black" }}>
     {SHOTS.map((s, i) => (
@@ -163,7 +168,13 @@ export const EditTrack: React.FC = () => (
         durationInFrames={sec(s.end) - sec(s.start)}
         premountFor={30}
       >
-        {s.kind === "card" ? <CardShot shot={s} /> : <FullShot shot={s} index={i} />}
+        {s.kind === "card" ? (
+          <CardShot shot={s} />
+        ) : s.kind === "fx" ? (
+          <FxShot shot={s} />
+        ) : (
+          <FullShot shot={s} index={i} />
+        )}
       </Sequence>
     ))}
   </AbsoluteFill>

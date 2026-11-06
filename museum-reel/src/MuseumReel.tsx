@@ -16,7 +16,7 @@ const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 
 // Оранжево-жёлтые засветки на переходах (как в референсе)
-const LEAKS = [5.99, 18.6, 25.8, 32.74, 35.24, 38.11, 45.735];
+const LEAKS = [18.593, 25.789, 32.625, 35.144, 38.022, 45.578];
 
 const LightLeak: React.FC<{ at: number }> = ({ at }) => {
   const f = useCurrentFrame();
@@ -38,9 +38,9 @@ const LightLeak: React.FC<{ at: number }> = ({ at }) => {
 
 // «медицину / математику / астрономию» — крупные белые слова поверх кадров
 const BIG_WORDS: [string, number, number][] = [
-  ["медицину", 32.74, 33.65],
-  ["математику", 33.65, 34.25],
-  ["астрономию", 34.25, 35.24],
+  ["медицину", 32.625, 33.345],
+  ["математику", 33.345, 34.24],
+  ["астрономию", 34.24, 35.144],
 ];
 
 const BigWord: React.FC<{ word: string; len: number }> = ({ word, len }) => {
@@ -71,7 +71,7 @@ const BigWord: React.FC<{ word: string; len: number }> = ({ word, len }) => {
 // Тряска камеры на вступлении бита
 const Shake: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const f = useCurrentFrame();
-  const hits = [18.6, 38.11];
+  const hits = [6.0, 18.593, 38.022];
   let dx = 0;
   let dy = 0;
   for (const h of hits) {
@@ -87,20 +87,21 @@ const Shake: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // Звуки: [момент, файл, пик внутри файла, громкость]
 const SFX: [number, string, number, number][] = [
-  [5.99, "whoosh_slow_thick.wav", 0.46, 0.55],
-  [9.01, "page_turn1.wav", 0.84, 0.8],
-  [12.0, "page_turn4.wav", 0.18, 0.75],
-  [18.6, "riser_R2.mp3", 5.17, 0.3],
-  [18.6, "whoosh4.wav", 0.42, 0.55],
-  [19.78, "standard_swoosh.wav", 0.42, 0.5],
-  [25.8, "fast_swoosh.mp3", 0.15, 0.35],
-  [32.74, "whoosh_fast_airy.wav", 0.26, 0.55],
-  [33.65, "whoosh_fast_airy.wav", 0.26, 0.5],
-  [34.25, "whoosh_fast_airy.wav", 0.26, 0.55],
-  [35.24, "whoosh_slow_thick.wav", 0.46, 0.45],
-  [38.11, "whoosh4.wav", 0.42, 0.55],
-  [40.297, "standard_swoosh.wav", 0.42, 0.5],
-  [45.735, "long_woosh.wav", 1.08, 0.45],
+  [6.0, "riser_R2.mp3", 5.17, 0.22],
+  [6.0, "whoosh_slow_thick.wav", 0.46, 0.6],
+  [7.8, "whoosh_fast_airy.wav", 0.26, 0.4],
+  [9.238, "page_turn1.wav", 0.84, 0.75],
+  [12.117, "page_turn4.wav", 0.18, 0.75],
+  [18.593, "whoosh4.wav", 0.42, 0.55],
+  [20.032, "standard_swoosh.wav", 0.42, 0.5],
+  [25.789, "fast_swoosh.mp3", 0.15, 0.35],
+  [32.625, "whoosh_fast_airy.wav", 0.26, 0.55],
+  [33.345, "whoosh_fast_airy.wav", 0.26, 0.5],
+  [34.24, "whoosh_fast_airy.wav", 0.26, 0.55],
+  [35.144, "whoosh_slow_thick.wav", 0.46, 0.45],
+  [38.022, "whoosh4.wav", 0.42, 0.55],
+  [40.181, "standard_swoosh.wav", 0.42, 0.5],
+  [45.578, "long_woosh.wav", 1.08, 0.45],
 ];
 
 const FadeOut: React.FC = () => {
@@ -138,7 +139,7 @@ export const MuseumReel: React.FC = () => {
         <Audio
           src={staticFile("audio/music.wav")}
           volume={(f) =>
-            interpolate(f, [0, sec(VO_END) - 4, sec(VO_END) + 8, total], [0.22, 0.22, 0.55, 0.55], clamp)
+            interpolate(f, [0, sec(VO_END) - 4, sec(VO_END) + 8, total], [0.17, 0.17, 0.55, 0.55], clamp)
           }
         />
       </Sequence>
