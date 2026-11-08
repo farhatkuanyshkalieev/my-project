@@ -73,7 +73,6 @@ ewhoosh = hp(lp(load(P + 'ewhoosh.wav'), 6500), 160)
 bigw = lp(hp(load(P + 'bigwhoosh.mp3'), 150), 5500)
 riser = hp(lp(load(P + 'riser.mp3'), 7000), 150)
 bulk = [lp(load(P + f'bulk{i}.wav'), 9000) for i in range(1, 6)]
-xp = lp(load(P + 'xp.mp3'), 8000)
 typing = lp(load(P + 'typing.mp3'), 9000)
 tpk = np.load(os.path.join(HERE, 'typing_peaks.npy'))
 keys = [trim(typing, p / SR - 0.012, p / SR + 0.13) for p in tpk[:24]]
@@ -143,7 +142,8 @@ for i, s_ in enumerate([0, 3, 5, 7]):                                   # бук
     place(pitch(mallet1, s_), L0 + 62 + i * 7 + 6, 0.26, -0.4 + i * 0.25, 0.3)
 place(ref_logo, L0 + 76, 0.50, 0.35, 0.4)                               # звезда
 place(bloop_b, L0 + 126, 0.30, 0.1, 0.3)                                # точка садится в «.»
-place(trim(xp, 0.35, 1.6), L0 + 132, 0.07, 0.1, 0.35, align=0.16)
+place(pitch(mallet1, 12), L0 + 128, 0.16, 0.15, 0.35)                 # мягкий деревянный «тинк» вместо xp
+place(pitch(mallet1, 19), L0 + 134, 0.07, 0.3, 0.4)
 for i in range(4):                                                      # .work
     place(keys[i + 2], L0 + 120 + i * 5 + 4, 0.10, 0.2 + i * 0.12, 0.15)
 place(trim(whoosh, 0.55), L0 + 168, 0.04, -0.5, 0.4, align=0.46)        # свет по тексту
