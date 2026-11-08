@@ -131,23 +131,22 @@ place(mal_a, 510, 0.50, -0.15, 0.15)
 place(mal_b, 532, 0.50, 0.0, 0.15)
 place(mal_c, 554, 0.50, 0.15, 0.15)
 
-# ================= 8. Логотип =================
+# ================= 8. Логотип (Apple-style) =================
 L0 = 580
 suck = ewhoosh[::-1].copy()
-place(suck, L0 + 14, 0.25, 0.0, 0.2, align=len(suck) / SR - 0.59)
-place(bloop_c, L0 + 14, 0.25, 0.0, 0.25)
-place(trim(whoosh, 0.6), L0 + 30, 0.10, 0.0, 0.15, align=0.41)
-orbit = pan_sweep(trim(bigw, 0.4), -0.7, 0.7)
-place(orbit, L0 + 84, 0.14, 0.0, 0.3, align=len(orbit) / SR - 0.02)
-for i, s in enumerate([0, 2, 4, 7]):  # приземления frht — мягкие деревянные удары вверх по тону
-    place(pitch(mallet1, s), L0 + 52 + i * 6 + 7, 0.40, -0.45 + i * 0.3, 0.2)
-place(ref_logo, L0 + 84, 0.60, 0.0, 0.35)
-place(cut, L0 + 84, 0.07, 0.0, 0.2)
-place(bloop_b, L0 + 96, 0.35, 0.1, 0.25)
-place(trim(xp, 0.35, 1.6), L0 + 104, 0.10, 0.1, 0.3, align=0.16)
-for i in range(4):
-    place(keys[i + 2], L0 + 100 + i * 5 + 3, 0.14, 0.2 + i * 0.12, 0.1)
-place(trim(whoosh, 0.6), L0 + 136, 0.05, -0.5, 0.3, align=0.41)
+place(suck, L0 + 24, 0.22, 0.0, 0.25, align=len(suck) / SR - 0.59)   # карточка сжимается в точку
+place(pitch(bloop_c, 2), L0 + 24, 0.22, 0.0, 0.3)                      # точка родилась
+place(trim(whoosh, 0.6), L0 + 46, 0.07, -0.3, 0.2, align=0.41)          # точка уходит на старт орбиты
+orbit = pan_sweep(trim(bigw, 0.6), -0.6, 0.6)
+place(orbit, L0 + 108, 0.09, 0.0, 0.35, align=len(orbit) / SR - 0.05)   # прорисовка орбиты
+for i, s_ in enumerate([0, 3, 5, 7]):                                   # буквы frht — мягкие щипки
+    place(pitch(mallet1, s_), L0 + 62 + i * 7 + 6, 0.26, -0.4 + i * 0.25, 0.3)
+place(ref_logo, L0 + 76, 0.50, 0.35, 0.4)                               # звезда
+place(bloop_b, L0 + 126, 0.30, 0.1, 0.3)                                # точка садится в «.»
+place(trim(xp, 0.35, 1.6), L0 + 132, 0.07, 0.1, 0.35, align=0.16)
+for i in range(4):                                                      # .work
+    place(keys[i + 2], L0 + 120 + i * 5 + 4, 0.10, 0.2 + i * 0.12, 0.15)
+place(trim(whoosh, 0.55), L0 + 168, 0.04, -0.5, 0.4, align=0.46)        # свет по тексту
 
 # ---------- лёгкий «зал» для склейки ----------
 def room_ir(sec=1.1):
