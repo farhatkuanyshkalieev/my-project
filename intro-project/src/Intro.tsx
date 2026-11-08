@@ -8,12 +8,13 @@ import {
   continueRender,
   delayRender,
   interpolate,
+  random,
   spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import {BUST_H, BUST_PATH, BUST_W} from './bust';
+import {BUST_H, BUST_HEAD, BUST_NECK, BUST_PATH, BUST_W} from './bust';
 
 /* ================= Шрифты (Helvetica-клон Nimbus Sans) ================= */
 const HN = 'HN';
@@ -36,10 +37,15 @@ if (typeof document !== 'undefined') {
     });
 }
 
-export const ACCENT = '#7A1F33';
+/* ================= Палитра: глубокий винный ================= */
+const WINE = '#7B0A2A';
+const WINE_HI = '#C4144A';
+const WINE_DK = '#3A0513';
+const WINE_BG = `radial-gradient(ellipse 85% 95% at 50% 45%, #A8153F 0%, ${WINE} 50%, ${WINE_DK} 100%)`;
+const GLOW = '0 0 22px rgba(196,20,74,0.75), 0 0 6px rgba(255,80,120,0.6)';
+
 const W = 1920;
 const H = 1080;
-export const FPS = 60;
 
 const T = {
   figma: 0,
@@ -48,14 +54,13 @@ const T = {
   eye: 370,
   creative: 470,
   logo: 580,
-  end: 700,
+  end: 800,
 };
 export const DURATION = T.end;
 
 const C = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 const io = Easing.inOut(Easing.cubic);
 const out = Easing.out(Easing.cubic);
-/** keyframes с плавностью */
 const kf = (t: number, ts: number[], vs: number[], easing = io) => interpolate(t, ts, vs, {...C, easing});
 const hop = (t: number, t0: number, t1: number, h: number) => {
   if (t < t0 || t > t1) return 0;
@@ -79,16 +84,17 @@ const DirBlur: React.FC<{x: number; y: number; children: React.ReactNode; style?
     </>
   );
 };
-/** хроматическая аберрация через text-shadow */
 const chroma = (d: number) => (d > 0.2 ? `${d}px 0 rgba(255,0,70,0.75), ${-d}px 0 rgba(0,190,255,0.75)` : 'none');
 
 const Cursor: React.FC<{t: number; h: number; solid?: boolean}> = ({t, h, solid}) => (
   <span
     style={{
       display: 'inline-block',
-      width: Math.max(3, h * 0.045),
+      width: Math.max(4, h * 0.05),
       height: h,
-      background: ACCENT,
+      background: WINE_HI,
+      boxShadow: GLOW,
+      borderRadius: 2,
       verticalAlign: 'middle',
       opacity: solid || Math.floor(t / 16) % 2 === 0 ? 1 : 0,
     }}
@@ -114,10 +120,10 @@ const Guides: React.FC<{x: number; y: number; w: number; h: number; color: strin
       <line x1={x + w / 2 - L} x2={x + w / 2 + L} y1={y + h} y2={y + h} {...d} />
       <line x1={x} x2={x} y1={y + h / 2 - L} y2={y + h / 2 + L} {...d} />
       <line x1={x + w} x2={x + w} y1={y + h / 2 - L} y2={y + h / 2 + L} {...d} />
-      <text x={x + w / 2} y={y - 10} fill={color} fontSize={13} fontFamily={HN} textAnchor="middle" opacity={p}>
+      <text x={x + w / 2} y={y - 10} fill={color} fontSize={14} fontFamily={HN} textAnchor="middle" opacity={p}>
         {lw}
       </text>
-      <text x={x - 10} y={y + h / 2 + 4} fill={color} fontSize={13} fontFamily={HN} textAnchor="end" opacity={p}>
+      <text x={x - 10} y={y + h / 2 + 4} fill={color} fontSize={14} fontFamily={HN} textAnchor="end" opacity={p}>
         {lh}
       </text>
     </svg>
@@ -138,47 +144,34 @@ const FigmaScene: React.FC = () => {
   const flash = kf(t, [34, 40], [0, 1]);
   const cx = 960 + x;
   const cy = 540 + y;
-  const bw = 76 * s;
-  const bh = 94 * s;
+  const bw = 90 * s;
+  const bh = 112 * s;
+  const letter = (color: string, extra: React.CSSProperties = {}) => (
+    <div
+      style={{
+        position: 'absolute',
+        left: cx,
+        top: cy,
+        transform: `translate(-50%,-50%) scale(${s})`,
+        fontFamily: HN,
+        fontWeight: 700,
+        fontSize: 150,
+        lineHeight: 1,
+        color,
+        ...extra,
+      }}
+    >
+      H
+    </div>
+  );
   return (
     <AbsoluteFill style={{background: '#000'}}>
       <DirBlur x={vx * 0.35} y={vy * 0.35}>
         <Guides x={cx - bw / 2} y={cy - bh / 2} w={bw} h={bh} color="#6a6a6a" p={g} lw="95px" lh="120px" />
-        <div
-          style={{
-            position: 'absolute',
-            left: cx,
-            top: cy,
-            transform: `translate(-50%,-50%) scale(${s})`,
-            fontFamily: HN,
-            fontWeight: 400,
-            fontSize: 130,
-            lineHeight: 1,
-            color: '#fff',
-          }}
-        >
-          H
-        </div>
+        {letter('#fff')}
       </DirBlur>
       <AbsoluteFill style={{background: '#fff', opacity: flash}} />
-      {t >= 36 && (
-        <div
-          style={{
-            position: 'absolute',
-            left: cx,
-            top: cy,
-            transform: `translate(-50%,-50%) scale(${s})`,
-            fontFamily: HN,
-            fontSize: 130,
-            lineHeight: 1,
-            color: ACCENT,
-            textShadow: chroma(6),
-            opacity: flash,
-          }}
-        >
-          H
-        </div>
-      )}
+      {t >= 36 && letter(WINE_HI, {textShadow: chroma(7), opacity: flash})}
     </AbsoluteFill>
   );
 };
@@ -189,29 +182,29 @@ const HiScene: React.FC = () => {
   const {fps} = useVideoConfig();
   const inv = t >= 56;
   const fg = inv ? '#fff' : '#000';
-  const push = kf(t, [0, 68], [1.12, 1.28], Easing.linear);
+  const push = kf(t, [0, 68], [1.0, 1.14], Easing.linear);
   const drift = kf(t, [0, 68], [0, -24], Easing.linear);
-  const iIn = kf(t, [2, 10], [140, 0], out);
-  const iBlur = Math.abs(iIn - kf(t - 1, [2, 10], [140, 0], out));
+  const iIn = kf(t, [2, 10], [180, 0], out);
+  const iBlur = Math.abs(iIn - kf(t - 1, [2, 10], [180, 0], out));
   const hand = spring({frame: t - 6, fps, config: {damping: 9, stiffness: 160}});
   const wave = t > 14 ? Math.sin((t - 14) / 3.2) * 16 : (1 - hand) * -60;
   const g = kf(t, [0, 8], [0, 1], out);
-  const shake = inv && t < 62 ? (t % 2 ? 6 : -6) : 0;
-  const ch = t < 10 ? 10 - t : inv && t < 62 ? 8 : 0;
+  const shake = inv && t < 62 ? (t % 2 ? 7 : -7) : 0;
+  const ch = t < 10 ? 10 - t : inv && t < 62 ? 9 : 0;
   return (
     <AbsoluteFill style={{background: inv ? '#000' : '#fff'}}>
       <div style={{position: 'absolute', inset: 0, transform: `translate(${shake + drift}px, ${-drift * 0.4}px) scale(${push})`}}>
-        <Guides x={790} y={470} w={170} h={136} color={inv ? '#4a4a4a' : '#c4c4c4'} p={g} lw="96px" lh="120px" />
+        <Guides x={752} y={452} w={262} h={180} color={inv ? '#4a4a4a' : '#c4c4c4'} p={g} lw="96px" lh="120px" />
         <div
           style={{
             position: 'absolute',
-            left: 792,
-            top: 442,
+            left: 752,
+            top: 405,
             fontFamily: HN,
             fontWeight: 700,
-            fontSize: 188,
+            fontSize: 250,
             lineHeight: 1,
-            letterSpacing: -4,
+            letterSpacing: -8,
             color: fg,
             textShadow: chroma(ch),
             whiteSpace: 'nowrap',
@@ -224,10 +217,10 @@ const HiScene: React.FC = () => {
           src={staticFile('hand.png')}
           style={{
             position: 'absolute',
-            left: 1010,
-            top: 296,
-            width: 190,
-            height: 190,
+            left: 1020,
+            top: 262,
+            width: 240,
+            height: 240,
             transformOrigin: '30% 85%',
             transform: `scale(${Math.max(0, hand)}) rotate(${wave}deg)`,
             filter: `${inv ? 'brightness(0.12) ' : ''}blur(${Math.max(0, (1 - hand) * 6)}px)`,
@@ -238,29 +231,39 @@ const HiScene: React.FC = () => {
   );
 };
 
-/* ================= Силуэт ================= */
+/* ================= Силуэт: голова поворачивается отдельно от тела ================= */
 const BR = BUST_W / BUST_H;
-const HEAD = {x: 0.585, y: 0.27};
-const PIVOT = {x: 0.6, y: 0.64};
-const Bust: React.FC<{h: number; hx: number; bottom: number; rot: number}> = ({h, hx, bottom, rot}) => {
+const NECK_CUT = BUST_NECK.y;
+const Bust: React.FC<{h: number; hx: number; bottom: number; tilt: number; sway: number}> = ({h, hx, bottom, tilt, sway}) => {
   const w = h * BR;
+  const left = hx - BUST_HEAD.x * w;
+  const top = bottom - h;
+  const piv = `${BUST_NECK.x * BUST_W} ${BUST_NECK.y * BUST_H}`;
+  const cut = NECK_CUT * BUST_H;
   return (
     <svg
       viewBox={`0 0 ${BUST_W} ${BUST_H}`}
       width={w}
       height={h}
-      style={{
-        position: 'absolute',
-        left: hx - HEAD.x * w,
-        top: bottom - h,
-        transformOrigin: `${PIVOT.x * 100}% ${PIVOT.y * 100}%`,
-        transform: `rotate(${rot}deg)`,
-        overflow: 'visible',
-      }}
+      style={{position: 'absolute', left, top, overflow: 'visible', transformOrigin: '50% 100%', transform: `rotate(${sway * 0.25}deg)`}}
     >
-      <path d={BUST_PATH} fill="#0b0b0b" />
-      {/* «продолжение» тела вниз, чтобы при наклоне не было зазора */}
-      <rect x={BUST_W * 0.03} y={BUST_H - 4} width={BUST_W * 0.75} height={BUST_H * 0.4} fill="#0b0b0b" />
+      <defs>
+        <clipPath id="bodyClip">
+          <rect x={-BUST_W} y={cut - 60} width={BUST_W * 3} height={BUST_H * 2} />
+        </clipPath>
+        <clipPath id="headClip">
+          <rect x={-BUST_W} y={-BUST_H} width={BUST_W * 3} height={BUST_H + cut + 40} />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#bodyClip)">
+        <path d={BUST_PATH} fill="#0b0b0b" />
+        <rect x={BUST_W * 0.02} y={BUST_H - 6} width={BUST_W * 0.66} height={BUST_H * 0.5} fill="#0b0b0b" />
+      </g>
+      <g transform={`rotate(${tilt + sway} ${piv})`}>
+        <g clipPath="url(#headClip)">
+          <path d={BUST_PATH} fill="#0b0b0b" />
+        </g>
+      </g>
     </svg>
   );
 };
@@ -271,64 +274,63 @@ const SilScene: React.FC = () => {
   const t = useCurrentFrame();
   const {fps} = useVideoConfig();
 
-  // --- геометрия силуэта ---
   const shrinkK = (f: number) => kf(f, [56, 72], [0, 1], Easing.inOut(Easing.quad));
   const k = shrinkK(t);
   const vk = Math.abs(k - shrinkK(t - 1));
-  const enter = kf(t, [0, 10], [1.25, 1], out);
-  const hgt = interpolate(k, [0, 1], [1120, 600]) * enter;
-  const bottom = interpolate(k, [0, 1], [1100, 1120]);
-  const tilt = kf(t, [100, 150], [0, 13]) + kf(t, [200, 240], [0, 4]);
-  const sway = Math.sin(t / 22) * 1.6 + Math.sin(t / 9) * 0.35;
-  const bob = Math.sin(t / 26) * 6;
+  const enter = kf(t, [0, 10], [1.2, 1], out);
+  const hgt = interpolate(k, [0, 1], [920, 500]) * enter;
+  const bottom = interpolate(k, [0, 1], [1090, 1100]);
+  const tilt = kf(t, [100, 150], [0, 14]) + kf(t, [200, 240], [0, 4]);
+  const sway = Math.sin(t / 20) * 2.2 + Math.sin(t / 8) * 0.4;
+  const bob = Math.sin(t / 24) * 6;
   const exitK = kf(t, [244, 260], [0, 1], Easing.in(Easing.cubic));
   const exitV = Math.abs(exitK - kf(t - 1, [244, 260], [0, 1], Easing.in(Easing.cubic)));
   const hx = 960;
-  const headY = bottom - hgt + HEAD.y * hgt;
+  const headY = bottom - hgt + BUST_HEAD.y * hgt;
+  const headTop = bottom - hgt;
 
-  // --- I'm ---
   const imIn = spring({frame: t - 2, fps, config: {damping: 13, stiffness: 170}});
-  const imDeleted = t >= 34 ? 1 : 0;
+  const imDeleted = t >= 34;
   const imOpacity = kf(t, [56, 64], [1, 0]);
 
-  // --- имя ---
   const typed = Math.max(0, Math.min(NAME.length, Math.floor((t - 82) / 5) + 1));
   const nameOn = t >= 78;
   const fallStart = (i: number) => 156 + (NAME.length - 1 - i) * 4;
 
-  // --- кольцо / точка / Your ---
   const ringIn = spring({frame: t - 184, fps, config: {damping: 7, stiffness: 200}});
   const fill = kf(t, [206, 213], [0, 1]);
-  const yIn = kf(t, [198, 210], [-120, 0], out);
-  const urIn = kf(t, [200, 212], [140, 0], out);
+  const yIn = kf(t, [198, 210], [-150, 0], out);
+  const urIn = kf(t, [200, 212], [170, 0], out);
   const urOut = kf(t, [240, 248], [0, 1]);
-  const dotY = hop(t, 213, 229, 120) + hop(t, 229, 241, 46);
+  const dotY = hop(t, 213, 229, 150) + hop(t, 229, 241, 60);
   const land = (t >= 229 && t < 233) || (t >= 241 && t < 244);
-  const sq = land ? 1.28 : 1;
-  const textTop = 392;
-  const showRing = t >= 182;
+  const sq = land ? 1.3 : 1;
+  const nameTop = interpolate(k, [0, 1], [380, 455]);
+  const yourTop = 432;
 
   return (
     <AbsoluteFill style={{background: '#fff'}}>
       <DirBlur
         x={exitV * 220}
         y={vk * 70 + exitV * 120}
-        style={{transform: `translate(${exitK * 500}px, ${exitK * 380}px) scale(${(1 + exitK * 0.6) * kf(t, [72, 244], [1, 1.06], Easing.linear)})`, transformOrigin: '50% 45%'}}
+        style={{
+          transform: `translate(${exitK * 500}px, ${exitK * 380}px) scale(${(1 + exitK * 0.6) * kf(t, [72, 244], [1, 1.06], Easing.linear)})`,
+          transformOrigin: '50% 50%',
+        }}
       >
-        <Bust h={hgt} hx={hx} bottom={bottom + bob * (1 - k * 0.5)} rot={tilt + sway} />
+        <Bust h={hgt} hx={hx} bottom={bottom + bob * (1 - k * 0.5)} tilt={tilt} sway={sway} />
 
-        {/* I'm в голове */}
         {imOpacity > 0 && (
           <div
             style={{
               position: 'absolute',
-              left: hx - 40,
-              top: headY + bob,
-              transform: `translate(-50%,-50%) scale(${(0.6 + 0.4 * imIn) * interpolate(k, [0, 1], [1, 0.45])})`,
+              left: hx - 20,
+              top: headY + bob - 10,
+              transform: `translate(-50%,-50%) scale(${(0.6 + 0.4 * imIn) * interpolate(k, [0, 1], [1, 0.5])})`,
               fontFamily: HN,
               fontWeight: 700,
-              fontSize: 200,
-              letterSpacing: -6,
+              fontSize: 250,
+              letterSpacing: -8,
               lineHeight: 1,
               color: '#fff',
               opacity: imOpacity,
@@ -337,26 +339,24 @@ const SilScene: React.FC = () => {
               alignItems: 'center',
             }}
           >
-            {t >= 18 && <Cursor t={t} h={150} solid={t < 34} />}
-            <span style={{marginLeft: 8, opacity: 1 - imDeleted}}>{imDeleted ? '' : 'I'}</span>
+            {t >= 18 && <Cursor t={t} h={190} solid={t < 34} />}
+            <span style={{marginLeft: 10}}>{imDeleted ? '' : 'I'}</span>
             <span>’m</span>
           </div>
         )}
 
-        {/* Имя */}
         {nameOn && t < 200 && (
           <div
             style={{
               position: 'absolute',
               width: W,
-              top: textTop,
+              top: Math.min(nameTop, headTop - 150),
               textAlign: 'center',
               fontFamily: HN,
               fontWeight: 400,
-              fontSize: 92,
-              letterSpacing: -3,
-              color: '#111',
-              WebkitTextStroke: '2.2px #fff',
+              fontSize: 128,
+              letterSpacing: -4,
+              color: '#0b0b0b',
               whiteSpace: 'nowrap',
               lineHeight: 1,
             }}
@@ -383,24 +383,23 @@ const SilScene: React.FC = () => {
                 </span>
               );
             })}
-            {t < 150 && <Cursor t={t} h={86} solid={t < 112} />}
+            {t < 150 && <Cursor t={t} h={118} solid={t < 112} />}
           </div>
         )}
 
-        {/* Y • ur */}
-        {showRing && (
+        {t >= 182 && (
           <div
             style={{
               position: 'absolute',
               width: W,
-              top: textTop - 6,
+              top: yourTop,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'flex-end',
               fontFamily: HN,
               fontWeight: 700,
-              fontSize: 112,
-              letterSpacing: -4,
+              fontSize: 160,
+              letterSpacing: -6,
               lineHeight: 1,
               color: '#0b0b0b',
             }}
@@ -408,21 +407,29 @@ const SilScene: React.FC = () => {
             <span style={{display: 'inline-block', opacity: t >= 198 ? 1 : 0, transform: `translateX(${yIn}px)`, filter: `blur(${Math.abs(yIn) * 0.05}px)`}}>
               Y
             </span>
-            <span style={{display: 'inline-block', width: 66, height: 90, position: 'relative'}}>
+            <span style={{display: 'inline-block', width: 96, height: 120, position: 'relative'}}>
               <svg
-                width={80}
-                height={80}
-                viewBox="-40 -40 80 80"
+                width={100}
+                height={100}
+                viewBox="-50 -50 100 100"
                 style={{
                   position: 'absolute',
-                  left: -6,
-                  top: -4,
+                  left: -2,
+                  top: -6,
                   overflow: 'visible',
                   transform: `translateY(${dotY}px) scale(${ringIn * sq}, ${ringIn / sq})`,
                   transformOrigin: '50% 100%',
+                  filter: `drop-shadow(0 0 10px rgba(196,20,74,${fill * 0.7}))`,
                 }}
               >
-                <circle r={22 + fill * 6} fill={fill > 0.5 ? (t > 236 ? ACCENT : '#0b0b0b') : 'none'} stroke={ACCENT} strokeWidth={6 + fill * 10} />
+                <defs>
+                  <radialGradient id="dotg" cx="35%" cy="30%" r="75%">
+                    <stop offset="0%" stopColor="#E8336A" />
+                    <stop offset="55%" stopColor={WINE_HI} />
+                    <stop offset="100%" stopColor={WINE_DK} />
+                  </radialGradient>
+                </defs>
+                <circle r={32 + fill * 8} fill={fill > 0.5 ? 'url(#dotg)' : 'none'} stroke={WINE_HI} strokeWidth={8 + fill * 12} />
               </svg>
             </span>
             <span
@@ -444,21 +451,20 @@ const SilScene: React.FC = () => {
 };
 
 /* ================= 6. Глаз ================= */
+const BIG = 150;
 const EyeScene: React.FC = () => {
   const t = useCurrentFrame();
   const {fps} = useVideoConfig();
   const openS = spring({frame: t, fps, config: {damping: 11, stiffness: 150}});
   const blink = t >= 30 && t <= 38 ? Math.abs(Math.cos(((t - 30) / 8) * Math.PI)) : 1;
   const open = Math.max(0.06, interpolate(openS, [0, 1], [0.15, 1]) * blink);
-  const hh = 560 * open;
+  const hh = 580 * open;
   const lx = (f: number) => kf(f, [8, 18, 42, 50, 58, 64], [150, 190, 190, 20, -170, -200]);
   const ly = (f: number) => kf(f, [42, 50, 58], [0, 70, 30]);
   const x = lx(t);
   const y = ly(t);
   const v = Math.hypot(x - lx(t - 1), y - ly(t - 1));
-  const path = `M -500 0 Q 0 ${-hh} 500 0 Q 0 ${hh} -500 0 Z`;
-
-  // финальный проход внутрь глаза
+  const path = `M -520 0 Q 0 ${-hh} 520 0 Q 0 ${hh} -520 0 Z`;
   const push = kf(t, [76, 98], [0, 1], Easing.in(Easing.quad));
   const eyeScale = 1 + push * 5;
   const irisFade = kf(t, [78, 86], [1, 0]);
@@ -466,9 +472,9 @@ const EyeScene: React.FC = () => {
   const letters = Math.max(0, Math.min(word.length, Math.floor((t - 60) / 3)));
   const txtX = interpolate(push, [0, 1], [x - 20, 0]);
   const txtY = interpolate(push, [0, 1], [y + 4, 0]);
-  const txtSize = interpolate(push, [0, 1], [66, 110]);
+  const txtSize = interpolate(push, [0, 1], [84, BIG]);
   const txtColor = push > 0.35 ? '#000' : '#fff';
-  const pupilOff = {x: -Math.sign(x) * 14, y: 10};
+  const pupilOff = {x: -Math.sign(x) * 16, y: 12};
 
   return (
     <AbsoluteFill style={{background: '#000'}}>
@@ -480,6 +486,11 @@ const EyeScene: React.FC = () => {
           <filter id="eb" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation={`${v * 0.25 + push * 10} ${(1 - open) * 4 + push * 10}`} />
           </filter>
+          <radialGradient id="iris" cx="50%" cy="50%" r="50%">
+            <stop offset="60%" stopColor="#E0285E" />
+            <stop offset="85%" stopColor={WINE_HI} />
+            <stop offset="100%" stopColor={WINE_DK} />
+          </radialGradient>
           <radialGradient id="pupil" cx="45%" cy="40%" r="60%">
             <stop offset="0%" stopColor="#1a1a1a" />
             <stop offset="100%" stopColor="#000" />
@@ -489,9 +500,9 @@ const EyeScene: React.FC = () => {
           <path d={path} fill="#fff" transform={`scale(${eyeScale})`} />
           <g clipPath="url(#eyeclip)" opacity={irisFade}>
             <g transform={`translate(${x} ${y}) scale(${1 + push * 2})`}>
-              <circle r={182} fill={ACCENT} />
-              <circle cx={pupilOff.x} cy={pupilOff.y} r={160} fill="url(#pupil)" />
-              <circle cx={pupilOff.x + 48} cy={pupilOff.y - 62} r={46} fill="#fff" />
+              <circle r={190} fill="url(#iris)" />
+              <circle cx={pupilOff.x} cy={pupilOff.y} r={166} fill="url(#pupil)" />
+              <circle cx={pupilOff.x + 50} cy={pupilOff.y - 64} r={48} fill="#fff" />
             </g>
           </g>
         </g>
@@ -505,8 +516,9 @@ const EyeScene: React.FC = () => {
           fontFamily: HN,
           fontWeight: 400,
           fontSize: txtSize,
-          letterSpacing: -3,
+          letterSpacing: -txtSize * 0.032,
           color: txtColor,
+          WebkitTextStroke: `${txtSize * 0.011}px ${txtColor}`,
           whiteSpace: 'nowrap',
           lineHeight: 1,
         }}
@@ -536,7 +548,9 @@ const measure = (txt: string, size: number, ls: number) => {
 };
 const CreativeScene: React.FC = () => {
   const t = useCurrentFrame();
-  const shiftPx = React.useMemo(() => (measure('Director', 110, -3.5) + 30) / 2, []);
+  const LS = -BIG * 0.032;
+  const GAP = 40;
+  const shiftPx = React.useMemo(() => (measure('Director', BIG, LS) + GAP) / 2, []);
   const role = [...ROLES].reverse().find((r) => t >= r.from)!;
   const lt = t - role.from;
   const fg = role.dark ? '#fff' : '#000';
@@ -546,19 +560,20 @@ const CreativeScene: React.FC = () => {
   const gray = first ? kf(t, [8, 26], [0.3, 1]) : 1;
   const draw = kf(t, [4, 24], [1, 0], out);
   const pop = first ? 1 : kf(lt, [0, 7], [1.08, 1], out);
-  const ch = !first && lt < 4 ? 6 - lt : 0;
+  const ch = !first && lt < 4 ? 7 - lt : 0;
   const push = kf(t, [0, 110], [1, 1.07], Easing.linear);
   return (
-    <AbsoluteFill style={{background: role.dark ? ACCENT : '#fff', justifyContent: 'center', alignItems: 'center'}}>
+    <AbsoluteFill style={{background: role.dark ? WINE_BG : '#fff', justifyContent: 'center', alignItems: 'center'}}>
       <div
         style={{
           display: 'flex',
-          gap: 30,
+          gap: GAP,
           alignItems: 'baseline',
           fontFamily: HN,
-          fontSize: 110,
-          letterSpacing: -3.5,
+          fontSize: BIG,
+          letterSpacing: LS,
           color: fg,
+          WebkitTextStroke: `${BIG * 0.011}px ${fg}`,
           lineHeight: 1,
           transform: `scale(${push * pop})`,
           textShadow: chroma(ch),
@@ -566,12 +581,12 @@ const CreativeScene: React.FC = () => {
       >
         <div style={{position: 'relative', transform: `translateX(${shift * shiftPx}px)`}}>
           Creative
-          <svg width={430} height={80} viewBox="0 0 430 80" style={{position: 'absolute', left: -14, top: 104, overflow: 'visible'}}>
+          <svg width={590} height={110} viewBox="0 0 430 80" style={{position: 'absolute', left: -18, top: 140, overflow: 'visible'}}>
             <path
               d="M 18 14 C 120 4, 300 2, 410 10 C 418 12, 416 20, 400 22 C 300 26, 140 30, 60 44 C 40 48, 44 56, 70 52 C 120 44, 170 40, 200 42"
               fill="none"
               stroke={fg}
-              strokeWidth={3.2}
+              strokeWidth={3}
               strokeLinecap="round"
               pathLength={1}
               strokeDasharray="1 1"
@@ -579,121 +594,335 @@ const CreativeScene: React.FC = () => {
             />
           </svg>
         </div>
-        <div style={{opacity: wordOp * gray, transform: `translateX(${shift * 40}px)`}}>{role.word}</div>
+        <div style={{opacity: wordOp * gray, transform: `translateX(${shift * 50}px)`}}>{role.word}</div>
       </div>
     </AbsoluteFill>
   );
 };
 
 /* ================= 8. Логотип ================= */
-const LW = 1320;
-const LH = (LW * 667) / 2000;
-const TXT = {x0: 0.112, x1: 0.912, y0: 0.3, y1: 0.665};
+const LW = 1500;
+const SC = LW / 2000;
+const LH = 667 * SC;
+const ELL = {cx: 1004 * SC, cy: 318.6 * SC, a: 745 * SC, b: 174.5 * SC, rot: (-18.5 * Math.PI) / 180};
+const ellPt = (th: number) => {
+  const u = [Math.cos(ELL.rot), Math.sin(ELL.rot)];
+  const v = [-u[1], u[0]];
+  return [ELL.cx + ELL.a * Math.cos(th) * u[0] + ELL.b * Math.sin(th) * v[0], ELL.cy + ELL.a * Math.cos(th) * u[1] + ELL.b * Math.sin(th) * v[1]];
+};
+const cssAng = (p: number[]) => {
+  const a = (Math.atan2(p[0] - ELL.cx, -(p[1] - ELL.cy)) * 180) / Math.PI;
+  return (a + 360) % 360;
+};
+const TH_END = 0.06;
+const TH_START = TH_END - Math.PI * 2 * 1.08;
+const BAND = {y0: 200, y1: 448};
+const LETTERS = [
+  {x0: 236, x1: 445},
+  {x0: 445, x1: 609},
+  {x0: 609, x1: 820},
+  {x0: 820, x1: 1036},
+  {x0: 1036, x1: 1108},
+  {x0: 1108, x1: 1395},
+  {x0: 1395, x1: 1560},
+  {x0: 1560, x1: 1652},
+  {x0: 1652, x1: 1830},
+];
+const SPARK = {x: 1715 * SC, y: 92 * SC};
+const DOT = {x: 1072 * SC, y: 404 * SC};
+
+const Particles: React.FC<{t: number}> = ({t}) => (
+  <>
+    {new Array(46).fill(0).map((_, i) => {
+      const x = random(`px${i}`) * W;
+      const y0 = random(`py${i}`) * H;
+      const sp = 0.2 + random(`ps${i}`) * 0.6;
+      const r = 1 + random(`pr${i}`) * 2.6;
+      const y = (((y0 - t * sp) % H) + H) % H;
+      const tw = 0.25 + 0.6 * Math.abs(Math.sin(t / (10 + random(`pt${i}`) * 20) + i));
+      return (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: x,
+            top: y,
+            width: r * 2,
+            height: r * 2,
+            borderRadius: '50%',
+            background: i % 3 === 0 ? '#ff6a92' : '#fff',
+            opacity: tw * 0.5,
+            filter: 'blur(0.6px)',
+          }}
+        />
+      );
+    })}
+  </>
+);
+
+const DotBall: React.FC<{size: number; style?: React.CSSProperties}> = ({size, style}) => (
+  <div
+    style={{
+      position: 'absolute',
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      background: `radial-gradient(circle at 35% 30%, #FF6A92, ${WINE_HI} 45%, ${WINE_DK})`,
+      boxShadow: GLOW,
+      ...style,
+    }}
+  />
+);
+
 const LogoScene: React.FC = () => {
   const t = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const reveal = kf(t, [0, 14], [0, 150], out);
-  const sweep = kf(t, [8, 38], [0, 361], Easing.inOut(Easing.quad));
-  const ringS = kf(t, [8, 40], [1.12, 1], out);
-  const ringR = kf(t, [8, 40], [-10, 0], out);
-  const txt = kf(t, [20, 40], [0, 1], out);
-  const shine = kf(t, [46, 72], [-30, 130], Easing.inOut(Easing.quad));
-  const sp = spring({frame: t - 38, fps, config: {damping: 8, stiffness: 140}});
-  const twinkle = t > 90 ? 1 + 0.35 * Math.max(0, Math.sin((t - 90) / 3)) : 1;
-  const push = kf(t, [0, 120], [1.06, 1], out);
-  const dotIn = kf(t, [2, 10], [0, 1], out);
-  const holeRect = `M0 0H${LW}V${LH}H0Z M${TXT.x0 * LW} ${TXT.y0 * LH}V${TXT.y1 * LH}H${TXT.x1 * LW}V${TXT.y0 * LH}Z`;
-  const logoImg = <Img src={staticFile('logo.png')} style={{width: LW, height: LH, display: 'block'}} />;
+
+  const start = ellPt(TH_START);
+  const dashF = (f: number) => kf(f, [24, 31], [0, 1], Easing.in(Easing.quad));
+  const dash = dashF(t);
+  const dashV = Math.hypot(start[0] - ELL.cx, start[1] - ELL.cy) * Math.abs(dash - dashF(t - 1));
+  const collapse = kf(t, [0, 14], [150, 0], Easing.inOut(Easing.quad));
+  const dotPulse = 1 + 0.3 * Math.sin(Math.max(0, t - 14) / 2.2) * kf(t, [14, 22, 30], [0, 1, 0], Easing.linear);
+
+  const orbitP = kf(t, [30, 84], [0, 1], Easing.inOut(Easing.sin));
+  const th = TH_START + (TH_END - TH_START) * orbitP;
+  const head = ellPt(th);
+  const startAng = cssAng(start);
+  const turns = Math.floor((th - TH_START) / (Math.PI * 2));
+  let sweep = (cssAng(head) - startAng + 360) % 360;
+  sweep = Math.min(360, sweep + turns * 360);
+  if (orbitP >= 1) sweep = 360;
+  const cometOn = t >= 30 && t < 88;
+  const trailLen = 1.1 * Math.min(1, orbitP * 3);
+  const trail = new Array(28).fill(0).map((_, i) => ellPt(th - (i / 28) * trailLen));
+
+  const ry = kf(t, [16, 130], [22, 0], Easing.out(Easing.cubic));
+  const rx = kf(t, [16, 130], [10, 0], Easing.out(Easing.cubic));
+  const rz = kf(t, [16, 130], [-4, 0], Easing.out(Easing.cubic));
+  const zoom = kf(t, [16, 130], [1.22, 1], Easing.out(Easing.cubic)) * kf(t, [130, 220], [1, 1.04], Easing.linear);
+
+  const landT = (i: number) => 52 + i * 6;
+  const sp = (f: number) => spring({frame: f, fps, config: {damping: 11, stiffness: 190, mass: 0.9}});
+  let shake = 0;
+  for (let i = 0; i < 4; i++) {
+    const d = t - (landT(i) + 7);
+    if (d >= 0 && d < 6) shake += (d % 2 ? -1 : 1) * (6 - d) * 1.2;
+  }
+
+  const flareT = t - 84;
+  const flare = spring({frame: flareT, fps, config: {damping: 7, stiffness: 120}});
+  const flash = flareT >= 0 && flareT < 6 ? (1 - flareT / 6) * 0.12 : 0;
+  const shock = kf(flareT, [0, 26], [0, 1], out);
+
+  const dotLand = spring({frame: t - 96, fps, config: {damping: 8, stiffness: 180}});
+  const dotChrome = kf(t, [160, 180], [0, 1]);
+  const workT = (i: number) => 100 + i * 5;
+
+  const shine1 = kf(t, [122, 152], [-25, 125], Easing.inOut(Easing.quad));
+  const shine2 = kf(t, [168, 196], [-25, 125], Easing.inOut(Easing.quad));
+  const glow = kf(t, [70, 130], [0, 1]);
+  const twinkle = t > 150 ? 1 + 0.25 * Math.max(0, Math.sin((t - 150) / 3.5)) : 1;
+  const fadeOut = kf(t, [206, 220], [0, 1]);
+
+  const bandHole = `M-200 -200H${LW + 200}V${LH + 200}H-200Z M${230 * SC + 200} ${BAND.y0 * SC + 200}V${BAND.y1 * SC + 200}H${1830 * SC + 200}V${BAND.y0 * SC + 200}Z`;
+  const slice = (key: string, x0: number, x1: number, style: React.CSSProperties) => (
+    <div
+      key={key}
+      style={{
+        position: 'absolute',
+        left: x0 * SC,
+        top: BAND.y0 * SC,
+        width: (x1 - x0) * SC,
+        height: (BAND.y1 - BAND.y0) * SC,
+        overflow: 'hidden',
+        ...style,
+      }}
+    >
+      <Img src={staticFile('logo.png')} style={{position: 'absolute', left: -x0 * SC, top: -BAND.y0 * SC, width: LW, height: LH}} />
+    </div>
+  );
+  const sx = 960 - LW / 2 + ELL.cx;
+  const sy = 540 - LH / 2 + ELL.cy;
+
   return (
-    <AbsoluteFill style={{background: ACCENT}}>
-      <AbsoluteFill style={{background: '#fff', clipPath: `circle(${reveal}% at 50% 50%)`, justifyContent: 'center', alignItems: 'center'}}>
-        <div style={{position: 'relative', width: LW, height: LH, transform: `scale(${push})`}}>
-          {/* кольцо — прорисовывается по кругу */}
+    <AbsoluteFill style={{background: `radial-gradient(ellipse 70% 80% at 50% 50%, #2B0810 0%, #12030A 55%, #050103 100%)`, overflow: 'hidden'}}>
+      <Particles t={t} />
+      <div
+        style={{
+          position: 'absolute',
+          left: 960 - 700,
+          top: 540 - 260,
+          width: 1400,
+          height: 520,
+          borderRadius: '50%',
+          background: 'radial-gradient(closest-side, rgba(196,20,74,0.55), rgba(123,10,42,0.25) 55%, transparent)',
+          filter: 'blur(30px)',
+          opacity: glow,
+        }}
+      />
+      <div style={{position: 'absolute', inset: 0, perspective: 1800, transform: `translate(${shake}px, ${shake * 0.5}px)`}}>
+        <div
+          style={{
+            position: 'absolute',
+            left: 960 - LW / 2,
+            top: 540 - LH / 2,
+            width: LW,
+            height: LH,
+            transformStyle: 'preserve-3d',
+            transform: `rotateY(${ry}deg) rotateX(${rx}deg) rotateZ(${rz}deg) scale(${zoom})`,
+          }}
+        >
+          {/* кольцо, проявляющееся за кометой */}
           <div
             style={{
               position: 'absolute',
-              inset: 0,
-              clipPath: `path(evenodd, '${holeRect}')`,
-              WebkitMaskImage: `conic-gradient(from 200deg at 50% 50%, #000 ${sweep}deg, transparent ${sweep + 0.5}deg)`,
-              transform: `scale(${ringS}) rotate(${ringR}deg)`,
+              left: -200,
+              top: -200,
+              width: LW + 400,
+              height: LH + 400,
+              clipPath: `path(evenodd, '${bandHole}')`,
+              WebkitMaskImage: `conic-gradient(from ${startAng}deg at ${ELL.cx + 200}px ${ELL.cy + 200}px, #000 ${sweep}deg, transparent ${Math.min(360, sweep + 0.01)}deg)`,
             }}
           >
-            {logoImg}
+            <Img src={staticFile('logo.png')} style={{position: 'absolute', left: 200, top: 200, width: LW, height: LH}} />
           </div>
-          {/* текст — выезжает снизу с размытием */}
-          <div
+
+          {/* frht */}
+          {LETTERS.slice(0, 4).map((L, i) => {
+            const a = sp(t - landT(i));
+            const vel = Math.abs(a - sp(t - 1 - landT(i)));
+            const flashL = kf(t - landT(i), [6, 9, 18], [0, 1, 0], Easing.linear);
+            return slice(`l${i}`, L.x0, L.x1, {
+              transform: `translateY(${(1 - a) * -380}px) rotateX(${(1 - a) * 45}deg) scale(${0.92 + 0.08 * a})`,
+              opacity: a > 0.02 ? 1 : 0,
+              filter: `blur(${Math.min(14, vel * 70)}px) brightness(${1 + flashL * 0.8})`,
+              transformOrigin: '50% 100%',
+            });
+          })}
+
+          {/* «.» */}
+          {slice('dot', LETTERS[4].x0, LETTERS[4].x1, {opacity: dotChrome})}
+          <DotBall
+            size={52}
             style={{
-              position: 'absolute',
-              inset: 0,
-              clipPath: `inset(${TXT.y0 * 100}% ${(1 - TXT.x1) * 100 + (1 - txt) * (TXT.x1 - TXT.x0) * 100}% ${(1 - TXT.y1) * 100}% ${TXT.x0 * 100}%)`,
-              transform: `translateY(${(1 - txt) * 40}px)`,
-              filter: `blur(${(1 - txt) * 10}px)`,
-              opacity: txt,
-            }}
-          >
-            {logoImg}
-          </div>
-          {/* блик по хрому */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              WebkitMaskImage: `url(${staticFile('logo.png')})`,
-              WebkitMaskSize: '100% 100%',
-              background: `linear-gradient(110deg, transparent ${shine - 12}%, rgba(255,255,255,0.95) ${shine}%, transparent ${shine + 12}%)`,
-              mixBlendMode: 'screen',
-              opacity: t > 44 ? 1 : 0,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              WebkitMaskImage: `url(${staticFile('logo.png')})`,
-              WebkitMaskSize: '100% 100%',
-              background: `linear-gradient(110deg, transparent ${shine - 6}%, ${ACCENT} ${shine - 2}%, transparent ${shine + 4}%)`,
-              mixBlendMode: 'multiply',
-              opacity: t > 44 ? 0.55 : 0,
+              left: DOT.x - 26,
+              top: DOT.y - 26,
+              transform: `translateY(${(1 - dotLand) * -260}px) scale(${Math.max(0, dotLand)})`,
+              opacity: (t >= 96 ? 1 : 0) * (1 - dotChrome),
             }}
           />
-          {/* звезда-вспышка */}
-          <svg
-            width={300}
-            height={300}
-            viewBox="-150 -150 300 300"
-            style={{
-              position: 'absolute',
-              left: 0.857 * LW - 150,
-              top: 0.138 * LH - 150,
-              overflow: 'visible',
-              transform: `scale(${Math.max(0, sp) * twinkle}) rotate(${(1 - sp) * 90 + t * 0.6}deg)`,
-            }}
-          >
-            <defs>
-              <radialGradient id="glow">
-                <stop offset="0%" stopColor="#fff" stopOpacity="1" />
-                <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            <circle r={60} fill="url(#glow)" />
-            <path d="M0 -110 L7 -7 L140 0 L7 7 L0 110 L-7 7 L-140 0 L-7 -7 Z" fill="#fff" stroke="#bbb" strokeWidth={1} />
-            <circle r={9} fill="#fff" />
-          </svg>
-          {/* бордовая точка — продолжение линии ролика */}
-          <div
-            style={{
-              position: 'absolute',
-              left: 0.5 * LW - 20,
-              top: 0.5 * LH - 20,
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              background: ACCENT,
-              transform: `scale(${dotIn * (1 - txt)})`,
-            }}
-          />
+
+          {/* work */}
+          {LETTERS.slice(5).map((L, i) => {
+            const p = kf(t, [workT(i), workT(i) + 14], [0, 1], out);
+            return slice(`w${i}`, L.x0, L.x1, {
+              transform: `translateX(${(1 - p) * -60}px)`,
+              opacity: p,
+              filter: `blur(${(1 - p) * 8}px)`,
+              clipPath: `inset(0 ${(1 - p) * 100}% 0 0)`,
+            });
+          })}
+
+          {/* блики по хрому */}
+          {[shine1, shine2].map((s, i) => (
+            <div
+              key={`s${i}`}
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                width: LW,
+                height: LH,
+                WebkitMaskImage: `url(${staticFile('logo.png')})`,
+                WebkitMaskSize: '100% 100%',
+                background: `linear-gradient(105deg, transparent ${s - 8}%, rgba(255,255,255,0.95) ${s}%, transparent ${s + 8}%)`,
+                mixBlendMode: 'screen',
+                opacity: (i === 0 ? t > 120 : t > 166) ? 1 : 0,
+              }}
+            />
+          ))}
+
+          {/* комета */}
+          {cometOn && (
+            <svg width={LW} height={LH} style={{position: 'absolute', left: 0, top: 0, overflow: 'visible'}}>
+              <defs>
+                <radialGradient id="comet">
+                  <stop offset="0%" stopColor="#fff" />
+                  <stop offset="35%" stopColor="#FF7AA0" />
+                  <stop offset="100%" stopColor="rgba(196,20,74,0)" />
+                </radialGradient>
+              </defs>
+              {trail.slice(1).map((p, i) => {
+                const q = trail[i];
+                const k2 = 1 - i / trail.length;
+                return (
+                  <line
+                    key={i}
+                    x1={q[0]}
+                    y1={q[1]}
+                    x2={p[0]}
+                    y2={p[1]}
+                    stroke={i < 6 ? '#fff' : WINE_HI}
+                    strokeOpacity={k2 * 0.95}
+                    strokeWidth={2 + k2 * 9}
+                    strokeLinecap="round"
+                  />
+                );
+              })}
+              <circle cx={head[0]} cy={head[1]} r={46} fill="url(#comet)" />
+              <circle cx={head[0]} cy={head[1]} r={9} fill="#fff" />
+            </svg>
+          )}
+
+          {/* вспышка-звезда */}
+          {flareT >= 0 && (
+            <svg
+              width={900}
+              height={900}
+              viewBox="-450 -450 900 900"
+              style={{position: 'absolute', left: SPARK.x - 450, top: SPARK.y - 450, overflow: 'visible', mixBlendMode: 'screen'}}
+            >
+              <defs>
+                <radialGradient id="fglow">
+                  <stop offset="0%" stopColor="#fff" stopOpacity="1" />
+                  <stop offset="25%" stopColor="#FFC2D3" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#C4144A" stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="streak" x1="0" x2="1">
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#fff" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <circle r={shock * 260} fill="none" stroke="#fff" strokeOpacity={(1 - shock) * 0.8} strokeWidth={3 + (1 - shock) * 6} />
+              <circle r={140 * flare * twinkle} fill="url(#fglow)" />
+              <rect x={-440 * flare} y={-3} width={880 * flare} height={6} fill="url(#streak)" opacity={kf(flareT, [0, 30, 60], [1, 0.8, 0.35])} />
+              <g transform={`rotate(${(1 - flare) * 90 + t * 0.4}) scale(${flare * twinkle})`}>
+                <path d="M0 -150 L9 -9 L180 0 L9 9 L0 150 L-9 9 L-180 0 L-9 -9 Z" fill="#fff" />
+                <path d="M0 -60 L5 -5 L60 0 L5 5 L0 60 L-5 5 L-60 0 L-5 -5 Z" fill="#fff" transform="rotate(45)" opacity={0.7} />
+              </g>
+              <circle r={10 * flare} fill="#fff" />
+            </svg>
+          )}
+
+          {t < 32 && (
+            <DotBall
+              size={48}
+              style={{
+                left: interpolate(dash, [0, 1], [ELL.cx, start[0]]) - 24,
+                top: interpolate(dash, [0, 1], [ELL.cy, start[1]]) - 24,
+                transform: `scale(${dotPulse})`,
+                filter: `blur(${dashV * 0.08}px)`,
+              }}
+            />
+          )}
         </div>
-      </AbsoluteFill>
+      </div>
+      {collapse > 0 && <AbsoluteFill style={{background: WINE_BG, clipPath: `circle(${collapse}% at ${sx}px ${sy}px)`}} />}
+      <AbsoluteFill style={{background: '#fff', opacity: flash, mixBlendMode: 'screen'}} />
+      <AbsoluteFill style={{background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)'}} />
+      <AbsoluteFill style={{background: '#000', opacity: fadeOut}} />
     </AbsoluteFill>
   );
 };
@@ -705,12 +934,13 @@ const Sfx: React.FC<{at: number; src: string; vol?: number; len?: number}> = ({a
   </Sequence>
 );
 const S = T.sil;
+const L0 = T.logo;
 const Sound: React.FC = () => (
   <>
     <Audio
       src={staticFile('music/swimming.m4a')}
       trimBefore={Math.round(33.2 * 60)}
-      volume={(f) => interpolate(f, [0, 12, DURATION - 50, DURATION], [0, 0.36, 0.36, 0], C)}
+      volume={(f) => interpolate(f, [0, 12, DURATION - 60, DURATION], [0, 0.36, 0.36, 0], C)}
     />
     <Sfx at={2} src="click.mp3" vol={0.45} />
     <Sfx at={30} src="whoosh.wav" vol={0.45} />
@@ -738,9 +968,18 @@ const Sound: React.FC = () => (
     {ROLES.slice(1).map((r) => (
       <Sfx key={r.word} at={T.creative + r.from} src="cut.mp3" vol={0.45} />
     ))}
-    <Sfx at={T.logo} src="ewhoosh.wav" vol={0.45} />
-    <Sfx at={T.logo + 38} src="bulk1.wav" vol={0.45} />
-    <Sfx at={T.logo + 48} src="whoosh.wav" vol={0.25} />
+    <Sfx at={L0} src="ewhoosh.wav" vol={0.45} />
+    <Sfx at={L0 + 14} src="bulk1.wav" vol={0.4} />
+    <Sfx at={L0 + 28} src="riser.mp3" vol={0.45} />
+    <Sfx at={L0 + 30} src="bigwhoosh.mp3" vol={0.4} />
+    {[0, 1, 2, 3].map((i) => (
+      <Sfx key={i} at={L0 + 52 + i * 6 + 7} src={`bulk${i + 2}.wav`} vol={0.45} />
+    ))}
+    <Sfx at={L0 + 84} src="cut.mp3" vol={0.55} />
+    <Sfx at={L0 + 86} src="ewhoosh.wav" vol={0.4} />
+    <Sfx at={L0 + 100} src="bulk3.wav" vol={0.45} />
+    <Sfx at={L0 + 102} src="whoosh.wav" vol={0.3} />
+    <Sfx at={L0 + 122} src="whoosh.wav" vol={0.2} />
   </>
 );
 
