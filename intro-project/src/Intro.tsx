@@ -935,53 +935,7 @@ const Sfx: React.FC<{at: number; src: string; vol?: number; len?: number}> = ({a
 );
 const S = T.sil;
 const L0 = T.logo;
-const Sound: React.FC = () => (
-  <>
-    <Audio
-      src={staticFile('music/swimming.m4a')}
-      trimBefore={Math.round(33.2 * 60)}
-      volume={(f) => interpolate(f, [0, 12, DURATION - 60, DURATION], [0, 0.36, 0.36, 0], C)}
-    />
-    <Sfx at={2} src="click.mp3" vol={0.45} />
-    <Sfx at={30} src="whoosh.wav" vol={0.45} />
-    <Sfx at={T.hi + 2} src="bulk2.wav" vol={0.5} />
-    <Sfx at={T.hi + 6} src="bulk3.wav" vol={0.5} />
-    <Sfx at={T.hi + 56} src="cut.mp3" vol={0.5} />
-    <Sfx at={S} src="ewhoosh.wav" vol={0.45} />
-    <Sfx at={S + 34} src="click.mp3" vol={0.45} />
-    <Sfx at={S + 54} src="bigwhoosh.mp3" vol={0.4} />
-    <Sfx at={S + 82} src="typing.mp3" vol={0.55} len={32} />
-    <Sfx at={S + 158} src="bulk5.wav" vol={0.4} />
-    <Sfx at={S + 166} src="bulk4.wav" vol={0.4} />
-    <Sfx at={S + 184} src="bulk1.wav" vol={0.45} />
-    <Sfx at={S + 198} src="whoosh.wav" vol={0.35} />
-    <Sfx at={S + 213} src="bulk3.wav" vol={0.45} />
-    <Sfx at={S + 229} src="bulk2.wav" vol={0.45} />
-    <Sfx at={S + 241} src="bulk4.wav" vol={0.35} />
-    <Sfx at={S + 244} src="ewhoosh.wav" vol={0.45} />
-    <Sfx at={T.eye} src="bulk2.wav" vol={0.45} />
-    <Sfx at={T.eye + 14} src="whoosh.wav" vol={0.25} />
-    <Sfx at={T.eye + 50} src="whoosh.wav" vol={0.3} />
-    <Sfx at={T.eye + 60} src="typing.mp3" vol={0.4} len={24} />
-    <Sfx at={T.eye + 70} src="riser.mp3" vol={0.4} />
-    <Sfx at={T.creative} src="bigwhoosh.mp3" vol={0.4} />
-    {ROLES.slice(1).map((r) => (
-      <Sfx key={r.word} at={T.creative + r.from} src="cut.mp3" vol={0.45} />
-    ))}
-    <Sfx at={L0} src="ewhoosh.wav" vol={0.45} />
-    <Sfx at={L0 + 14} src="bulk1.wav" vol={0.4} />
-    <Sfx at={L0 + 28} src="riser.mp3" vol={0.45} />
-    <Sfx at={L0 + 30} src="bigwhoosh.mp3" vol={0.4} />
-    {[0, 1, 2, 3].map((i) => (
-      <Sfx key={i} at={L0 + 52 + i * 6 + 7} src={`bulk${i + 2}.wav`} vol={0.45} />
-    ))}
-    <Sfx at={L0 + 84} src="cut.mp3" vol={0.55} />
-    <Sfx at={L0 + 86} src="ewhoosh.wav" vol={0.4} />
-    <Sfx at={L0 + 100} src="bulk3.wav" vol={0.45} />
-    <Sfx at={L0 + 102} src="whoosh.wav" vol={0.3} />
-    <Sfx at={L0 + 122} src="whoosh.wav" vol={0.2} />
-  </>
-);
+const Sound: React.FC = () => <Audio src={staticFile('sound_design.wav')} />;
 
 const Scene: React.FC<{from: number; to: number; children: React.ReactNode}> = ({from, to, children}) => (
   <Sequence from={from} durationInFrames={to - from}>
