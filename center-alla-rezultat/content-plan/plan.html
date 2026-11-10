@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Контент-план</title>
+<link rel="stylesheet" href="fonts/montserrat.css">
+<style>
+  @page { size: A4; margin: 0; }
+  :root { --turq:#3CE0D7; --turq-d:#1EBBB0; --turq-dd:#128C84; --aqua:#E6F8F6; --g:#373435; --grey:#6B7079; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Montserrat', sans-serif; color: var(--g); font-size: 10.5pt; line-height: 1.45; }
+  .page { width: 210mm; height: 297mm; padding: 18mm 18mm 16mm; position: relative; overflow: hidden; page-break-after: always; background: #fff; }
+  .page:last-child { page-break-after: auto; }
+  .circ { position: absolute; border-radius: 50%; background: var(--turq); opacity: .1; }
+  h1 { font-weight: 900; font-size: 34pt; line-height: 1.05; }
+  h2 { font-weight: 900; font-size: 20pt; margin-bottom: 5mm; }
+  h3 { font-weight: 800; font-size: 13pt; }
+  .eyebrow { font-weight: 700; font-size: 9pt; letter-spacing: .2em; text-transform: uppercase; color: var(--turq-d); margin-bottom: 3mm; }
+  .muted { color: var(--grey); }
+  .accent { color: var(--turq-d); }
+  .foot { position: absolute; left: 18mm; right: 18mm; bottom: 9mm; display: flex; justify-content: space-between; font-size: 8pt; color: #9AA3A6; }
+  .card { background: #fff; border: 1.5px solid #D7F2EF; border-radius: 5mm; padding: 5mm 6mm; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .pill { display: inline-block; background: var(--aqua); color: var(--turq-dd); font-weight: 700; font-size: 8.5pt; padding: 1.2mm 3mm; border-radius: 10mm; margin-right: 2mm; }
+  ul { padding-left: 5mm; } li { margin: 1.2mm 0; }
+  .topic { display: grid; grid-template-columns: 14mm 1fr; gap: 4mm; margin-bottom: 4.2mm; }
+  .num { width: 14mm; height: 14mm; border-radius: 4mm; background: linear-gradient(135deg, var(--turq), var(--turq-d)); color: #fff;
+         font-weight: 900; font-size: 18pt; display: flex; align-items: center; justify-content: center; }
+  .row { display: flex; gap: 6mm; margin-top: 1.5mm; font-size: 9.5pt; }
+  .row b { color: var(--turq-dd); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 10pt; }
+  th { text-align: left; font-weight: 800; background: var(--turq-d); color: #fff; padding: 3mm 4mm; }
+  th:first-child { border-radius: 3mm 0 0 0; } th:last-child { border-radius: 0 3mm 0 0; }
+  td { padding: 3mm 4mm; border-bottom: 1px solid #E3F4F2; vertical-align: top; }
+  tr:nth-child(even) td { background: #F6FCFB; }
+  .steps { counter-reset: s; }
+  .step { display: grid; grid-template-columns: 10mm 1fr; gap: 3mm; margin-bottom: 3.5mm; }
+  .step::before { counter-increment: s; content: counter(s); width: 10mm; height: 10mm; border-radius: 50%; background: var(--aqua);
+                  color: var(--turq-dd); font-weight: 900; display: flex; align-items: center; justify-content: center; }
+  .price { background: linear-gradient(135deg, #3CE0D7, #1EBBB0); color: #fff; border-radius: 5mm; padding: 6mm; }
+  .price .big { font-weight: 900; font-size: 26pt; line-height: 1.1; }
+  .price s { opacity: .75; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ============ 1. COVER ============ -->
+<div class="page">
+  <div class="circ" style="width:150mm;height:150mm;right:-50mm;top:-40mm;"></div>
+  <div class="circ" style="width:110mm;height:110mm;left:-40mm;bottom:-30mm;opacity:.08"></div>
+  <img src="../brand/logo.png" style="width:78mm;margin-top:6mm" alt="">
+  <div style="margin-top:42mm">
+    <div class="eyebrow">Предложение по контенту</div>
+    <h1>Контент-план<br>на месяц</h1>
+    <p style="font-size:15pt;margin-top:6mm;font-weight:500">для Центра омоложения и коррекции фигуры<br>Аллы Казаниной</p>
+    <p class="accent" style="font-size:13pt;margin-top:6mm;font-weight:800">11 ноября – 10 декабря 2026</p>
+  </div>
+  <div style="position:absolute;left:18mm;bottom:28mm">
+    <div class="muted" style="font-size:9pt">Подготовил</div>
+    <div style="font-weight:800;font-size:14pt">Фархат</div>
+    <div class="accent" style="font-weight:700">@frht.work · рекламные ролики и Reels</div>
+  </div>
+</div>
+
+<!-- ============ 2. STRATEGY ============ -->
+<div class="page">
+  <div class="circ" style="width:90mm;height:90mm;right:-30mm;top:-25mm;"></div>
+  <div class="eyebrow">Подход</div>
+  <h2>Стратегия продвижения</h2>
+  <p style="font-size:11pt;max-width:160mm">Сейчас в аккаунте в основном статичные карусели с текстом — они хорошо работают на тех, кто уже подписан,
+  но почти не приводят новых людей. Новых клиентов дают короткие <b>Reels</b>, поэтому они — основа плана.</p>
+
+  <div class="grid2" style="margin-top:7mm">
+    <div class="card"><h3>2 ролика в неделю</h3><p class="muted" style="margin-top:2mm">Регулярность важнее количества: алгоритм Instagram продвигает аккаунты, которые публикуют стабильно.</p></div>
+    <div class="card"><h3>Единый фирменный стиль</h3><p class="muted" style="margin-top:2mm">Ваши цвета и логотип в каждом ролике — центр узнают с первой секунды.</p></div>
+    <div class="card"><h3>Лёгкий юмор и инфографика</h3><p class="muted" style="margin-top:2mm">Как в «Ленивом спорте»: смешно, понятно, досматривают до конца и пересылают подругам.</p></div>
+    <div class="card"><h3>Одна понятная цель</h3><p class="muted" style="margin-top:2mm">Каждый ролик заканчивается одинаково: «Оставьте заявку» и телефон <b>8 707 474 78 24</b>.</p></div>
+  </div>
+
+  <div class="card" style="margin-top:7mm;background:var(--aqua);border-color:var(--aqua)">
+    <h3>Каждый ролик закрывает одно сомнение клиента</h3>
+    <div style="margin-top:3mm">
+      <span class="pill">«Это развод?»</span><span class="pill">«Будет больно?»</span><span class="pill">«Сколько стоит?»</span>
+      <span class="pill">«Мне подойдёт?»</span><span class="pill">«Будет ли результат?»</span>
+    </div>
+  </div>
+
+  <h3 style="margin-top:9mm">Как будем понимать, что контент работает</h3>
+  <ul style="margin-top:2mm">
+    <li>Количество заявок и звонков с роликов</li>
+    <li>Досмотры Reels и охват новых людей (не подписчиков)</li>
+    <li>Сохранения и репосты — показатель полезного контента</li>
+  </ul>
+  <div class="foot"><span>Контент-план · Центр Аллы Казаниной</span><span>Фархат · @frht.work</span></div>
+</div>
+
+<!-- ============ 3. FIVE TOPICS ============ -->
+<div class="page">
+  <div class="eyebrow">Для старта</div>
+  <h2>5 тем роликов</h2>
+
+  <div class="topic"><div class="num">1</div><div>
+    <h3>«Что можно успеть за 1 час?» — пробный визит</h3>
+    <p class="muted">Таймер часа: диагностика, замеры и до 8 аппаратных методик по шагам. В конце — результат и предложение пробного визита.</p>
+    <div class="row"><span><b>Цель:</b> заявки на первый визит</span><span><b>Формат:</b> инфографика + озвучка, 25–30 сек</span></div>
+  </div></div>
+
+  <div class="topic"><div class="num">2</div><div>
+    <h3>«Мифы о похудении» — с юмором</h3>
+    <p class="muted">«Миф / Правда» в формате мема: «Не есть после 6», «Аппараты — это развод», «После похудения обвиснет кожа». На каждый миф — короткий честный ответ.</p>
+    <div class="row"><span><b>Цель:</b> доверие и экспертность</span><span><b>Формат:</b> инфографика + озвучка, 20–25 сек</span></div>
+  </div></div>
+
+  <div class="topic"><div class="num">3</div><div>
+    <h3>«NEO PLASMA — сияющая кожа к Новому году»</h3>
+    <p class="muted">Что это за процедура, как ощущается и какой эффект — без уколов и операций.</p>
+    <div class="row"><span><b>Цель:</b> продажи процедур для лица</span><span><b>Формат:</b> анимация + музыка + озвучка, 15–20 сек</span></div>
+  </div></div>
+
+  <div class="topic"><div class="num">4</div><div>
+    <h3>«Мама, полчаса только для себя» — восстановление после родов</h3>
+    <p class="muted">Тёплый ролик для мам с малышами от 3 месяцев до 2 лет: восстановиться можно без спортзала и нагрузок.</p>
+    <div class="row"><span><b>Цель:</b> новая аудитория — молодые мамы</span><span><b>Формат:</b> инфографика + озвучка, 20 сек</span></div>
+  </div></div>
+
+  <div class="topic"><div class="num">5</div><div>
+    <h3>«Что подарить той, у которой всё есть?» — сертификат</h3>
+    <p class="muted">Подарок — это время для себя. Сертификат в фирменном конверте на процедуры для лица и тела.</p>
+    <div class="row"><span><b>Цель:</b> продажи сертификатов в декабре</span><span><b>Формат:</b> праздничная анимация + озвучка, 15–20 сек</span></div>
+  </div></div>
+
+  <p class="muted" style="font-size:9pt">Любую тему можно заменить — предложу альтернативу.</p>
+  <div class="card" style="margin-top:6mm;background:var(--aqua);border-color:var(--aqua)">
+    <h3>На следующий месяц</h3>
+    <p class="muted" style="margin-top:1.5mm">Видеоотзывы клиенток по готовому шаблону съёмки и реалити «Фокус-группа» — путь участниц к Новому году.</p>
+  </div>
+  <div class="foot"><span>Контент-план · Центр Аллы Казаниной</span><span>Фархат · @frht.work</span></div>
+</div>
+
+<!-- ============ 4. CALENDAR + PROCESS ============ -->
+<div class="page">
+  <div class="eyebrow">Месяц</div>
+  <h2>Календарь публикаций</h2>
+  <table>
+    <tr><th style="width:40mm">Неделя</th><th>Ролики</th><th style="width:46mm">Сторис</th></tr>
+    <tr><td><b>11–17 ноября</b></td><td>«Ленивый спорт» (готов)<br>«1 час — пробный визит»</td><td>Опрос «Пробовали аппаратное похудение?»</td></tr>
+    <tr><td><b>18–24 ноября</b></td><td>«Мифы о похудении»<br>«NEO PLASMA»</td><td>Викторина «Миф или правда?»</td></tr>
+    <tr><td><b>25 ноября – 1 декабря</b></td><td>«Мама, полчаса только для себя»</td><td>Вопросы от мам — ответы специалиста</td></tr>
+    <tr><td><b>2–10 декабря</b></td><td>«Подарочный сертификат»</td><td>Распаковка сертификата, обратный отсчёт до НГ</td></tr>
+  </table>
+  <p class="muted" style="margin-top:3mm;font-size:9pt">Каждый ролик дополнительно нарезаем в сторис со стикером-опросом или кнопкой заявки.</p>
+
+  <h2 style="margin-top:10mm">Как работаем</h2>
+  <div class="steps">
+    <div class="step"><div><b>Вы утверждаете темы</b> <span class="muted">— можно заменить любую.</span></div></div>
+    <div class="step"><div><b>Сценарий на согласование</b> <span class="muted">— по каждой теме присылаю текст на экране и озвучку.</span></div></div>
+    <div class="step"><div><b>Производство 2–3 дня</b> <span class="muted">— на ролик, в стоимость входят 2 круга правок.</span></div></div>
+    <div class="step"><div><b>Финальный файл</b> <span class="muted">— после утверждения и оплаты.</span></div></div>
+  </div>
+
+  <div class="grid2" style="margin-top:6mm">
+    <div class="price">
+      <div style="font-weight:700;opacity:.9">Пакет из 5 роликов</div>
+      <div class="big">42 000 ₸</div>
+      <div><s>50 000 ₸</s> · предоплата 50 %</div>
+    </div>
+    <div class="card">
+      <h3>От вас нужно</h3>
+      <ul style="margin-top:2mm;font-size:9.5pt">
+        <li>Подтвердить актуальные цены и акции</li>
+        <li>Видео и фото процедур и кабинетов, если есть</li>
+        <li>Ответственного за согласование сценариев</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot"><span>Контент-план · Центр Аллы Казаниной</span><span>Фархат · @frht.work</span></div>
+</div>
+
+</body>
+</html>
