@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Позвали на той</title>
+<link rel="stylesheet" href="fonts/montserrat.css">
+<style>
+  :root { --turq:#3CE0D7; --turq-d:#1EBBB0; --turq-dd:#128C84; --g:#373435; --grey:#6B7079; --dress:#E25C6A; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body { font-family: 'Montserrat', sans-serif; color: var(--g); background: linear-gradient(#FFFFFF, #E3F8F5); }
+  .abs { position: absolute; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .c { position: absolute; left: 0; right: 0; text-align: center; }
+  .emo { vertical-align: -0.18em; }
+  #logo { position: absolute; left: 50%; top: 52px; width: 430px; transform: translateX(-50%); z-index: 5; }
+  .h1 { font-weight: 900; font-size: 96px; line-height: 1.08; }
+  .h1 b { color: var(--turq-d); }
+  .sub { font-weight: 600; font-size: 46px; color: var(--grey); }
+  .notif { position: absolute; left: 70px; right: 70px; top: 330px; height: 230px; border-radius: 50px; background: rgba(255,255,255,.96);
+           box-shadow: 0 30px 70px rgba(18,140,132,.2); display: flex; align-items: center; gap: 34px; padding: 0 44px; }
+  .app { width: 130px; height: 130px; border-radius: 32px; background: linear-gradient(135deg,#3CE0D7,#1EBBB0); display: flex; align-items: center; justify-content: center; flex: none; }
+  .week { display: flex; align-items: center; gap: 26px; justify-content: center; margin: 22px 0; }
+  .week span { font-weight: 700; font-size: 40px; width: 230px; text-align: right; color: var(--grey); }
+  .dot { width: 84px; height: 84px; border-radius: 50%; background: #E6F3F2; display: flex; align-items: center; justify-content: center; }
+  .dot i { width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg,#3CE0D7,#1EBBB0); display: block; transform: scale(0); }
+  .btn { position: absolute; left: 110px; right: 110px; height: 170px; border-radius: 85px;
+         background: linear-gradient(90deg, #3CE0D7, #1EBBB0); color: #fff; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; box-shadow: 0 24px 50px rgba(30,187,176,.35); }
+  .btn b { font-weight: 900; font-size: 60px; } .btn small { font-weight: 800; font-size: 46px; letter-spacing: .02em; }
+</style>
+</head>
+<body>
+<svg class="abs" width="1080" height="1920" style="left:0;top:0">
+  <circle id="c1" cx="1080" cy="1600" r="560" fill="#3CE0D7" opacity=".12"/>
+  <circle id="c2" cx="-60" cy="420" r="300" fill="#3CE0D7" opacity=".10"/>
+  <g id="confetti"></g>
+</svg>
+<img id="logo" src="../../brand/logo.png" alt="">
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="gDress" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EE7380"/><stop offset="1" stop-color="#CC4655"/></linearGradient>
+    <filter id="fs" x="-30%" y="-20%" width="160%" height="150%"><feDropShadow dx="0" dy="24" stdDeviation="22" flood-color="#7A2A33" flood-opacity=".22"/></filter>
+    <!-- dress, front, on a hanger (origin = hanger hook) -->
+    <g id="dressFront">
+      <path d="M0 -40 C0 -70, 30 -70, 30 -50" fill="none" stroke="#9AA3A6" stroke-width="10" stroke-linecap="round"/>
+      <path d="M0 -40 L-150 30 L150 30 Z" fill="none" stroke="#9AA3A6" stroke-width="10" stroke-linejoin="round"/>
+      <path d="M-58 20 L-46 90 M58 20 L46 90" stroke="#CC4655" stroke-width="12" stroke-linecap="round"/>
+      <path d="M-70 90 C-40 104, 40 104, 70 90 L84 250 C200 420, 230 560, 236 640 C120 680, -120 680, -236 640 C-230 560, -200 420, -84 250 Z" fill="url(#gDress)"/>
+      <path d="M-84 250 C-30 270, 30 270, 84 250" fill="none" stroke="#B83A49" stroke-width="10" stroke-linecap="round"/>
+      <path d="M-40 300 C-70 420, -110 520, -150 620" fill="none" stroke="#F59AA3" stroke-width="8" stroke-linecap="round" opacity=".6"/>
+      <rect x="70" y="0" width="70" height="44" rx="10" fill="#FFF6D8" transform="rotate(12 105 22)"/>
+      <text x="105" y="30" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="22" fill="#9A7A2A" transform="rotate(12 105 22)">2025</text>
+    </g>
+    <!-- dress back with zipper (origin = top centre) -->
+    <g id="dressBack">
+      <path d="M-210 0 C-140 30, 140 30, 210 0 L240 420 C300 640, 330 820, 336 900 L-336 900 C-330 820, -300 640, -240 420 Z" fill="url(#gDress)"/>
+      <path d="M-240 420 C-80 450, 80 450, 240 420" fill="none" stroke="#B83A49" stroke-width="12" stroke-linecap="round"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- 1: invitation -->
+<div class="scene" id="s1">
+  <div class="notif" id="notif">
+    <div class="app"><img src="emoji/1f48d.png" style="height:84px"></div>
+    <div><div style="font-weight:800;font-size:44px">Приглашение на той</div>
+      <div style="font-weight:500;font-size:36px;color:#6B7079;margin-top:6px">Ждём вас через 3 недели <img class="emo" src="emoji/1f389.png" style="height:1em"></div></div>
+  </div>
+  <div class="c" id="t1" style="top:900px"><div class="h1">Когда позвали<br>на <b>той</b>…</div></div>
+</div>
+
+<!-- 2: last year's dress -->
+<div class="scene" id="s2">
+  <div class="c" id="t2" style="top:300px"><div class="h1" style="font-size:84px">…а платье —<br>с прошлого года <img class="emo" src="emoji/1f457.png" style="height:1em"></div></div>
+  <svg class="abs" style="left:0;top:620px" width="1080" height="1000"><g id="hang" transform="translate(540 120)"><use href="#dressFront" filter="url(#fs)"/></g>
+    <line x1="140" y1="70" x2="940" y2="70" stroke="#C9D4D7" stroke-width="14" stroke-linecap="round"/></svg>
+</div>
+
+<!-- 3 + 5: zipper -->
+<div class="scene" id="s3">
+  <div class="c" id="t3" style="top:300px"><div class="h1" style="font-size:84px">Молния такая:<br>«нет» <img class="emo" src="emoji/1f633.png" style="height:1em"></div></div>
+  <div class="c" id="t5" style="top:300px;opacity:0"><div class="h1" style="font-size:84px">И молния —<br><b>застегнулась!</b> <img class="emo" src="emoji/2728.png" style="height:1em"></div></div>
+  <svg class="abs" style="left:0;top:640px" width="1080" height="1280"><g transform="translate(540 120)">
+    <g id="dback"><use href="#dressBack" filter="url(#fs)"/></g>
+    <path id="gap" fill="#F1C8B2"/>
+    <g id="teeth"></g>
+    <g id="slider"><rect x="-26" y="-10" width="52" height="64" rx="12" fill="#D9DEE0"/><rect x="-10" y="40" width="20" height="56" rx="10" fill="#C3CACD"/></g>
+    <g id="spark"></g>
+  </g></svg>
+</div>
+
+<!-- 4: countdown -->
+<div class="scene" id="s4">
+  <div class="c" style="top:300px"><div class="sub" style="font-size:48px;color:#373435;font-weight:800"><img class="emo" src="emoji/1f4c5.png" style="height:1.1em"> до тоя осталось</div></div>
+  <div class="c" style="top:380px"><div id="days" style="font-weight:900;font-size:300px;line-height:1;color:#1EBBB0">21</div><div class="sub" id="daysw" style="margin-top:-6px">день</div></div>
+  <div class="c" id="t4" style="top:880px"><div class="h1" style="font-size:72px">Ленивый спорт —<br><b>3 раза в неделю</b></div></div>
+  <div class="c" id="weeks" style="top:1150px"></div>
+</div>
+
+<!-- 6: end -->
+<div class="scene" id="s6">
+  <img src="../../brand/logo.png" alt="" style="position:absolute;left:50%;top:260px;width:620px;transform:translateX(-50%)">
+  <div class="c" id="e1" style="top:660px"><div style="font-weight:700;font-size:34px;letter-spacing:.22em;color:#1EBBB0">ЛЕНИВЫЙ СПОРТ</div></div>
+  <div class="c" id="e2" style="top:730px"><div class="h1" style="font-size:92px">Готовьтесь к тою<br>заранее</div></div>
+  <div class="c" id="e3" style="top:990px"><div class="sub" style="font-size:44px">45 минут на аппаратах — без нагрузки</div></div>
+  <div class="btn" id="e4" style="top:1170px"><b>Оставьте заявку</b><small>8 707 474 78 24</small></div>
+  <div class="c" id="e5" style="top:1660px"><div style="font-weight:600;font-size:32px;color:#6B7079">Алматы · Аксай-1, 10/3 · Аль-Фараби, 83</div></div>
+</div>
+
+<script>
+// scene times follow vo.mp3 (placed at +0.2 s)
+const T = { dress: 2.6, zip: 6.0, count: 8.7, zipped: 13.1, end: 15.4 }, DUR = 20.4;
+const clamp = x => Math.min(Math.max(x, 0), 1);
+const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const eo = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+const back = x => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const $ = id => document.getElementById(id);
+function alpha(t, a, b) { return t < a || t >= b + .3 ? 0 : (t < b ? ease((t - a) / .3) : 1 - ease((t - b) / .3)); }
+function rise(id, lt) { $(id).style.opacity = ease(lt / .3); $(id).style.transform = `translateY(${(1 - eo(lt / .45)) * 44}px)`; }
+
+// weeks grid
+$('weeks').innerHTML = [1, 2, 3].map(w => `<div class="week"><span>неделя ${w}</span>${[0, 1, 2].map(k => `<div class="dot"><i id="d${w}${k}"></i></div>`).join('')}</div>`).join('');
+
+// confetti (deterministic)
+const CONF = Array.from({ length: 46 }, (_, i) => ({ x: (i * 197) % 1080, y0: -((i * 131) % 900), sp: 260 + (i * 37) % 220,
+  c: ['#3CE0D7', '#F2C94C', '#E25C6A', '#1EBBB0', '#FFFFFF'][i % 5], r: (i * 47) % 360, w: 14 + (i % 3) * 6 }));
+function confetti(t, t0, dur) {
+  const lt = t - t0; if (lt < 0 || lt > dur) return '';
+  return CONF.map(p => { const y = p.y0 + lt * p.sp; if (y > 1950) return '';
+    return `<rect x="${p.x + Math.sin(lt * 3 + p.r) * 30}" y="${y}" width="${p.w}" height="${p.w * .55}" rx="3" fill="${p.c}" opacity="${1 - lt / dur * .4}" transform="rotate(${p.r + lt * 220} ${p.x} ${y})"/>`; }).join('');
+}
+
+// zipper geometry (local to dressBack, top centre origin)
+function zipper(open) { // open: 0..1 (fraction of the back still open from the top)
+  const top = 20, bottom = 760, sy = top + (bottom - top) * open;   // slider y
+  const w = 70 * open;                                              // gap half-width at the neckline
+  const gap = open > .01 ? `M${-w} ${top} L${w} ${top} L0 ${sy} Z` : '';
+  let teeth = '';
+  for (let y = top; y < bottom; y += 22) {
+    if (y < sy) { const k = (sy - y) / (sy - top + 1e-6), off = w * k; teeth += `<rect x="${-off - 10}" y="${y}" width="10" height="12" rx="3" fill="#E9EDEF"/><rect x="${off}" y="${y + 11}" width="10" height="12" rx="3" fill="#E9EDEF"/>`; }
+    else teeth += `<rect x="-10" y="${y}" width="10" height="12" rx="3" fill="#E9EDEF"/><rect x="0" y="${y + 11}" width="10" height="12" rx="3" fill="#E9EDEF"/>`;
+  }
+  return { gap, teeth, sy };
+}
+
+window.render = function (t) {
+  $('c1').setAttribute('transform', `translate(${Math.sin(t * .4) * 24} ${Math.cos(t * .35) * 20})`);
+  $('c2').setAttribute('transform', `translate(${Math.cos(t * .5) * 20} ${Math.sin(t * .45) * 18})`);
+  $('confetti').innerHTML = confetti(t, 0.4, 2.6) + confetti(t, T.zipped + .2, 2.4);
+
+  // 1 invitation
+  $('s1').style.opacity = t < T.dress ? 1 : 1 - ease((t - T.dress) / .3);
+  const nv = back(t / .5);
+  $('notif').style.transform = `translateY(${(1 - nv) * -420}px)`;
+  rise('t1', t - .45);
+
+  // 2 dress on the hanger
+  const l2 = t - T.dress;
+  $('s2').style.opacity = alpha(t, T.dress, T.zip);
+  rise('t2', l2 - .1);
+  $('hang').setAttribute('transform', `translate(540 ${120 - (1 - eo(l2 / .5)) * 500}) rotate(${Math.sin(l2 * 3.2) * 5 * Math.exp(-l2 * .5)} 0 -40)`);
+
+  // 3 + 5 zipper
+  const l3 = t - T.zip, l5 = t - T.zipped;
+  $('s3').style.opacity = t < T.count ? alpha(t, T.zip, T.count) : (t >= T.zipped ? alpha(t, T.zipped, T.end) : 0);
+  let open;
+  if (t < T.count) {   // stuck halfway, the slider tries and fails
+    const tries = Math.max(0, Math.sin(l3 * 7)) * 0.05;
+    open = 0.55 - tries;
+    $('t3').style.opacity = ease(l3 / .3); $('t5').style.opacity = 0;
+  } else {             // zips up to the top
+    open = 0.55 * (1 - eo((l5 - .2) / .7));
+    $('t3').style.opacity = 0; rise('t5', l5 - .1);
+  }
+  const shake = t < T.count && l3 > .6 ? Math.sin(l3 * 50) * 6 * Math.max(0, Math.sin(l3 * 7)) : 0;
+  $('dback').setAttribute('transform', `translate(${shake} 0)`);
+  const z = zipper(open);
+  $('gap').setAttribute('d', z.gap); $('teeth').innerHTML = z.teeth;
+  $('slider').setAttribute('transform', `translate(${shake} ${z.sy - 30})`);
+  const sp = t >= T.zipped ? ease((l5 - .9) / .3) : 0;
+  $('spark').innerHTML = sp ? [[-160, 40], [170, 120], [-120, 380], [150, 460]].map(([x, y], k) => {
+    const s = (26 + 10 * Math.sin(t * 7 + k)) * sp;
+    return `<path d="M${x} ${y - s}L${x + s * .28} ${y - s * .28}L${x + s} ${y}L${x + s * .28} ${y + s * .28}L${x} ${y + s}L${x - s * .28} ${y + s * .28}L${x - s} ${y}L${x - s * .28} ${y - s * .28}Z" fill="#F2C94C"/>`; }).join('') : '';
+
+  // 4 countdown
+  const l4 = t - T.count;
+  $('s4').style.opacity = alpha(t, T.count, T.zipped);
+  const dn = Math.max(0, Math.round(21 * (1 - eo((l4 - .3) / 3.4))));
+  $('days').textContent = dn;
+  $('daysw').textContent = (dn % 10 === 1 && dn % 100 !== 11) ? 'день' : ([2,3,4].includes(dn % 10) && ![12,13,14].includes(dn % 100)) ? 'дня' : 'дней';
+  $('days').style.transform = `scale(${1 + .05 * Math.abs(Math.sin(l4 * 9))})`;
+  rise('t4', l4 - 2.0);
+  for (let w = 1; w <= 3; w++) for (let k = 0; k < 3; k++) {
+    const d = 2.2 + ((w - 1) * 3 + k) * .19;
+    $('d' + w + k).style.transform = `scale(${Math.max(0, back((l4 - d) / .3))})`;
+  }
+
+  // 6 end
+  const l6 = t - T.end;
+  $('s6').style.opacity = ease(l6 / .35);
+  $('logo').style.opacity = 1 - ease(l6 / .35);
+  ['e1', 'e2', 'e3', 'e4', 'e5'].forEach((id, k) => {
+    const x = (l6 - .15 - k * .2) / .4;
+    $(id).style.opacity = ease(x);
+    $(id).style.transform = `translateY(${(1 - eo(x)) * 40}px)` + (id === 'e4' ? ` scale(${1 + .025 * Math.sin(t * 6)})` : '');
+  });
+};
+window.render(0);
+</script>
+</body>
+</html>
