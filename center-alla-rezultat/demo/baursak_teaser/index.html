@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Сколько баурсаков в сантиметре</title>
+<link rel="stylesheet" href="fonts/montserrat.css">
+<style>
+  :root { --turq:#3CE0D7; --turq-d:#1EBBB0; --turq-dd:#128C84; --g:#373435; --grey:#6B7079; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body { font-family: 'Montserrat', sans-serif; color: var(--g); background: linear-gradient(#FFFFFF, #E3F8F5); }
+  .abs { position: absolute; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .c { position: absolute; left: 0; right: 0; text-align: center; }
+  .emo { vertical-align: -0.2em; }
+  #logo { position: absolute; left: 50%; top: 52px; width: 430px; transform: translateX(-50%); z-index: 5; }
+  .h1 { font-weight: 900; font-size: 104px; line-height: 1.05; }
+  .eq { font-weight: 900; font-size: 88px; line-height: 1.1; }
+  .eq b { color: var(--turq-d); }
+  .sub { font-weight: 600; font-size: 48px; color: var(--grey); }
+  .strip { position: absolute; left: 80px; right: 80px; top: 1560px; height: 180px; border-radius: 90px; background: #fff;
+           box-shadow: 0 20px 50px rgba(18,140,132,.14); overflow: hidden; }
+  .btn { position: absolute; left: 110px; right: 110px; height: 170px; border-radius: 85px;
+         background: linear-gradient(90deg, #3CE0D7, #1EBBB0); color: #fff; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; box-shadow: 0 24px 50px rgba(30,187,176,.35); }
+  .btn b { font-weight: 900; font-size: 60px; } .btn small { font-weight: 800; font-size: 46px; letter-spacing: .02em; }
+</style>
+</head>
+<body>
+<svg class="abs" width="1080" height="1920" style="left:0;top:0">
+  <circle id="c1" cx="1080" cy="1600" r="560" fill="#3CE0D7" opacity=".12"/>
+  <circle id="c2" cx="-60" cy="420" r="300" fill="#3CE0D7" opacity=".10"/>
+</svg>
+<img id="logo" src="../../brand/logo.png" alt="">
+
+<!-- shared food illustrations -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="gBaur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F8CF7A"/><stop offset="1" stop-color="#D88B2A"/></linearGradient>
+    <linearGradient id="gSamsa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4BD6A"/><stop offset="1" stop-color="#C77926"/></linearGradient>
+    <filter id="fs" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="#8A5A1E" flood-opacity=".25"/></filter>
+    <g id="baursak">
+      <path d="M-108 -86 Q0 -122 108 -86 Q134 0 108 86 Q0 118 -108 86 Q-134 0 -108 -86 Z" fill="url(#gBaur)"/>
+      <path d="M-70 -78 C-40 -92, 10 -94, 40 -84" fill="none" stroke="#FFE9B8" stroke-width="16" stroke-linecap="round" opacity=".8"/>
+      <circle cx="-48" cy="12" r="7" fill="#C27A22" opacity=".55"/><circle cx="30" cy="36" r="6" fill="#C27A22" opacity=".5"/>
+      <circle cx="58" cy="-18" r="5" fill="#C27A22" opacity=".5"/><circle cx="-12" cy="58" r="5" fill="#C27A22" opacity=".45"/>
+    </g>
+    <g id="samsa">
+      <path d="M0 -118 C14 -118, 22 -110, 30 -96 L128 72 C138 92, 126 108, 104 108 L-104 108 C-126 108, -138 92, -128 72 L-30 -96 C-22 -110, -14 -118, 0 -118 Z" fill="url(#gSamsa)"/>
+      <path d="M-4 -88 L-60 12" stroke="#FFE2AE" stroke-width="14" stroke-linecap="round" opacity=".75"/>
+      <g fill="#FFF3D6"><ellipse cx="-20" cy="20" rx="7" ry="4"/><ellipse cx="24" cy="44" rx="7" ry="4"/><ellipse cx="50" cy="10" rx="7" ry="4"/>
+        <ellipse cx="-50" cy="64" rx="7" ry="4"/><ellipse cx="6" cy="76" rx="7" ry="4"/><ellipse cx="66" cy="70" rx="7" ry="4"/></g>
+    </g>
+    <g id="besh">
+      <ellipse cx="0" cy="30" rx="220" ry="78" fill="#E9EEF0"/>
+      <ellipse cx="0" cy="18" rx="220" ry="78" fill="#FFFFFF"/>
+      <ellipse cx="0" cy="18" rx="170" ry="54" fill="#F4F7F8"/>
+      <g fill="#F7E6C4" stroke="#E8CF9E" stroke-width="3">
+        <rect x="-150" y="-10" width="80" height="44" rx="8" transform="rotate(-8 -110 12)"/>
+        <rect x="-60" y="-24" width="84" height="46" rx="8" transform="rotate(6 -18 0)"/>
+        <rect x="40" y="-12" width="84" height="44" rx="8" transform="rotate(-5 82 10)"/>
+        <rect x="-110" y="20" width="84" height="40" rx="8" transform="rotate(4 -68 40)"/>
+        <rect x="10" y="22" width="90" height="40" rx="8" transform="rotate(-6 55 42)"/>
+      </g>
+      <g fill="#A4603F"><rect x="-70" y="-40" width="58" height="40" rx="14"/><rect x="-6" y="-30" width="64" height="42" rx="14"/>
+        <rect x="58" y="-38" width="52" height="38" rx="14"/><rect x="-30" y="4" width="56" height="36" rx="14"/></g>
+      <g fill="none" stroke="#FFFFFF" stroke-width="7" opacity=".9">
+        <ellipse cx="-40" cy="-18" rx="20" ry="9"/><ellipse cx="40" cy="-10" rx="18" ry="8"/><ellipse cx="0" cy="22" rx="18" ry="8"/></g>
+    </g>
+  </defs>
+</svg>
+
+<!-- 0: hook -->
+<div class="scene" id="s0">
+  <div class="c" style="top:420px"><div class="h1" id="h0">Сколько стоит<br>один баурсак?</div></div>
+  <svg class="abs" style="left:0;top:820px" width="1080" height="600"><g id="b0" transform="translate(540 300) scale(1.9)"><use href="#baursak" filter="url(#fs)"/></g></svg>
+</div>
+
+<!-- 1-3: cards -->
+<div class="scene" id="s1"></div><div class="scene" id="s2"></div><div class="scene" id="s3"></div>
+
+<!-- 4: twist -->
+<div class="scene" id="s4">
+  <div class="c" style="top:380px"><div class="eq">А на тое всё это<br>за один вечер <img class="emo" src="emoji/1f972.png" style="height:1em"></div></div>
+  <svg class="abs" style="left:0;top:700px" width="1080" height="700">
+    <g id="st1" transform="translate(540 520) scale(1.2)"><use href="#besh" filter="url(#fs)"/></g>
+    <g id="st2" transform="translate(360 300) scale(1)"><use href="#samsa" filter="url(#fs)"/></g>
+    <g id="st3" transform="translate(720 300) scale(1)"><use href="#baursak" filter="url(#fs)"/></g>
+  </svg>
+  <div class="c" id="tot" style="top:1460px"><div class="sub">это примерно</div><div class="eq"><b id="totn">≈ 2 ч 20 мин</b> спорта</div></div>
+</div>
+
+<!-- 5: lazy alternative -->
+<div class="scene" id="s5">
+  <div class="c" style="top:420px"><div class="eq" style="font-size:80px">Или просто<br>полежать <b>45 минут</b> <img class="emo" src="emoji/1f60c.png" style="height:1em"></div></div>
+  <svg class="abs" style="left:0;top:820px" width="1080" height="600"><g id="girl"></g></svg>
+  <div class="c" style="top:1480px"><div class="sub">аппараты работают — вы отдыхаете</div></div>
+</div>
+
+<!-- 6: end card -->
+<div class="scene" id="s6">
+  <img src="../../brand/logo.png" alt="" style="position:absolute;left:50%;top:260px;width:620px;transform:translateX(-50%)">
+  <div class="c" id="e1" style="top:660px"><div style="font-weight:700;font-size:34px;letter-spacing:.22em;color:#1EBBB0">ЛЕНИВЫЙ СПОРТ</div></div>
+  <div class="c" id="e2" style="top:730px"><div class="h1" style="font-size:96px">Баурсаки<br>можно оставить</div></div>
+  <div class="c" id="e3" style="top:990px"><div class="sub" style="font-size:44px">45 минут на аппаратах — без нагрузки</div></div>
+  <div class="btn" id="e4" style="top:1170px"><b>Оставьте заявку</b><small>8 707 474 78 24</small></div>
+  <div class="c" id="e5" style="top:1660px"><div style="font-weight:600;font-size:32px;color:#6B7079">Алматы · Аксай-1, 10/3 · Аль-Фараби, 83</div></div>
+  <div class="c" style="top:1760px"><div style="font-weight:500;font-size:24px;color:#9AA3A6">* калорийность и время — примерные</div></div>
+</div>
+
+<script>
+const T = { c1: 2.2, c2: 4.6, c3: 7.0, tw: 9.4, lazy: 11.4, end: 13.2 }, DUR = 16.0;
+const CARDS = [
+  { id: 's1', food: 'baursak', scale: 1.75, line1: '1 баурсак', line2: '≈ <b>15 минут</b> бега*', emoji: '1f3c3-200d-2640-fe0f', mins: 15, t: T.c1 },
+  { id: 's2', food: 'samsa', scale: 1.6, line1: '1 самса', line2: '≈ <b>35 минут</b> в зале*', emoji: '1f3cb-fe0f-200d-2640-fe0f', mins: 35, t: T.c2 },
+  { id: 's3', food: 'besh', scale: 1.25, line1: 'Порция бешбармака', line2: '≈ <b>1,5 часа</b> на велосипеде*', emoji: '1f6b4-200d-2640-fe0f', mins: 90, t: T.c3 },
+];
+const clamp = x => Math.min(Math.max(x, 0), 1);
+const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const eo = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+const back = x => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const $ = id => document.getElementById(id);
+
+CARDS.forEach(c => {
+  $(c.id).innerHTML = `
+    <svg class="abs" style="left:0;top:560px" width="1080" height="640"><g id="${c.id}f"><use href="#${c.food}" filter="url(#fs)"/></g></svg>
+    <div class="c" id="${c.id}t1" style="top:1190px"><div class="sub" style="font-size:56px;color:#373435;font-weight:800">${c.line1}</div></div>
+    <div class="c" id="${c.id}t2" style="top:1270px"><div class="eq">${c.line2}</div></div>
+    <div class="strip" id="${c.id}s">
+      <img id="${c.id}e" src="emoji/${c.emoji}.png" style="position:absolute;top:38px;height:104px">
+      <div style="position:absolute;right:36px;top:30px;width:120px;height:120px">
+        <svg width="120" height="120"><circle cx="60" cy="60" r="50" fill="none" stroke="#EAF5F4" stroke-width="14"/>
+          <circle id="${c.id}r" cx="60" cy="60" r="50" fill="none" stroke="#1EBBB0" stroke-width="14" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314.2" stroke-dashoffset="314.2"/></svg>
+        <div id="${c.id}n" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:36px">0</div>
+      </div>
+      <img src="emoji/23f1-fe0f.png" style="position:absolute;right:170px;top:58px;height:64px">
+    </div>`;
+});
+
+function sceneAlpha(t, a, b) { return t < a || t >= b + 0.3 ? 0 : (t < b ? ease((t - a) / 0.3) : 1 - ease((t - b) / 0.3)); }
+
+window.render = function (t) {
+  $('c1').setAttribute('transform', `translate(${Math.sin(t * .4) * 24} ${Math.cos(t * .35) * 20})`);
+  $('c2').setAttribute('transform', `translate(${Math.cos(t * .5) * 20} ${Math.sin(t * .45) * 18})`);
+  // hook
+  $('s0').style.opacity = t < T.c1 ? ease(t / .3) : 1 - ease((t - T.c1) / .3);
+  $('h0').style.transform = `translateY(${(1 - eo(t / .5)) * 50}px)`;
+  const drop = eo((t - .5) / .6), bounce = Math.max(0, Math.sin(((t - 1.1) / .5) * Math.PI)) * (t > 1.1 && t < 1.6 ? 1 : 0);
+  $('b0').setAttribute('transform', `translate(540 ${-200 + 500 * drop - 40 * bounce}) rotate(${(1 - drop) * -30 + Math.sin(t * 2) * 3}) scale(1.9)`);
+  // cards
+  CARDS.forEach((c, i) => {
+    const end = i < 2 ? CARDS[i + 1].t : T.tw, lt = t - c.t;
+    $(c.id).style.opacity = sceneAlpha(t, c.t, end);
+    if (lt < -0.1 || t > end + 0.4) return;
+    $(c.id + 'f').setAttribute('transform', `translate(540 330) rotate(${Math.sin(t * 2.2) * 3}) scale(${c.scale * (0.5 + 0.5 * back(lt / .4))})`);
+    [['t1', .25], ['t2', .45]].forEach(([k, d]) => {
+      $(c.id + k).style.opacity = ease((lt - d) / .3);
+      $(c.id + k).style.transform = `translateY(${(1 - eo((lt - d) / .4)) * 40}px)`;
+    });
+    $(c.id + 's').style.opacity = ease((lt - .6) / .3);
+    const p = eo((lt - .7) / 1.4);
+    $(c.id + 'e').style.left = (30 + p * 500) + 'px';
+    $(c.id + 'e').style.transform = `translateY(${-Math.abs(Math.sin(t * 12)) * 12}px)`;
+    $(c.id + 'r').setAttribute('stroke-dashoffset', 314.2 * (1 - p));
+    $(c.id + 'n').textContent = Math.round(c.mins * p);
+  });
+  // twist
+  const lt4 = t - T.tw;
+  $('s4').style.opacity = sceneAlpha(t, T.tw, T.lazy);
+  [['st1', 0, 1.2, 540, 520], ['st2', .15, 1, 360, 300], ['st3', .3, 1, 720, 300]].forEach(([id, d, s, x, y]) => {
+    const k = back((lt4 - d) / .4);
+    $(id).setAttribute('transform', `translate(${x} ${y - (1 - eo((lt4 - d) / .4)) * 300}) scale(${s * Math.max(.01, k)})`);
+  });
+  $('tot').style.opacity = ease((lt4 - .7) / .3);
+  $('tot').style.transform = `scale(${1 + .12 * Math.max(0, 1 - (lt4 - .7) / .3)})`;
+  // lazy
+  const lt5 = t - T.lazy;
+  $('s5').style.opacity = sceneAlpha(t, T.lazy, T.end);
+  if (lt5 > -0.1 && lt5 < 2.5) drawLyingSimple($('girl'), 50, 360, 1.0, lt5);
+  // end
+  const lt6 = t - T.end;
+  $('s6').style.opacity = ease(lt6 / .35);
+  $('logo').style.opacity = 1 - ease(lt6 / .35);
+  ['e1', 'e2', 'e3', 'e4', 'e5'].forEach((id, k) => {
+    const x = (lt6 - .15 - k * .2) / .4;
+    $(id).style.opacity = ease(x);
+    $(id).style.transform = `translateY(${(1 - eo(x)) * 40}px)` + (id === 'e4' ? ` scale(${1 + .025 * Math.sin(t * 6)})` : '');
+  });
+};
+</script>
+<script src="../lazy_v4/lying_simple.js"></script>
+<script>window.render(0);</script>
+</body>
+</html>
