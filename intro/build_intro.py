@@ -21,15 +21,15 @@ FPS = 30
 # (src, start, source_duration, speed, crop_center_x for vertical, audio spec)
 # audio spec: (src, start, dur, reverse) — C's own soundtrack is dropped (music)
 SEGS = [
-    ("C", 0.00, 1.10, 1.0, 0.5,  ("B", 0.00, 1.10, False)),   # dining room
+    ("C", 0.00, 1.10, 1.0, 0.40, ("B", 0.00, 1.10, False)),   # dining room
     ("A", 0.10, 1.40, 1.0, 0.5,  ("A", 0.10, 1.40, False)),   # table top-down
-    ("C", 3.30, 1.70, 1.0, 0.5,  ("B", 2.70, 1.70, False)),   # cocktail pour
+    ("C", 3.30, 1.70, 1.0, 0.63, ("B", 2.70, 1.70, False)),   # cocktail pour
     ("B", 1.55, 1.20, 1.0, 0.56, ("B", 1.55, 1.20, False)),   # girl waving
-    ("C", 5.80, 1.20, 1.0, 0.5,  ("B", 2.70, 1.20, True)),    # pizza cut
+    ("C", 5.80, 1.20, 1.0, 0.50, ("B", 2.70, 1.20, True)),    # pizza cut
     ("B", 4.55, 1.45, 1.0, 0.52, ("B", 4.55, 1.45, False)),   # guy with tea
     ("A", 1.60, 1.30, 1.0, 0.5,  ("A", 1.60, 1.30, False)),   # table, more food
-    ("C", 1.20, 1.50, 1.0, 0.5,  ("B", 0.00, 1.50, True)),    # diners
-    ("B", 6.50, 1.65, 0.5, 0.62, ("B", 6.50, 1.65, False)),   # wide hall, slow-mo -> title
+    ("C", 1.20, 1.50, 1.0, 0.47, ("B", 0.00, 1.50, True)),    # diners
+    ("B", 6.50, 1.65, 0.5, 0.62, ("ROOM", 0, 0, False)),   # wide hall, slow-mo -> title
 ]
 FADE_OUT = 1.0
 TAIL_BLACK = 0.35
@@ -69,13 +69,11 @@ def render_segment(i, seg, W, H, tag):
     pre.append(f"fps={FPS}")
     vertical = H > W
     if src == "C" and not vertical:
-        # vertical reel in a 16:9 frame: blurred fill + centred foreground
+        # vertical reel -> cut a full-width 16:9 band (top/bottom removed), upscale + sharpen
         base = ",".join(pre)
-        fc = (f"[0:v]{base},split[a][b];"
-              f"[a]scale={W2}:{H2}:force_original_aspect_ratio=increase,crop={W2}:{H2},"
-              f"gblur=sigma=40,eq=brightness=-0.12:saturation=0.8[bg];"
-              f"[b]scale=-2:{H2}:flags=lanczos[fg];"
-              f"[bg][fg]overlay=(W-w)/2:0,setsar=1[c];")
+        fc = (f"[0:v]{base},crop=w=iw:h='trunc(iw*9/16/2)*2':x=0:"
+              f"y='min(max(0,ih*{cx}-iw*9/32),ih-iw*9/16)',"
+              f"scale={W2}:{H2}:flags=lanczos,unsharp=7:7:0.7:5:5:0.0,setsar=1[c];")
         zin = "[c]"
     else:
         if vertical and src in ("A", "B"):
@@ -213,6 +211,25 @@ def shimmer(dur=1.6):
 def db(x): return 10 ** (x / 20)
 
 
+def room_tone(srcs, n):
+    """Voice-free restaurant hum: noise shaped by the average spectrum of the ambience."""
+    ref = np.concatenate([a.mean(1) for a in srcs])
+    f, pxx = signal.welch(ref, SR, nperseg=4096)
+    out = []
+    for ch in range(2):
+        x = rng.standard_normal(n)
+        X = np.fft.rfft(x)
+        fx = np.fft.rfftfreq(n, 1 / SR)
+        X *= np.sqrt(np.interp(fx, f, pxx))
+        y = np.fft.irfft(X, n)
+        out.append(y)
+    y = np.stack(out, 1)
+    # slow, gentle level drift so it does not sound static
+    t = np.arange(n) / SR
+    y *= (1 + 0.12 * np.sin(2 * np.pi * 0.37 * t))[:, None]
+    return y / np.sqrt(np.mean(y ** 2)) * 0.05
+
+
 def build_audio(total, starts, durs):
     n_total = int(round(total * SR))
     mix = np.zeros((n_total, 2))
@@ -223,7 +240,9 @@ def build_audio(total, starts, durs):
     xf = int(0.03 * SR)
     for i, (seg, st, du) in enumerate(zip(SEGS, starts, durs)):
         src, ss, d, rev = seg[5]
-        if seg[3] != 1.0:
+        if src == "ROOM":
+            a = room_tone([aud["A"], aud["B"]], int(du * SR) + xf)
+        elif seg[3] != 1.0:
             a = stretch_audio(src, ss, d, seg[3])
             a *= 0.05 / (np.sqrt(np.mean(a ** 2)) + 1e-9)
         else:
@@ -238,6 +257,11 @@ def build_audio(total, starts, durs):
     # room-tone glue layer: B looped, low-passed, quiet
     bed = np.concatenate([aud["B"], aud["B"][::-1], aud["B"]])[:n_total]
     bed = signal.sosfilt(signal.butter(2, 2500, "low", fs=SR, output="sos"), bed, axis=0)
+    # the glue bed also carries voices -> swap it for room tone under the final shot
+    s8b = int(starts[8] * SR); xb = int(0.2 * SR)
+    w = np.ones(n_total); w[s8b:s8b + xb] = np.linspace(1, 0, xb); w[s8b + xb:] = 0
+    rt = room_tone([aud["A"], aud["B"]], n_total) * np.sqrt(np.mean(bed ** 2)) / 0.05
+    bed = bed * w[:, None] + rt * (1 - w)[:, None]
     mix += bed * db(-11)
 
     def place(clip, t, gain_db):
