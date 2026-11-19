@@ -1,0 +1,26 @@
+{
+  "name": "real3d-short-edit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "words": "node tools/whisper.mjs",
+    "shots": "node tools/shots.mjs",
+    "plan": "node tools/plan.mjs",
+    "music": "node tools/music.mjs 46 cold",
+    "sfx": "node tools/sfx.mjs",
+    "animatic": "node tools/plan.mjs && ffmpeg -y -v error -framerate 30 -i ../renders/animatic/f_%04d.jpg -c:v libx264 -pix_fmt yuv420p -crf 20 public/video.mp4 && remotion render src/index.ts Short out/animatic.mp4",
+    "render": "remotion render src/index.ts Short out/short.mp4",
+    "studio": "remotion studio src/index.ts"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.250",
+    "@remotion/google-fonts": "4.0.250",
+    "@remotion/install-whisper-cpp": "4.0.250",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.250"
+  },
+  "optionalDependencies": {
+    "sherpa-onnx-node": "1.12.15"
+  }
+}
