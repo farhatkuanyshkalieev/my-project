@@ -1,0 +1,504 @@
+{
+ "events": [
+  {
+   "kind": "pop",
+   "f": 3
+  },
+  {
+   "kind": "pop",
+   "f": 244
+  },
+  {
+   "kind": "pop",
+   "f": 353
+  },
+  {
+   "kind": "pop",
+   "f": 457
+  },
+  {
+   "kind": "pop",
+   "f": 587
+  },
+  {
+   "kind": "pop",
+   "f": 627
+  },
+  {
+   "kind": "pop",
+   "f": 697
+  },
+  {
+   "kind": "pop",
+   "f": 776
+  },
+  {
+   "kind": "pop",
+   "f": 913
+  },
+  {
+   "kind": "pop",
+   "f": 1060
+  },
+  {
+   "kind": "pop",
+   "f": 1313
+  },
+  {
+   "kind": "pop",
+   "f": 1546
+  },
+  {
+   "kind": "glitch",
+   "f": 418
+  },
+  {
+   "kind": "glitch",
+   "f": 419
+  },
+  {
+   "kind": "glitch",
+   "f": 422
+  },
+  {
+   "kind": "glitch",
+   "f": 423
+  },
+  {
+   "kind": "glitch",
+   "f": 501
+  },
+  {
+   "kind": "glitch",
+   "f": 502
+  },
+  {
+   "kind": "flash",
+   "f": 503
+  },
+  {
+   "kind": "whoosh",
+   "f": 497
+  },
+  {
+   "kind": "impact",
+   "f": 3
+  },
+  {
+   "kind": "impact",
+   "f": 913
+  },
+  {
+   "kind": "rise",
+   "f": 831,
+   "dur": 82
+  },
+  {
+   "kind": "riser",
+   "f": 1506,
+   "dur": 40
+  },
+  {
+   "kind": "impact",
+   "f": 1546
+  },
+  {
+   "kind": "whoosh",
+   "f": 267
+  },
+  {
+   "kind": "whoosh",
+   "f": 795
+  },
+  {
+   "kind": "whoosh",
+   "f": 1435
+  },
+  {
+   "kind": "servo",
+   "f": -1,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 184,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 349,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 583,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 623,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 693,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 909,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 1056,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 1309,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": 1542,
+   "dur": 4
+  },
+  {
+   "kind": "servo",
+   "f": -13,
+   "dur": 6
+  },
+  {
+   "kind": "servo",
+   "f": 63,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 101,
+   "dur": 12
+  },
+  {
+   "kind": "servo",
+   "f": 170,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 192,
+   "dur": 6
+  },
+  {
+   "kind": "servo",
+   "f": 226,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 333,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 371,
+   "dur": 11
+  },
+  {
+   "kind": "servo",
+   "f": 419,
+   "dur": 6
+  },
+  {
+   "kind": "servo",
+   "f": 451,
+   "dur": 12
+  },
+  {
+   "kind": "servo",
+   "f": 567,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 608,
+   "dur": 13
+  },
+  {
+   "kind": "servo",
+   "f": 677,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 752,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 789,
+   "dur": 11
+  },
+  {
+   "kind": "servo",
+   "f": 887,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 909,
+   "dur": 6
+  },
+  {
+   "kind": "servo",
+   "f": 949,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 979,
+   "dur": 8
+  },
+  {
+   "kind": "servo",
+   "f": 1040,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 1095,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 1133,
+   "dur": 12
+  },
+  {
+   "kind": "servo",
+   "f": 1214,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 1255,
+   "dur": 13
+  },
+  {
+   "kind": "servo",
+   "f": 1299,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 1392,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 1430,
+   "dur": 12
+  },
+  {
+   "kind": "servo",
+   "f": 1526,
+   "dur": 14
+  },
+  {
+   "kind": "servo",
+   "f": 1575,
+   "dur": 14
+  },
+  {
+   "kind": "beep",
+   "f": 20
+  },
+  {
+   "kind": "beep",
+   "f": 103
+  },
+  {
+   "kind": "beep",
+   "f": 186
+  },
+  {
+   "kind": "beep",
+   "f": 269
+  },
+  {
+   "kind": "beep",
+   "f": 352
+  },
+  {
+   "kind": "beep",
+   "f": 435
+  },
+  {
+   "kind": "beep",
+   "f": 518
+  },
+  {
+   "kind": "beep",
+   "f": 601
+  },
+  {
+   "kind": "beep",
+   "f": 684
+  },
+  {
+   "kind": "beep",
+   "f": 767
+  },
+  {
+   "kind": "beep",
+   "f": 850
+  },
+  {
+   "kind": "beep",
+   "f": 933
+  },
+  {
+   "kind": "beep",
+   "f": 1016
+  },
+  {
+   "kind": "beep",
+   "f": 1099
+  },
+  {
+   "kind": "beep",
+   "f": 1182
+  },
+  {
+   "kind": "beep",
+   "f": 1265
+  },
+  {
+   "kind": "beep",
+   "f": 1348
+  },
+  {
+   "kind": "beep",
+   "f": 1431
+  },
+  {
+   "kind": "beep",
+   "f": 1514
+  },
+  {
+   "kind": "beep",
+   "f": 1597
+  },
+  {
+   "kind": "beep",
+   "f": 506
+  },
+  {
+   "kind": "beep",
+   "f": 271
+  },
+  {
+   "kind": "beep",
+   "f": 1440
+  }
+ ],
+ "scenes": {
+  "1": [
+   0,
+   106
+  ],
+  "2": [
+   107,
+   267
+  ],
+  "3": [
+   268,
+   403
+  ],
+  "4": [
+   404,
+   502
+  ],
+  "5": [
+   503,
+   795
+  ],
+  "6": [
+   796,
+   978
+  ],
+  "7": [
+   979,
+   1134
+  ],
+  "8": [
+   1135,
+   1435
+  ],
+  "9": [
+   1436,
+   1636
+  ]
+ },
+ "cams": [
+  [
+   0,
+   106,
+   "Cam_S1"
+  ],
+  [
+   107,
+   267,
+   "Cam_S2"
+  ],
+  [
+   268,
+   403,
+   "Cam_S3"
+  ],
+  [
+   404,
+   502,
+   "Cam_S4"
+  ],
+  [
+   503,
+   795,
+   "Cam_S5"
+  ],
+  [
+   796,
+   978,
+   "Cam_S6"
+  ],
+  [
+   979,
+   1134,
+   "Cam_S7"
+  ],
+  [
+   1135,
+   1435,
+   "Cam_S8"
+  ],
+  [
+   1436,
+   1636,
+   "Cam_S9"
+  ]
+ ],
+ "fend": 1636,
+ "glitch": [
+  418,
+  419,
+  422,
+  423,
+  501,
+  502
+ ],
+ "flash": [
+  503
+ ],
+ "free_from": 1589,
+ "mouth_min_hold": 2
+}
