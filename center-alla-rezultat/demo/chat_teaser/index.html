@@ -28,6 +28,7 @@
   .in  { align-self: flex-start; background: #fff; border-bottom-left-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,.05); }
   .out { align-self: flex-end; background: linear-gradient(135deg,#3CE0D7,#1EBBB0); color: #fff; border-bottom-right-radius: 12px; transform-origin: right bottom; }
   .big { font-size: 96px; font-weight: 900; letter-spacing: .02em; }
+  .emo { vertical-align: -0.2em; }
   .time { display: block; font-size: 24px; font-weight: 500; opacity: .6; margin-top: 6px; text-align: right; }
   .typing { align-self: flex-start; background: #fff; border-radius: 40px; border-bottom-left-radius: 12px; padding: 30px 38px;
             display: flex; gap: 14px; opacity: 0; }
@@ -51,7 +52,7 @@
 
 <div id="phone">
   <div id="head">
-    <div id="ava">⚖️</div>
+    <div id="ava"><img class="emo" src="emoji/2696-fe0f.png" style="height:64px" alt=""></div>
     <div><div id="name">Мои килограммы</div><div id="status">в сети</div></div>
   </div>
   <div id="area"><div id="feed"></div></div>
@@ -69,16 +70,16 @@
 <script>
 const DUR = 16.0, T_END = 12.6;
 const MSGS = [
-  { t: 0.9, side: 'in',  text: 'ты где? 🥺' },
+  { t: 0.9, side: 'in',  text: 'ты где? <img class="emo" src="emoji/1f97a.png" style="height:1.08em" alt="">' },
   { t: 2.0, side: 'in',  text: 'почему не отвечаешь' },
-  { t: 3.1, side: 'in',  text: 'мы же вместе с 2019 года 💔' },
+  { t: 3.1, side: 'in',  text: 'мы же вместе с 2019 года <img class="emo" src="emoji/1f494.png" style="height:1.08em" alt="">' },
   { t: 4.4, side: 'out', text: 'я на аппаратах у Аллы Казаниной' },
   { t: 5.5, side: 'out', text: 'не пиши мне больше' },
   { t: 6.8, side: 'in',  text: 'стоп. ты похудела на 3 см?!' },
   { t: 7.9, side: 'in',  text: 'на 7?!' },
   { t: 8.8, side: 'in',  text: 'ПОДОЖДИ', big: true },
-  { t: 10.0, side: 'out', text: '45 минут лежу — а ты уходишь сам 😌' },
-  { t: 11.3, side: 'sys', text: '🔒 Вы заблокировали «Мои килограммы»' },
+  { t: 10.0, side: 'out', text: '45 минут лежу — а ты уходишь сам <img class="emo" src="emoji/1f60c.png" style="height:1.08em" alt="">' },
+  { t: 11.3, side: 'sys', text: '<img class="emo" src="emoji/1f512.png" style="height:1.08em" alt=""> Вы заблокировали «Мои килограммы»' },
 ];
 const clamp = x => Math.min(Math.max(x, 0), 1);
 const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
