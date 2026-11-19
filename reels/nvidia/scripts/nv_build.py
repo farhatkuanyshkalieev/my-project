@@ -421,12 +421,12 @@ CL_ROUTE = [  # (frame, world position)  — robotic hops between them
     (SCN["3"][0], CARD_C + Vector((-0.75, -0.55, 0.15))), (F_CARDS - 6, CARD_C + Vector((-0.5, -0.6, 0.08))), (F_GAMER, CARD_C + Vector((0.5, -0.55, 0.12))),
     (SCN["4"][0] + 6, CARD_C + Vector((0.55, -0.6, 0.2))), (F_CHANGE + 6, CARD_C + Vector((0.7, -0.45, 0.55))), (F_AI + 6, CARD_C + Vector((0.75, -0.55, 0.15))),
     (F_DC, dcv(0.0, 2.4, 1.35)), (F_NN - 6, dcv(0.25, 4.6, 1.5)), (F_GPT - 6, dcv(-0.3, 8.0, 1.6)), (F_DCW - 6, dcv(0.25, 11.4, 1.5)),
-    (F_GROW - 10, dcv(0.0, 14.4, 1.4)), (SCN["6"][0] + 4, BAR_C + Vector((-0.95, -0.9, 0.9))), (F_REV, BAR_C + Vector((-0.9, -0.75, 1.0))),
-    (F_X2 - 12, BAR_C + Vector((0.15, -0.75, 1.3))), (F_X2 + 2, BAR_C + Vector((0.2, -0.75, 2.5))), (F_LAST, BAR_C + Vector((0.95, -0.85, 1.6))),
+    (F_GROW - 10, dcv(0.0, 14.4, 1.4)), (SCN["6"][0] + 4, BAR_C + Vector((-0.75, -1.7, 0.9))), (F_REV, BAR_C + Vector((-0.7, -1.6, 1.0))),
+    (F_X2 - 12, BAR_C + Vector((0.15, -1.0, 1.3))), (F_X2 + 2, BAR_C + Vector((0.3, -1.0, 2.4))), (F_LAST, BAR_C + Vector((0.85, -1.5, 1.7))),
     (SCN["7"][0] + 8, CHIP_C + Vector((-0.9, -0.95, 1.2))), (F_PLAYER - 6, CHIP_C + Vector((1.3, -1.05, 1.75))), (F_IND, CHIP_C + Vector((0.8, -1.45, 1.6))),
     (SCN["8"][0] + 10, CHIP_C + Vector((-0.6, -1.25, 1.3))), (F_NEW, CHIP_C + Vector((-0.75, -1.0, 1.45))), (F_Q2, CHIP_C + Vector((-0.35, -1.25, 1.05))),
     (F_LEAD, CHIP_C + Vector((0.45, -1.2, 1.2))), (SCN["9"][0] - 30, CHIP_C + Vector((0.7, -0.9, 1.4))),
-    (SCN["9"][0] + 6, LOGO_C + Vector((-0.8, -1.9, -0.75))), (F_GREEN - 6, LOGO_C + Vector((-0.95, -1.7, -0.6))), (F_END_FREE, LOGO_C + Vector((-1.05, -1.9, -0.55))),
+    (SCN["9"][0] + 6, LOGO_C + Vector((-0.55, -2.4, -0.75))), (F_GREEN - 6, LOGO_C + Vector((-0.6, -2.6, -0.65))), (F_END_FREE, LOGO_C + Vector((-0.7, -3.3, -0.6))),
 ]
 def hop_time(f0, f1): return min(14, max(6, (f1 - f0) // 3))
 def cl_pos_raw(f):
