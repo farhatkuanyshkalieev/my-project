@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Как я худела раньше</title>
+<link rel="stylesheet" href="fonts/montserrat.css">
+<style>
+  :root { --turq:#3CE0D7; --turq-d:#1EBBB0; --g:#373435; --grey:#6B7079; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body { font-family: 'Montserrat', sans-serif; color: var(--g); background: linear-gradient(#FFFFFF, #E3F8F5); }
+  .abs { position: absolute; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .c { position: absolute; left: 0; right: 0; text-align: center; }
+  #logo { position: absolute; left: 50%; top: 52px; width: 430px; transform: translateX(-50%); z-index: 5; }
+  .h1 { font-weight: 900; font-size: 92px; line-height: 1.06; }
+  .h1 b { color: var(--turq-d); }
+  .sub { font-weight: 600; font-size: 46px; color: var(--grey); }
+  #s1 { background: linear-gradient(#F2F3F6, #DCDFE4); }
+  .chip { position: absolute; left: 110px; right: 110px; height: 190px; border-radius: 50px; background: #fff;
+          display: flex; align-items: center; gap: 36px; padding: 0 46px; box-shadow: 0 20px 50px rgba(40,44,52,.10); }
+  .chip img { width: 120px; height: 120px; }
+  .chip .d { font-weight: 800; font-size: 34px; color: #9AA0AA; width: 90px; }
+  .chip .t { font-weight: 800; font-size: 56px; }
+  .card { position: absolute; left: 80px; right: 80px; height: 230px; border-radius: 56px; background: #fff;
+          display: flex; align-items: center; gap: 36px; padding: 0 46px; box-shadow: 0 24px 60px rgba(18,140,132,.14); }
+  .card .ic { width: 150px; height: 150px; border-radius: 42px; background: #E6F8F6; display: flex; align-items: center; justify-content: center; flex: none; position: relative; }
+  .card .ic img { width: 110px; height: 110px; }
+  .card .t { font-weight: 800; font-size: 52px; line-height: 1.12; }
+  .card .t small { display: block; font-weight: 600; font-size: 36px; color: var(--grey); margin-top: 6px; }
+  .btn { position: absolute; left: 110px; right: 110px; height: 170px; border-radius: 85px;
+         background: linear-gradient(90deg, #3CE0D7, #1EBBB0); color: #fff; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; box-shadow: 0 24px 50px rgba(30,187,176,.35); }
+  .btn b { font-weight: 900; font-size: 60px; } .btn small { font-weight: 800; font-size: 46px; letter-spacing: .02em; }
+</style>
+</head>
+<body>
+<svg class="abs" width="1080" height="1920" style="left:0;top:0">
+  <circle id="c1" cx="1080" cy="1600" r="560" fill="#3CE0D7" opacity=".12"/>
+  <circle id="c2" cx="-60" cy="420" r="300" fill="#3CE0D7" opacity=".10"/>
+</svg>
+
+<!-- 1: how I used to diet -->
+<div class="scene" id="s1">
+  <div class="c" id="t1" style="top:300px"><div class="h1" style="color:#4A4E57">Как я худела<br>раньше</div></div>
+  <div class="chip" id="k1" style="top:620px"><span class="d">ПН</span><img src="emoji160/1f95b.png"><span class="t">кефир</span></div>
+  <div class="chip" id="k2" style="top:840px"><span class="d">СР</span><img src="emoji160/1f96c.png"><span class="t">листик салата</span></div>
+  <div class="chip" id="k3" style="top:1060px"><span class="d">ПТ</span><img src="emoji160/1f36b.png"><span class="t" style="color:#E2574C">срыв</span></div>
+  <div class="c" id="k4" style="top:1340px"><div style="font-weight:700;font-size:48px;color:#6B7079">итог:</div>
+    <div style="font-weight:900;font-size:150px;line-height:1.05;color:#4A4E57">−0 кг <img src="emoji160/1f629.png" style="height:130px;vertical-align:-18px"></div></div>
+</div>
+
+<!-- 2: how we do it -->
+<div class="scene" id="s2">
+  <div class="c" id="t2" style="top:300px"><div class="h1">Как худеют<br><b>у нас</b></div></div>
+  <div class="card" id="m1" style="top:600px"><div class="ic"><img src="emoji160/1f37d-fe0f.png"></div>
+    <div class="t">Нормальные порции<small>и вы сыты</small></div></div>
+  <div class="card" id="m2" style="top:860px"><div class="ic"><img src="emoji160/1f36a.png"><img src="emoji160/1f6ab.png" style="position:absolute;width:150px;height:150px;opacity:.9"></div>
+    <div class="t">Без перекусов<small>на бегу</small></div></div>
+  <div class="card" id="m3" style="top:1120px"><div class="ic"><img src="emoji160/1f45f.png"></div>
+    <div class="t">Движение<small>каждый день · <b id="steps" style="color:#1EBBB0">0</b> шагов</small></div></div>
+  <div class="card" id="m4" style="top:1380px"><div class="ic"><img src="emoji160/1f486-200d-2640-fe0f.png"></div>
+    <div class="t">Аппараты<small>помогают телу</small></div></div>
+</div>
+
+<!-- 3: result that stays -->
+<div class="scene" id="s3">
+  <div class="c" id="t3" style="top:300px"><div class="h1" style="font-size:84px">Без срывов —<br>результат,<br><b>который остаётся</b></div></div>
+  <svg class="abs" style="left:80px;top:760px" width="920" height="760" viewBox="0 0 920 760">
+    <rect x="0" y="0" width="920" height="760" rx="56" fill="#fff"/>
+    <g stroke="#EEF3F3" stroke-width="3"><line x1="80" y1="180" x2="860" y2="180"/><line x1="80" y1="340" x2="860" y2="340"/><line x1="80" y1="500" x2="860" y2="500"/></g>
+    <path id="zig" d="M80 200 C140 320, 180 330, 220 230 C260 140, 300 220, 350 310 C400 400, 440 330, 480 230 C520 150, 560 220, 610 300 C660 380, 700 300, 740 220 C780 160, 820 200, 860 230"
+          fill="none" stroke="#C3C9CF" stroke-width="10" stroke-linecap="round" stroke-dasharray="1800" stroke-dashoffset="1800"/>
+    <path id="smooth" d="M80 200 C260 240, 420 360, 560 450 C680 525, 780 560, 860 580"
+          fill="none" stroke="#1EBBB0" stroke-width="14" stroke-linecap="round" stroke-dasharray="1100" stroke-dashoffset="1100"/>
+    <circle id="dot" r="16" fill="#fff" stroke="#1EBBB0" stroke-width="8" cx="80" cy="200"/>
+    <g font-family="Montserrat" font-weight="700" font-size="30" fill="#9AA3A6">
+      <text x="260" y="660" text-anchor="middle">1 мес</text><text x="500" y="660" text-anchor="middle">2 мес</text><text x="740" y="660" text-anchor="middle">3 мес</text></g>
+    <g font-family="Montserrat" font-weight="800" font-size="32">
+      <rect x="90" y="40" width="26" height="10" rx="5" fill="#C3C9CF"/><text x="128" y="52" fill="#9AA3A6">диеты и срывы</text>
+      <rect x="470" y="40" width="26" height="10" rx="5" fill="#1EBBB0"/><text x="508" y="52" fill="#1EBBB0">программа центра</text></g>
+  </svg>
+</div>
+
+<!-- 4: end -->
+<div class="scene" id="s4">
+  <img src="../../brand/logo.png" alt="" style="position:absolute;left:50%;top:260px;width:620px;transform:translateX(-50%)">
+  <div class="c" id="e2" style="top:700px"><div class="h1" style="font-size:90px">Начните<br>с диагностики</div></div>
+  <div class="c" id="e3" style="top:960px"><div class="sub" style="font-size:44px">подберём питание и нагрузку под вас</div></div>
+  <div class="btn" id="e4" style="top:1150px"><b>Оставьте заявку</b><small>8 707 474 78 24</small></div>
+  <div class="c" id="e5" style="top:1660px"><div style="font-weight:600;font-size:32px;color:#6B7079">Алматы · Аксай-1, 10/3 · Аль-Фараби, 83</div></div>
+</div>
+<img id="logo" src="../../brand/logo.png" alt="">
+
+<script>
+// scene times follow vo.mp3 (placed at +0.2 s)
+const T = { ours: 8.9, chart: 19.1, end: 22.6 }, DUR = 26.3;
+const clamp = x => Math.min(Math.max(x, 0), 1);
+const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const eo = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+const back = x => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const $ = id => document.getElementById(id);
+function alpha(t, a, b) { return t < a || t >= b + .3 ? 0 : (t < b ? ease((t - a) / .3) : 1 - ease((t - b) / .3)); }
+function pop(id, lt, dx) { $(id).style.opacity = ease(lt / .25); $(id).style.transform = `translateX(${(1 - eo(lt / .4)) * (dx || 0)}px) scale(${.85 + .15 * back(lt / .4)})`; }
+
+window.render = function (t) {
+  $('c1').setAttribute('transform', `translate(${Math.sin(t * .4) * 24} ${Math.cos(t * .35) * 20})`);
+  $('c2').setAttribute('transform', `translate(${Math.cos(t * .5) * 20} ${Math.sin(t * .45) * 18})`);
+  // 1 old way (grey)
+  $('s1').style.opacity = alpha(t, 0, T.ours);
+  pop('t1', t - .15);
+  pop('k1', t - 2.0, -200); pop('k2', t - 2.75, -200); pop('k3', t - 4.05, -200);
+  const crash = t - 4.05; $('k3').style.transform += ` rotate(${crash > .3 && crash < 1.2 ? Math.sin(crash * 40) * 2.5 * (1.2 - crash) : 0}deg)`;
+  pop('k4', t - 5.5);
+  // 2 our way
+  const l2 = t - T.ours;
+  $('s2').style.opacity = alpha(t, T.ours, T.chart);
+  pop('t2', l2 - .3);
+  pop('m1', l2 - 2.0, 200); pop('m2', l2 - 4.55, 200); pop('m3', l2 - 5.85, 200); pop('m4', l2 - 7.9, 200);
+  $('steps').textContent = Math.round(8000 * eo((l2 - 6.0) / 1.6)).toLocaleString('ru-RU');
+  // 3 chart
+  const l3 = t - T.chart;
+  $('s3').style.opacity = alpha(t, T.chart, T.end);
+  pop('t3', l3 - .2);
+  $('zig').setAttribute('stroke-dashoffset', 1800 * (1 - ease((l3 - .3) / 1.4)));
+  const p = eo((l3 - .9) / 1.8);
+  $('smooth').setAttribute('stroke-dashoffset', 1100 * (1 - p));
+  const pt = $('smooth').getPointAtLength($('smooth').getTotalLength() * p);
+  $('dot').setAttribute('cx', pt.x); $('dot').setAttribute('cy', pt.y); $('dot').style.opacity = p > .01 ? 1 : 0;
+  // 4 end
+  const l4 = t - T.end;
+  $('s4').style.opacity = ease(l4 / .35);
+  $('logo').style.opacity = 1 - ease(l4 / .35);
+  ['e2', 'e3', 'e4', 'e5'].forEach((id, k) => {
+    const x = (l4 - .15 - k * .2) / .4;
+    $(id).style.opacity = ease(x);
+    $(id).style.transform = `translateY(${(1 - eo(x)) * 40}px)` + (id === 'e4' ? ` scale(${1 + .025 * Math.sin(t * 6)})` : '');
+  });
+};
+window.render(0);
+</script>
+</body>
+</html>
