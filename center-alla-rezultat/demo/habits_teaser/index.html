@@ -24,7 +24,12 @@
   .chip .t { font-weight: 800; font-size: 56px; }
   .chip .t small { display: block; font-weight: 600; font-size: 34px; color: var(--grey); margin-top: 4px; }
   .chip.ok { box-shadow: 0 20px 50px rgba(18,140,132,.16); }
-  .chip.ok .d { color: #1EBBB0; }
+  .chip.ok { height: 180px; gap: 28px; padding: 0 40px; }
+  .chip.ok .t { font-size: 50px; white-space: nowrap; }
+  .chip .ck { width: 64px; height: 64px; border-radius: 50%; background: #1EBBB0; color: #fff; font-weight: 900; font-size: 38px;
+              display: flex; align-items: center; justify-content: center; flex: none; }
+  .chip .ic2 { position: relative; width: 120px; height: 120px; flex: none; }
+  .chip .ic2 .no { position: absolute; left: -6px; top: -6px; width: 132px; height: 132px; opacity: .9; }
   .card { position: absolute; left: 80px; right: 80px; height: 230px; border-radius: 56px; background: #fff;
           display: flex; align-items: center; gap: 36px; padding: 0 46px; box-shadow: 0 24px 60px rgba(18,140,132,.14); }
   .card .ic { width: 150px; height: 150px; border-radius: 42px; background: #E6F8F6; display: flex; align-items: center; justify-content: center; flex: none; position: relative; }
@@ -53,39 +58,41 @@
     <div style="font-weight:900;font-size:150px;line-height:1.05;color:#4A4E57">−0 кг <img src="emoji160/1f629.png" style="height:130px;vertical-align:-18px"></div></div>
 </div>
 
-<!-- 2: how we do it (mirrors scene 1: same week, at the centre) -->
+<!-- 2: how we do it (mirrors scene 1: the same list, but the centre's method) -->
 <div class="scene" id="s2">
-  <div class="c" id="t2" style="top:300px"><div class="h1">Как худеют<br><b>у нас</b></div></div>
-  <div class="chip ok" id="m1" style="top:620px"><span class="d">ПН</span><img src="emoji160/1fa7a.png"><span class="t">диагностика<small>замеры и план под вас</small></span></div>
-  <div class="chip ok" id="m2" style="top:840px"><span class="d">СР</span><img src="emoji160/1f486-200d-2640-fe0f.png"><span class="t">аппараты<small>45 минут, без нагрузки</small></span></div>
-  <div class="chip ok" id="m3" style="top:1060px"><span class="d">ПТ</span><img src="emoji160/1f37d-fe0f.png"><span class="t">еда без голода<small>сыта — и без срыва</small></span></div>
-  <div class="c" id="m4" style="top:1350px"><div style="display:inline-flex;align-items:center;gap:22px;background:#fff;border-radius:60px;padding:22px 44px;box-shadow:0 16px 40px rgba(18,140,132,.14)">
-    <img src="emoji160/1f469-200d-2695-fe0f.png" style="width:90px;height:90px"><span style="font-weight:800;font-size:42px">специалист ведёт вас<br>весь курс</span></div></div>
+  <div class="c" id="t2" style="top:290px"><div class="h1">Как худеют<br><b>у нас</b></div></div>
+  <div class="chip ok" id="m1" style="top:560px"><span class="ck">✓</span><img src="emoji160/1fa7a.png"><span class="t">диагностика<small>замеры и план под вас</small></span></div>
+  <div class="chip ok" id="m2" style="top:765px"><span class="ck">✓</span><img src="emoji160/1f37d-fe0f.png"><span class="t">нормальная порция<small>и вы сыты</small></span></div>
+  <div class="chip ok" id="m3" style="top:970px"><span class="ck">✓</span><span class="ic2"><img src="emoji160/1f36a.png"><img src="emoji160/1f6ab.png" class="no"></span><span class="t">без перекусов<small>на бегу не тянет</small></span></div>
+  <div class="chip ok" id="m4" style="top:1175px"><span class="ck">✓</span><img src="emoji160/1f45f.png"><span class="t">движение<small>каждый день · <b id="steps" style="color:#1EBBB0">0</b> шагов</small></span></div>
+  <div class="chip ok" id="m5" style="top:1380px"><span class="ck">✓</span><img src="emoji160/1f486-200d-2640-fe0f.png"><span class="t">аппараты<small>помогают телу</small></span></div>
 </div>
 
 <!-- 3: weight goes down and stays -->
 <div class="scene" id="s3">
   <div class="c" id="t3" style="top:290px"><div class="h1" style="font-size:88px">Вес уходит —<br><b>и не возвращается</b></div></div>
-  <svg class="abs" style="left:60px;top:620px" width="960" height="900" viewBox="0 0 960 900">
-    <rect x="0" y="0" width="960" height="900" rx="56" fill="#fff"/>
+  <svg class="abs" style="left:60px;top:600px" width="960" height="880" viewBox="0 0 960 880">
+    <rect x="0" y="0" width="960" height="880" rx="56" fill="#fff"/>
     <g font-family="Montserrat" font-weight="800" font-size="32">
       <rect x="60" y="54" width="34" height="12" rx="6" fill="#C3C9CF"/><text x="106" y="70" fill="#9AA3A6">диеты</text>
       <rect x="300" y="54" width="34" height="12" rx="6" fill="#1EBBB0"/><text x="346" y="70" fill="#1EBBB0">программа центра</text></g>
-    <!-- axis: weight -->
-    <line x1="130" y1="150" x2="130" y2="720" stroke="#D5DCDD" stroke-width="5"/><line x1="130" y1="720" x2="900" y2="720" stroke="#D5DCDD" stroke-width="5"/>
+    <line x1="130" y1="150" x2="130" y2="720" stroke="#D5DCDD" stroke-width="5"/><line x1="130" y1="720" x2="905" y2="720" stroke="#D5DCDD" stroke-width="5"/>
     <path d="M114 172 L130 140 L146 172" fill="none" stroke="#D5DCDD" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
     <text x="70" y="440" transform="rotate(-90 70 440)" text-anchor="middle" font-family="Montserrat" font-weight="900" font-size="38" fill="#373435">ВЕС, кг</text>
-    <rect id="band" x="610" y="585" width="285" height="80" rx="26" fill="#E2F8F6" opacity="0"/>
-    <text id="bandt" x="752" y="555" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="34" fill="#128C84" opacity="0">вес держится</text>
-    <path id="zig" d="M130 230 C220 290, 260 470, 340 460 C420 450, 440 330, 500 360 C560 390, 600 260, 680 250 C760 240, 820 250, 880 220"
-          fill="none" stroke="#C3C9CF" stroke-width="10" stroke-linecap="round" stroke-dasharray="1400" stroke-dashoffset="1400"/>
-    <text id="zigt" x="880" y="190" text-anchor="end" font-family="Montserrat" font-weight="800" font-size="32" fill="#9AA3A6" opacity="0">вес вернулся</text>
-    <path id="smooth" d="M130 230 C280 270, 420 520, 600 600 C700 625, 800 625, 880 625"
+    <rect id="band" x="700" y="575" width="198" height="76" rx="24" fill="#E2F8F6" opacity="0"/>
+    <text id="bandt" x="800" y="548" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="32" fill="#128C84" opacity="0">вес держится</text>
+    <path id="zig" d="M130 260 C190 320, 220 430, 280 430 C340 430, 360 250, 420 220 C470 200, 500 340, 560 390 C610 430, 640 250, 700 205 C760 165, 820 195, 890 175"
+          fill="none" stroke="#C3C9CF" stroke-width="10" stroke-linecap="round" stroke-dasharray="2000" stroke-dashoffset="2000"/>
+    <text id="zigt" x="890" y="140" text-anchor="end" font-family="Montserrat" font-weight="800" font-size="32" fill="#9AA3A6" opacity="0">вес вернулся</text>
+    <path id="smooth" d="M130 260 C330 300, 520 530, 720 605 C790 620, 840 622, 890 622"
           fill="none" stroke="#1EBBB0" stroke-width="14" stroke-linecap="round" stroke-dasharray="1100" stroke-dashoffset="1100"/>
-    <circle id="dot" r="16" fill="#fff" stroke="#1EBBB0" stroke-width="8" cx="130" cy="230"/>
-    <g font-family="Montserrat" font-weight="700" font-size="30" fill="#9AA3A6" text-anchor="middle">
-      <text x="300" y="775">1 мес</text><text x="470" y="775">2 мес</text><text x="640" y="775">3 мес</text><text x="810" y="775">после</text></g>
+    <circle id="dot" r="16" fill="#fff" stroke="#1EBBB0" stroke-width="8" cx="130" cy="260"/>
+    <g font-family="Montserrat" font-weight="700" font-size="28" fill="#9AA3A6" text-anchor="middle">
+      <text x="258" y="770">1</text><text x="386" y="770">2</text><text x="514" y="770">3</text><text x="642" y="770">4</text><text x="770" y="770">5</text><text x="890" y="770">6</text>
+      <text x="514" y="820" font-size="30">месяцы</text></g>
   </svg>
+  <div class="c" id="t3b" style="top:1530px"><div style="display:inline-flex;align-items:center;gap:22px;background:#fff;border-radius:60px;padding:20px 44px;box-shadow:0 16px 40px rgba(18,140,132,.14)">
+    <img src="emoji160/1f469-200d-2695-fe0f.png" style="width:84px;height:84px"><span style="font-weight:800;font-size:40px;text-align:left">специалист рядом<br>весь курс</span></div></div>
 </div>
 
 <!-- 4: end -->
@@ -100,7 +107,7 @@
 
 <script>
 // scene times follow vo.mp3 (placed at +0.2 s)
-const T = { ours: 8.2, chart: 15.6, end: 19.7 }, DUR = 23.6;
+const T = { ours: 8.3, chart: 20.6, end: 24.5 }, DUR = 28.0;
 const clamp = x => Math.min(Math.max(x, 0), 1);
 const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
 const eo = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
@@ -121,19 +128,21 @@ window.render = function (t) {
   // 2 our way
   const l2 = t - T.ours;
   $('s2').style.opacity = alpha(t, T.ours, T.chart);
-  pop('t2', l2 - .25);
-  pop('m1', l2 - 2.3, 200); pop('m2', l2 - 4.0, 200); pop('m3', l2 - 5.75, 200); pop('m4', l2 - 6.6);
+  pop('t2', l2 - .2);
+  [['m1', 10.25], ['m2', 11.85], ['m3', 14.5], ['m4', 16.05], ['m5', 18.2]].forEach(([id, at]) => pop(id, t - at, 200));
+  $('steps').textContent = Math.round(8000 * eo((t - 16.3) / 1.4)).toLocaleString('ru-RU');
   // 3 chart
   const l3 = t - T.chart;
   $('s3').style.opacity = alpha(t, T.chart, T.end);
   pop('t3', l3 - .2);
-  $('zig').setAttribute('stroke-dashoffset', 1400 * (1 - ease((l3 - .4) / 1.6)));
-  $('zigt').setAttribute('opacity', ease((l3 - 1.9) / .3));
-  const p = eo((l3 - 1.0) / 1.8);
+  $('zig').setAttribute('stroke-dashoffset', 2000 * (1 - ease((l3 - .4) / 1.8)));
+  $('zigt').setAttribute('opacity', ease((l3 - 2.1) / .3));
+  const p = eo((l3 - .9) / 2.0);
   $('smooth').setAttribute('stroke-dashoffset', 1100 * (1 - p));
   const pt = $('smooth').getPointAtLength($('smooth').getTotalLength() * p);
   $('dot').setAttribute('cx', pt.x); $('dot').setAttribute('cy', pt.y); $('dot').style.opacity = p > .01 ? 1 : 0;
-  $('band').setAttribute('opacity', ease((l3 - 2.2) / .4)); $('bandt').setAttribute('opacity', ease((l3 - 2.4) / .4));
+  $('band').setAttribute('opacity', ease((l3 - 2.4) / .4)); $('bandt').setAttribute('opacity', ease((l3 - 2.6) / .4));
+  pop('t3b', l3 - 2.9);
   // 4 end
   const l4 = t - T.end;
   $('s4').style.opacity = ease(l4 / .35);

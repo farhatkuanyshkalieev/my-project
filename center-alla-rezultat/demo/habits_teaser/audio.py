@@ -3,8 +3,8 @@ Usage: python3 audio.py OUT.wav"""
 import subprocess, sys, wave
 from pathlib import Path
 import numpy as np
-SR, DUR, VO_OFF = 44100, 23.6, 0.2
-T = dict(ours=8.2, chart=15.6, end=19.7)
+SR, DUR, VO_OFF = 44100, 28.0, 0.2
+T = dict(ours=8.3, chart=20.6, end=24.5)
 n = int(SR * DUR); out = np.zeros(n, np.float32); r = np.random.default_rng(5)
 def add(sig, t, g=1.0):
     s = int(t * SR); e = min(n, s + len(sig))
@@ -19,7 +19,9 @@ def thump():
 for t in (2.0, 2.75): add(pop(660), t, .7)
 add(thump(), 4.1, .8); add(tone(330, .5, 5) * .3, 4.15)          # срыв
 add(tone(392, .35, 6) * .3, 5.5); add(tone(311, .5, 5) * .3, 5.7)  # «−0 кг»
-for d in (2.3, 4.0, 5.75, 6.6): add(pop(), T['ours'] + d)
+for at in (10.25, 11.85, 14.5, 16.05, 18.2): add(pop(), at)
+for i in range(7): add(tone(2200, .02, 300) * .1, 16.3 + i * .2)   # step ticks
+add(pop(990), T['chart'] + 2.9, .6)
 add(tone(523.25, .8, 3) * .25, T['chart'] + 1.0); add(tone(659.25, .9, 3) * .2, T['chart'] + 1.6); add(tone(784, 1.0, 3) * .18, T['chart'] + 2.4)
 add(tone(1046.5, 1.2, 3) * .25, T['end'] + .1); add(tone(1568, 1.0, 3) * .18, T['end'] + .25)
 beat, t, k = .55, .2, 0
