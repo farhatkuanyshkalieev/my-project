@@ -51,7 +51,7 @@ export const Reveal: React.FC<{
 }> = ({at, children, y = 40, x = 0, scale = false, style}) => {
   const s = useSpr(at);
   const frame = useCurrentFrame();
-  if (frame < at) return null;
+  if (frame < at) return <div style={{...style, visibility: 'hidden'}}>{children}</div>;
   return (
     <div
       style={{
