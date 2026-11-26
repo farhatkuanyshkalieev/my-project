@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, interpolate, delayRender, continueRender} from 'remotion';
+import {AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, interpolate} from 'remotion';
 import timeline from './timeline.json';
 import {Background, SceneFrame, C, FONT, DISPLAY, clamp, Sfx} from './ui';
 import {S1Intro, S2History, S3Scale, S4AssetLight, S5Portfolio, S6Local, S7Loyalty, S8Partners, S9Kazakhstan, S10Outro} from './scenes';
@@ -8,25 +8,7 @@ const SCENES = [S1Intro, S2History, S3Scale, S4AssetLight, S5Portfolio, S6Local,
 const CHAPTERS = ['Кіріспе', 'Тарих', 'Ауқым', 'Стратегия 1', 'Стратегия 2', 'Стратегия 3', 'Стратегия 4', 'Стратегия 5', 'Қазақстан', 'Қорытынды'];
 const HUES = [C.gold, C.teal, C.blue, C.gold, C.teal, C.rose, C.gold, C.teal, C.teal, C.gold];
 
-const fontFiles: [string, string, string][] = [
-  ['Inter', 'Inter-Regular.otf', '400'],
-  ['Inter', 'Inter-Medium.otf', '500'],
-  ['Inter', 'Inter-SemiBold.otf', '600'],
-  ['Inter', 'Inter-Bold.otf', '700'],
-  ['InterDisplay', 'InterDisplay-Bold.otf', '700'],
-  ['InterDisplay', 'InterDisplay-ExtraBold.otf', '800'],
-];
-if (typeof document !== 'undefined') {
-  const h = delayRender('fonts', {timeoutInMilliseconds: 180000, retries: 2});
-  Promise.all(
-    fontFiles.map(([fam, file, w]) => {
-      const f = new FontFace(fam, `url(${staticFile('fonts/' + file)})`, {weight: w});
-      return f.load().then((ff) => document.fonts.add(ff));
-    }),
-  )
-    .catch((e) => console.warn('font load failed', e))
-    .then(() => continueRender(h));
-}
+import './fonts';
 
 const lead = timeline.lead;
 

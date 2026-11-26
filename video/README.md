@@ -14,3 +14,14 @@
 npm install
 npx remotion render src/index.ts Main out/ihg_strategy_kk.mp4 --codec=h264 --crf=18
 ```
+
+## Reel нұсқасы (2 минут, динамикалық)
+
+- `reel/lines.json` — сценарий + әр кадрдың (shot) сипаттамасы
+- `reel/tts.py` — эмоциялы қазақша дауыс (Microsoft kk-KZ-DauletNeural, edge-tts), сөздердің уақыт белгілерімен
+- `reel/timeline.py` → `src/reel/reel.json`; `reel/sound.py` — 124 BPM музыка мен SFX
+- `src/reel/` — Remotion композициясы `Reel`
+
+```bash
+npx remotion render src/index.ts Reel out/ihg_reel_kk_2min.mp4 --codec=h264 --crf=20
+```
