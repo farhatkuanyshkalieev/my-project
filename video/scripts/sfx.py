@@ -1,336 +1,360 @@
-"""Синтез саундтрека: lo-fi бит + все звуковые эффекты, расставленные по timeline.json.
-Только numpy. Результат: public/mix.wav (44.1 кГц, стерео, 16 бит)."""
-import json, os, wave
+"""Саунд-дизайн под референс: озвучка (Kokoro TTS) + музыка + ~60 эффектов.
+Только numpy + ffmpeg. Результат: public/mix.wav (44.1 кГц, стерео)."""
+import os, subprocess, wave
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-T = json.load(open(os.path.join(ROOT, 'src', 'timeline.json'), encoding='utf-8'))
 SR = 44100
-FPS = T['fps']
-DUR = T['total'] / FPS + 1.5
-N = int(DUR * SR)
-rng = np.random.default_rng(7)
-
+FPS = 30
+TOTAL = 621
+N = int(TOTAL / FPS * SR) + SR
+rng = np.random.default_rng(11)
 music = np.zeros((N, 2))
 fx = np.zeros((N, 2))
+vo = np.zeros((N, 2))
 
 
-def t_(n):
+def T(n):
     return np.arange(n) / SR
 
 
-def fr(frame):
+def F(frame):
     return frame / FPS
 
 
 def place(bus, sig, at, pan=0.0, gain=1.0):
     i = int(at * SR)
-    if i >= N:
-        return
     if sig.ndim == 1:
-        l, r = np.sqrt((1 - pan) / 2), np.sqrt((1 + pan) / 2)
-        sig = np.stack([sig * l, sig * r], 1)
+        sig = np.stack([sig * np.sqrt((1 - pan) / 2), sig * np.sqrt((1 + pan) / 2)], 1)
+    if i < 0:
+        sig, i = sig[-i:], 0
     n = min(len(sig), N - i)
-    bus[i:i + n] += sig[:n] * gain
+    if n > 0:
+        bus[i:i + n] += sig[:n] * gain
 
 
-def fft_filter(x, lo=None, hi=None, slope=0.15):
+def filt(x, lo=None, hi=None):
     X = np.fft.rfft(x)
     f = np.fft.rfftfreq(len(x), 1 / SR)
     m = np.ones_like(f)
     if hi:
-        m *= 1 / (1 + (f / hi) ** (2 / slope * 0.1 + 2))
+        m /= 1 + (f / hi) ** 4
     if lo:
-        m *= 1 / (1 + (lo / np.maximum(f, 1)) ** 4)
+        m /= 1 + (lo / np.maximum(f, 1)) ** 4
     return np.fft.irfft(X * m, len(x))
 
 
 def env(n, a=0.002, d=0.1):
-    t = t_(n)
+    t = T(n)
     e = np.exp(-t / d)
     na = max(1, int(a * SR))
     e[:na] *= np.linspace(0, 1, na)
     return e
 
 
-def sweep(f0, f1, n, curve=1.0):
+def chirp(f0, f1, n, curve=1.0):
     k = np.linspace(0, 1, n) ** curve
-    f = f0 * (f1 / f0) ** k
-    return np.cumsum(f) / SR * 2 * np.pi
+    return np.cumsum(f0 * (f1 / f0) ** k) / SR * 2 * np.pi
 
 
-def square(phase, duty=0.5):
-    return np.where((phase / (2 * np.pi)) % 1 < duty, 1.0, -1.0)
+def noise(n):
+    return rng.standard_normal(n)
 
 
-# ---------------- инструменты ----------------
+# ---------- эффекты ----------
 
-def kick():
-    n = int(0.45 * SR)
-    s = np.sin(sweep(140, 45, n, 0.35)) * env(n, 0.001, 0.16)
-    return np.tanh(s * 2.2) * 0.9
-
-
-def snare():
-    n = int(0.25 * SR)
-    noise = fft_filter(rng.standard_normal(n), lo=1500, hi=8000) * env(n, 0.001, 0.06)
-    tone = np.sin(2 * np.pi * 190 * t_(n)) * env(n, 0.001, 0.04)
-    return (noise * 0.6 + tone * 0.5) * 0.8
-
-
-def hat(open_=False):
-    n = int((0.18 if open_ else 0.05) * SR)
-    s = fft_filter(rng.standard_normal(n), lo=7000) * env(n, 0.0005, 0.06 if open_ else 0.012)
-    return s * 0.35
-
-
-def pad_chord(freqs, dur):
+def whoosh(dur=0.5, up=True, bright=1.0):
     n = int(dur * SR)
-    t = t_(n)
-    s = np.zeros(n)
-    for f in freqs:
-        for det in (-0.25, 0.0, 0.3):
-            ph = 2 * np.pi * f * (1 + det / 100) * t + rng.random() * 6
-            s += (2 * ((ph / (2 * np.pi)) % 1) - 1)  # пила
-    s = fft_filter(s, hi=1100)
-    a = np.minimum(1, t / 0.25) * np.minimum(1, (dur - t) / 0.2)
-    wobble = 1 + 0.004 * np.sin(2 * np.pi * 0.6 * t)  # «плёночный» дрейф уже в громкости
-    return s * a * wobble * 0.05
+    x = noise(n)
+    k = np.linspace(0, 1, n)
+    lowp, highp = filt(x, hi=600), filt(x, lo=2000, hi=9000 * bright)
+    mix = k if up else 1 - k
+    shape = np.sin(np.pi * k) ** 1.5
+    s = (lowp * (1 - mix) * 1.7 + highp * mix * 0.7) * shape
+    return np.stack([s * (1 - 0.7 * k), s * (0.3 + 0.7 * k)], 1)
 
 
-def bass(f, dur):
+def swish(dur=0.25):
     n = int(dur * SR)
-    t = t_(n)
-    s = np.sin(2 * np.pi * f * t) + 0.25 * np.sin(4 * np.pi * f * t)
-    return s * np.minimum(1, t / 0.01) * np.exp(-t / (dur * 0.9)) * 0.45
-
-
-def crackle(n):
-    s = np.zeros(n)
-    idx = rng.integers(0, n, n // 2500)
-    s[idx] = rng.standard_normal(len(idx)) * 0.5
-    hiss = fft_filter(rng.standard_normal(n), lo=3000, hi=9000) * 0.012
-    return fft_filter(s, lo=1000) * 0.4 + hiss
-
-
-# ---------------- эффекты ----------------
-
-def click():
-    n = int(0.03 * SR)
-    noise = fft_filter(rng.standard_normal(n), lo=2500, hi=9000) * env(n, 0.0003, 0.004)
-    tone = np.sin(2 * np.pi * (1600 + rng.random() * 600) * t_(n)) * env(n, 0.0003, 0.006)
-    return (noise * 0.7 + tone * 0.3) * (0.5 + rng.random() * 0.25)
-
-
-def thock():
-    n = int(0.12 * SR)
-    s = np.sin(sweep(900, 260, n, 0.4)) * env(n, 0.0005, 0.03)
-    s += fft_filter(rng.standard_normal(n), lo=1500, hi=5000) * env(n, 0.0003, 0.006) * 0.5
+    k = np.linspace(0, 1, n)
+    s = filt(noise(n), lo=3000, hi=11000) * np.sin(np.pi * k) ** 3
     return s * 0.7
 
 
-def pop():
-    n = int(0.15 * SR)
-    s = np.sin(sweep(1100, 280, n, 0.3)) * env(n, 0.0005, 0.04)
-    return s * 0.6
-
-
-def whoosh(dur=0.5, up=True):
+def impact(dur=1.2, pitch=140, gain=1.0):
     n = int(dur * SR)
-    noise = rng.standard_normal(n)
-    lowp = fft_filter(noise, hi=700)
-    highp = fft_filter(noise, lo=2500, hi=9000)
-    k = np.linspace(0, 1, n)
-    mix = k if up else 1 - k
-    shape = np.sin(np.pi * k) ** 1.6
-    s = (lowp * (1 - mix) * 1.6 + highp * mix * 0.6) * shape
-    return np.stack([s * (1 - k * 0.8), s * (0.2 + k * 0.8)], 1) * 0.9  # панорама слева направо
+    sub = np.sin(chirp(pitch, 38, n, 0.25)) * env(n, 0.001, 0.35)
+    body = filt(noise(n), hi=1500) * env(n, 0.001, 0.08)
+    return np.tanh((sub * 1.4 + body * 0.7) * 1.8) * 0.8 * gain
 
 
-def ping(step):
-    base = 660 * 2 ** (step * 2 / 12)
-    out = []
-    for f, d in ((base, 0.06), (base * 1.5, 0.16)):
-        n = int(d * SR)
-        out.append(square(2 * np.pi * f * t_(n), 0.25) * env(n, 0.001, d * 0.6))
-    return np.concatenate(out) * 0.22
+def pen(dur=0.3, strokes=5):
+    n = int(dur * SR)
+    x = filt(noise(n), lo=1200, hi=5000)
+    am = np.zeros(n)
+    for _ in range(strokes):
+        c = rng.integers(0, n)
+        w = int(rng.uniform(0.02, 0.07) * SR)
+        a, b = max(0, c - w), min(n, c + w)
+        am[a:b] += np.hanning(b - a) * rng.uniform(0.5, 1)
+    return x * np.clip(am, 0, 1.2) * 0.35
 
 
-def glitch():
+def beep(dur, f=880):
+    n = int(dur * SR)
+    e = np.ones(n)
+    r = int(0.004 * SR)
+    e[:r] = np.linspace(0, 1, r)
+    e[-r:] = np.linspace(1, 0, r)
+    return np.sin(2 * np.pi * f * T(n)) * e * 0.22
+
+
+def zap():
     n = int(0.16 * SR)
-    s = rng.standard_normal(n)
-    s = np.repeat(s[::40], 40)[:n]  # даунсэмплинг-хруст
-    s += square(sweep(2000, 300, n, 0.5), 0.3) * 0.5
-    gate = np.repeat(rng.random(n // 600 + 1) > 0.35, 600)[:n]
-    s = np.round(s * 4) / 4 * gate
-    return s * env(n, 0.0005, 0.08) * 0.35
+    s = np.sign(np.sin(chirp(1600, 90, n, 0.5))) * 0.5 + noise(n) * 0.5
+    s = np.repeat(s[::30], 30)[:n]
+    return np.tanh(s * 2) * env(n, 0.001, 0.07) * 0.45
 
 
-def impact(dur=1.6):
+def shing(dur=0.9, base=2100):
     n = int(dur * SR)
-    sub = np.sin(sweep(160, 38, n, 0.25)) * env(n, 0.001, 0.45)
-    body = fft_filter(rng.standard_normal(n), hi=1800) * env(n, 0.001, 0.12)
-    return np.tanh((sub * 1.4 + body * 0.8) * 1.8) * 0.85
+    t = T(n)
+    s = sum(np.sin(2 * np.pi * base * r * t + rng.random() * 6) / (i + 1) for i, r in enumerate([1, 1.52, 2.21, 2.93, 3.71]))
+    s = s * env(n, 0.003, 0.25)
+    s += filt(noise(n), lo=5000) * np.linspace(1, 0, n) ** 3 * 0.25
+    return s * 0.25
 
 
-def riser(dur):
+def splat():
+    n = int(0.22 * SR)
+    blob = np.sin(chirp(420, 70, n, 0.3)) * env(n, 0.001, 0.05)
+    wet = filt(noise(n), lo=200, hi=2500) * env(n, 0.001, 0.03)
+    return (blob * 0.8 + wet * 0.6) * 0.7
+
+
+def boom():
+    n = int(0.7 * SR)
+    s = filt(noise(n), hi=900) * env(n, 0.002, 0.12) * 1.2
+    s += np.sin(chirp(110, 40, n, 0.4)) * env(n, 0.001, 0.2)
+    crackle = np.zeros(n)
+    idx = rng.integers(0, int(0.4 * SR), 60)
+    crackle[idx] = rng.standard_normal(60)
+    s += filt(crackle, lo=2000) * 2
+    return np.tanh(s * 1.5) * 0.6
+
+
+def bitglitch(dur=0.25):
+    n = int(dur * SR)
+    step = int(0.025 * SR)
+    s = np.zeros(n)
+    for i in range(0, n, step):
+        f = rng.choice([220, 330, 440, 660, 880, 1320])
+        s[i:i + step] = np.sign(np.sin(2 * np.pi * f * T(min(step, n - i))))
+    return s * 0.12 * env(n, 0.001, dur * 0.8)
+
+
+def shutter():
+    n = int(0.12 * SR)
+    c = np.zeros(n)
+    for at, a in ((0, 1.0), (int(0.035 * SR), 0.7)):
+        m = int(0.012 * SR)
+        c[at:at + m] += filt(noise(m), lo=1500, hi=8000) * env(m, 0.0002, 0.003) * a
+    return c * 1.2
+
+
+def scratch(dur=0.5):
+    n = int(dur * SR)
+    t = T(n)
+    rate = 400 + 350 * np.sin(2 * np.pi * 5 * t) * np.sin(2 * np.pi * 1.3 * t)
+    ph = np.cumsum(np.abs(rate)) / SR * 2 * np.pi
+    s = np.sin(ph) * 0.4 + filt(noise(n), lo=500, hi=3000) * (np.abs(np.sin(2 * np.pi * 5 * t)) * 0.6)
+    return s * np.sin(np.pi * np.linspace(0, 1, n)) * 0.5
+
+
+def plink(f):
+    n = int(0.5 * SR)
+    t = T(n)
+    s = np.sin(2 * np.pi * f * t) + 0.3 * np.sin(4 * np.pi * f * t) + 0.1 * np.sin(6 * np.pi * f * t)
+    return s * env(n, 0.002, 0.15) * 0.22
+
+
+def swell(dur=0.6):
     n = int(dur * SR)
     k = np.linspace(0, 1, n)
-    noise = rng.standard_normal(n)
-    a = fft_filter(noise, lo=300, hi=1500)
-    b = fft_filter(noise, lo=3000, hi=10000)
-    s = (a * (1 - k) + b * k) * k ** 2 * 0.9
-    s += np.sin(sweep(180, 1400, n, 1.4)) * k ** 2.5 * 0.18
+    s = filt(noise(n), lo=2000, hi=12000) * k ** 3 * 0.5
+    s += np.sin(chirp(300, 900, n, 1.5)) * k ** 3 * 0.1
     return s
 
 
-def save_jingle():
-    notes = [523.25, 659.25, 783.99, 1046.5, 1318.5]
-    out = []
-    for i, f in enumerate(notes):
-        d = 0.07 if i < len(notes) - 1 else 0.5
-        n = int(d * SR)
-        t = t_(n)
-        vib = 1 + (0.012 * np.sin(2 * np.pi * 7 * t) if i == len(notes) - 1 else 0)
-        ph = np.cumsum(2 * np.pi * f * vib / SR)
-        tone = square(ph, 0.5) * 0.6 + square(ph * 0.5, 0.25) * 0.3
-        out.append(tone * env(n, 0.001, d * (0.9 if i < len(notes) - 1 else 0.35)))
-    return np.concatenate(out) * 0.25
+def blip():
+    n = int(0.14 * SR)
+    a = np.sign(np.sin(2 * np.pi * 988 * T(n // 2)))
+    b = np.sign(np.sin(2 * np.pi * 1319 * T(n - n // 2)))
+    return np.concatenate([a, b]) * env(n, 0.001, 0.1) * 0.12
 
 
-def star():
-    n = int(0.22 * SR)
-    s = square(sweep(1800, 3600, n, 0.6), 0.5) * env(n, 0.001, 0.07)
-    return s * 0.12
+def tick():
+    n = int(0.05 * SR)
+    return filt(noise(n), lo=2500, hi=7000) * env(n, 0.0005, 0.01) * 0.25
 
 
-# ---------------- партитура ----------------
-
-typ = T['typing']
-for key, item in typ.items():
-    for i, ch in enumerate(item['text']):
-        if ch in ' \n':
-            continue
-        place(fx, click(), fr(item['start'] + i * item['fpc']), pan=rng.uniform(-0.3, 0.3), gain=0.9)
-
-for p in T['bgIconPops']:
-    place(fx, pop(), fr(p), gain=0.45)
-for i, p in enumerate(T['carouselPops']):
-    place(fx, pop(), fr(p), pan=np.cos(i / 10 * 2 * np.pi) * 0.7, gain=0.6)
-for i, p in enumerate(T['carouselPops']):
-    if i % 3 == 0:
-        place(fx, star(), fr(p), gain=0.8)
-
-place(fx, whoosh(0.55, True), fr(T['swipe']['start']) - 0.08, gain=1.0)
-place(fx, whoosh(0.9, True), fr(T['scenes']['s3']) + 0.6, gain=0.4)  # раскрутка карусели
-place(fx, whoosh(0.7, False), fr(T['carouselFlyOut']), gain=1.0)
-for g in T['glitches']:
-    place(fx, glitch(), fr(g), gain=1.0)
-
-for i, d in enumerate(T['drops']):
-    place(fx, whoosh(0.3, False), fr(d), gain=0.35)
-    land = fr(d + T['dropFall'])
-    place(fx, thock(), land, gain=0.8)
-    place(fx, ping(i), land + 0.01, gain=1.0)
-    place(fx, star(), land, gain=0.6)
-
-s5, s6, s7, s8 = (fr(T['scenes'][k]) for k in ('s5', 's6', 's7', 's8'))
-place(fx, whoosh(0.6, True), s5 - 0.05, gain=0.6)
-place(fx, riser(s6 - s5 - 0.4), s5 + 0.4, gain=0.9)
-place(fx, impact(1.8), s6, gain=1.0)
-place(fx, whoosh(0.8, True), fr(T['scenes']['s6'] + 8), gain=0.7)  # пролёт книги
-
-for l in T['letters']:
-    place(fx, whoosh(0.18, True), fr(l), gain=0.3)
-    place(fx, thock(), fr(l) + 0.2, gain=0.9)
-place(fx, pop(), fr(T['dot']), gain=0.7)
-
-place(fx, impact(2.2), fr(T['saveSlam']), gain=1.1)
-place(fx, save_jingle(), fr(T['saveSlam']) + 0.12, gain=1.0)
-place(fx, thock(), fr(T['check']), gain=0.8)
-
-# lo-fi бит: 96 BPM, Fmaj7 – Em7 – Dm7 – Cmaj7
-BPM = 96
-beat = 60 / BPM
-start = fr(T['typing']['ans']['start']) - beat  # бит входит на ответе «нисколько.»
-chords = [[174.6, 220.0, 261.6, 329.6], [164.8, 196.0, 246.9, 293.7], [146.8, 174.6, 220.0, 261.6], [130.8, 164.8, 196.0, 246.9]]
-roots = [43.65, 41.2, 36.71, 32.7]
-drop_from, drop_to = s6, s7          # брейк на взрыве
-stop_at = s8                         # бит обрывается на «сохранено.»
+def hum(dur=0.5):
+    n = int(dur * SR)
+    t = T(n)
+    s = np.sin(2 * np.pi * 110 * t) + 0.5 * np.sin(2 * np.pi * 220.7 * t)
+    return s * np.sin(np.pi * np.linspace(0, 1, n)) * 0.18
 
 
-def beat_on(t):
-    return t < stop_at and not (drop_from - 0.05 <= t < drop_to)
+# ---------- партитура эффектов (кадры = референс) ----------
+place(fx, whoosh(0.35, False), 0.0, gain=0.8)
+place(fx, pen(0.18, 3), F(4), gain=1.0)
+for i, d in enumerate([0.03, 0.09, 0.03, 0.09, 0.09, 0.03, 0.03, 0.03, 0.12]):
+    place(fx, beep(d, 900), F(12) + i * 0.07, gain=0.7)
+place(fx, pen(0.25, 6), F(18), gain=1.0)
+for at in (24, 30, 36, 41):
+    place(fx, pen(0.18, 4), F(at), pan=rng.uniform(-0.4, 0.4), gain=0.9)
+place(fx, zap(), F(54), gain=1.1)
+place(fx, shing(1.0), F(58), pan=-0.5, gain=1.0)
+place(fx, whoosh(0.5, True), F(58), gain=0.5)
+place(fx, swell(0.4), F(96), gain=0.5)
+place(fx, impact(1.4, 120), F(108), gain=0.8)
+place(fx, whoosh(0.5, True), F(106), gain=0.9)
+place(fx, whoosh(0.35, False), F(112), pan=0.4, gain=0.7)
+place(fx, swish(0.2), F(128), pan=0.4, gain=0.9)
+place(fx, swish(0.3), F(138), pan=0.3, gain=1.0)
+place(fx, swell(0.4), F(160), gain=0.6)
+place(fx, whoosh(0.4, True), F(169), gain=0.6)
+place(fx, whoosh(0.4, False), F(184), gain=0.5)
+place(fx, bitglitch(0.17), F(189), gain=1.0)
+place(fx, impact(1.0, 160), F(193), gain=0.7)
+for at, p in ((198, -0.3), (209, 0.4), (225, -0.2)):
+    place(fx, splat(), F(at), pan=p, gain=0.9)
+place(fx, whoosh(1.5, True, 0.6), F(196), gain=0.35)
+place(fx, boom(), F(210), pan=0.5, gain=0.9)
+place(fx, boom(), F(228), pan=-0.5, gain=0.9)
+place(fx, impact(0.9, 150), F(243), gain=0.7)
+place(fx, shing(0.7, 2600), F(243), pan=-0.2, gain=0.9)
+place(fx, whoosh(0.3, True), F(256), gain=0.5)
+place(fx, whoosh(0.4, False), F(270), gain=0.9)
+for at in (277, 287):
+    place(fx, swish(0.18), F(at), pan=0.5, gain=0.7)
+place(fx, impact(0.8, 130), F(294), gain=0.6)
+place(fx, whoosh(0.45, True), F(294), pan=-0.3, gain=0.8)
+place(fx, pen(0.2, 3), F(298), gain=0.6)
+place(fx, whoosh(0.3, False), F(313), gain=0.5)
+place(fx, whoosh(0.35, True), F(320), gain=1.1)
+place(fx, scratch(0.45), F(328), gain=1.0)
+for at, fr in ((331, 1046.5), (336, 1318.5), (337.5, 1568.0), (342, 880.0), (346, 1174.7)):
+    place(fx, plink(fr), F(at), pan=rng.uniform(-0.5, 0.5), gain=1.0)
+place(fx, whoosh(0.5, True), F(349), gain=1.1)
+place(fx, splat(), F(360), gain=0.8)
+place(fx, whoosh(0.4, False), F(364), gain=0.6)
+for at in (374, 378, 383, 386, 392, 395):
+    place(fx, splat(), F(at), pan=rng.uniform(-0.6, 0.6), gain=0.7)
+for at in (376, 377):
+    place(fx, pen(0.25, 5), F(at), pan=rng.uniform(-0.5, 0.5), gain=0.8)
+place(fx, whoosh(0.6, True), F(404), gain=1.1)
+place(fx, shing(0.8, 1700), F(410), gain=0.5)
+for at in (425, 437):
+    place(fx, tick(), F(at), gain=0.8)
+for i in range(6):
+    place(fx, plink(2637 + i * 200) * 0.25, F(430 + i * 6), pan=rng.uniform(-0.6, 0.6))
+place(fx, zap(), F(463), gain=0.6)
+place(fx, whoosh(0.4, True), F(466), gain=0.9)
+place(fx, blip(), F(474), gain=1.0)
+place(fx, impact(0.6, 90), F(480), gain=0.6)
+place(fx, shutter(), F(484), gain=1.2)
+place(fx, hum(0.3), F(488), gain=1.0)
+place(fx, impact(0.6, 120), F(493), gain=0.8)
+place(fx, scratch(0.35), F(498), gain=1.0)
+place(fx, swell(0.35), F(505), gain=0.9)
+place(fx, whoosh(0.45, True), F(512), gain=1.1)
+for at in (532, 546, 560, 572, 578, 583, 587, 590, 593, 596, 598, 600):
+    place(fx, pen(0.17, 3), F(at), pan=rng.uniform(-0.6, 0.6), gain=0.45)
+place(fx, swell(0.25), F(601), gain=0.8)
+place(fx, pen(0.2, 8), F(603), gain=1.0)
+place(fx, impact(0.5, 150), F(609), gain=0.8)
+place(fx, whoosh(0.3, False), F(613), gain=0.8)
+
+# ---------- музыка: эмбиент-пад + мягкое пианино ----------
+def piano(f, dur):
+    n = int(dur * SR)
+    t = T(n)
+    s = sum(np.sin(2 * np.pi * f * h * t) * a * np.exp(-t * (1.5 + h)) for h, a in ((1, 1), (2, 0.4), (3, 0.15), (4, 0.06)))
+    return s * env(n, 0.004, 10) * 0.16
 
 
-t = start
-b = 0
-while t < stop_at:
-    bar = b // 4
-    pos = b % 4
-    if pos == 0:
-        ch = chords[bar % 4]
-        place(music, pad_chord(ch, beat * 4), t, gain=1.0)
-        place(music, bass(roots[bar % 4] * 2, beat * 1.5), t, gain=0.9)
-    if pos == 2:
-        place(music, bass(roots[bar % 4] * 2, beat * 1.2), t + beat * 0.5, gain=0.7)
-    if beat_on(t):
-        if pos in (0,) or (pos == 2 and b % 8 == 2):
-            place(music, kick(), t, gain=1.0)
-        if pos == 2 and b % 8 == 6:
-            place(music, kick(), t + beat * 0.5, gain=0.8)
-        if pos in (1, 3):
-            place(music, snare(), t + 0.012, gain=0.9)
-        for h in range(2):
-            ht = t + h * beat * 0.5 + (0.04 if h else 0)  # свинг
-            place(music, hat(open_=(pos == 3 and h == 1)), ht, pan=0.25, gain=0.8 if h == 0 else 0.5)
-    t += beat
-    b += 1
+def pad(freqs, dur):
+    n = int(dur * SR)
+    t = T(n)
+    s = np.zeros(n)
+    for fr in freqs:
+        for det in (-0.2, 0.0, 0.25):
+            ph = 2 * np.pi * fr * (1 + det / 100) * t + rng.random() * 6
+            s += 2 * ((ph / (2 * np.pi)) % 1) - 1
+    s = filt(s, hi=900)
+    return s * np.minimum(1, t / 0.6) * np.minimum(1, (dur - t) / 0.6) * 0.035
 
-# в брейке пэд и бас глушим, оставляя хвост
-k0, k1 = int((drop_from + 0.02) * SR), int(drop_to * SR)
-music[k0:k1] *= np.linspace(0.15, 0.05, k1 - k0)[:, None]
-music[int(stop_at * SR):] = 0
 
-# тихий «воздух» в начале + треск винила на всём ролике
-room = fft_filter(rng.standard_normal(N), hi=400) * 0.03
-place(music, room, 0)
-place(music, crackle(int((stop_at) * SR)), 0, gain=0.8)
+chords = [[146.8, 185.0, 220.0, 277.2], [123.5, 146.8, 185.0, 220.0], [98.0, 146.8, 185.0, 246.9], [110.0, 138.6, 164.8, 220.0]]
+bar = 2.5
+for b in range(9):
+    t0 = b * bar
+    ch = chords[b % 4]
+    place(music, pad(ch, bar + 0.8), t0 - 0.4)
+    for i, fr in enumerate([ch[0] * 2, ch[2] * 2, ch[3] * 2, ch[1] * 4]):
+        place(music, piano(fr, 2.2), t0 + i * bar / 4 + 0.02, pan=(i - 1.5) * 0.25)
 
-# лоу-фай «ламповость» на музыке
-for c in range(2):
-    music[:, c] = fft_filter(music[:, c], hi=6500)
+# ---------- озвучка ----------
+VO = [('p1', 0.03, 0.88), ('p2', 3.44, 1), ('p3', 5.08, 1), ('p4', 7.8, 1), ('p5', 9.45, 1), ('p6', 10.98, 1), ('p7', 13.15, 0.8)]
 
-# простая реверберация на эффектах
-ir_n = int(1.2 * SR)
-ir = rng.standard_normal(ir_n) * np.exp(-t_(ir_n) / 0.25)
-ir = fft_filter(ir, hi=5000)
-ir /= np.abs(ir).sum() / 8
-L = 1 << int(np.ceil(np.log2(N + ir_n)))
-IR = np.fft.rfft(ir, L)
-for c in range(2):
-    wet = np.fft.irfft(np.fft.rfft(fx[:, c], L) * IR, L)[:N]
-    fx[:, c] += wet * 0.18
 
-# сайдчейн: музыка проседает под ударами
-duck = np.ones(N)
-for at in (s6, fr(T['saveSlam'])):
+def load(path):
+    with wave.open(path) as w:
+        x = np.frombuffer(w.readframes(w.getnframes()), '<i2') / 32768
+        return x.reshape(-1, w.getnchannels()).mean(1)
+
+
+tmp = os.path.join(ROOT, 'public', 'vo', '_tmp.wav')
+voenv = np.zeros(N)
+for name, at, tempo in VO:
+    src = os.path.join(ROOT, 'public', 'vo', f'{name}.wav')
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', src, '-af', f'atempo={tempo}', '-ar', str(SR), '-ac', '1', tmp], check=True)
+    x = load(tmp)
+    x = x / (np.abs(x).max() + 1e-9) * 0.8
+    place(vo, x, at)
     i = int(at * SR)
-    n = min(int(0.6 * SR), N - i)
-    duck[i:i + n] = np.minimum(duck[i:i + n], 1 - 0.7 * np.exp(-t_(n) / 0.2))
+    voenv[i:i + len(x)] = 1
+os.remove(tmp)
 
-mix = music * duck[:, None] * 0.85 + fx
-mix = np.tanh(mix * 1.1)
+# лёгкая «комнатная» реверберация на голос и эффекты
+def reverb(bus, mix=0.15, dec=0.3):
+    ir_n = int(1.2 * SR)
+    ir = filt(noise(ir_n) * np.exp(-T(ir_n) / dec), hi=5000)
+    ir /= np.abs(ir).sum() / 6
+    L = 1 << int(np.ceil(np.log2(N + ir_n)))
+    I = np.fft.rfft(ir, L)
+    for c in range(2):
+        bus[:, c] += np.fft.irfft(np.fft.rfft(bus[:, c], L) * I, L)[:N] * mix
+
+reverb(fx, 0.18)
+reverb(vo, 0.06, 0.2)
+
+# дакинг музыки под голос
+k = int(0.15 * SR)
+sm = np.convolve(voenv, np.ones(k) / k, 'same')
+duck = 1 - 0.5 * sm
+
+mix = music * duck[:, None] * 0.9 + fx * 0.85 + vo * 1.0
+mix = np.tanh(mix * 1.15)
 mix /= np.abs(mix).max() / 0.92
-mix = mix[: int(T['total'] / FPS * SR) + int(0.0 * SR)]
-fade = int(0.05 * SR)
+mix = mix[: int(TOTAL / FPS * SR)]
+fade = int(0.02 * SR)
 mix[-fade:] *= np.linspace(1, 0, fade)[:, None]
-
-os.makedirs(os.path.join(ROOT, 'public'), exist_ok=True)
 out = os.path.join(ROOT, 'public', 'mix.wav')
 with wave.open(out, 'wb') as w:
     w.setnchannels(2)
     w.setsampwidth(2)
     w.setframerate(SR)
     w.writeframes((mix * 32767).astype('<i2').tobytes())
-print('ok', out, round(len(mix) / SR, 2), 's')
+print('ok', round(len(mix) / SR, 2), 's')
