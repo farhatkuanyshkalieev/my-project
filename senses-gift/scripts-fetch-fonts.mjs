@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 const want = [
-  ["CormorantGaramond", "normal", ["400", "500"]],
-  ["CormorantGaramond", "italic", ["400", "500"]],
+  ["Unbounded", "normal", ["400", "700", "900"]],
+  ["PlayfairDisplay", "italic", ["400", "600"]],
   ["Manrope", "normal", ["400", "500", "600"]],
 ];
 const out = [];

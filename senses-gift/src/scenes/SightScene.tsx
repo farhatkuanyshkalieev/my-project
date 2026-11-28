@@ -1,5 +1,5 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { SceneFrame, SenseTitle } from "../components/Kit";
+import { Marquee, Progress, SceneFrame, SenseTitle } from "../components/Kit";
 import { colors, easeInExpo, easeInOut, ip } from "../theme";
 
 // A graphic eye opens, glances left/right on the beats, blinks, then the camera dives into the
@@ -11,12 +11,12 @@ const CY = 1010;
 
 export const SightScene: React.FC = () => {
   const f = useCurrentFrame();
-  const open = ip(f, [2, 14], [0.04, 1], easeInOut);
-  const blink = f < 62 ? 1 : ip(f, [62, 65, 70], [1, 0.04, 1], easeInOut);
+  const open = ip(f, [6, 14], [0.04, 1], easeInOut);
+  const blink = f < 48 ? 1 : ip(f, [48, 51, 55], [1, 0.04, 1], easeInOut);
   const a = open * blink;
-  const look = ip(f, [15, 22, 30, 37, 45, 52], [0, -110, -110, 110, 110, 0], easeInOut);
-  const lookY = ip(f, [15, 22, 30, 37, 45, 52], [0, 10, 10, -6, -6, 0], easeInOut);
-  const zoom = ip(f, [74, 90], [1, 34], easeInExpo);
+  const look = ip(f, [12, 17, 27, 32, 40, 45], [0, -110, -110, 110, 110, 0], easeInOut);
+  const lookY = ip(f, [12, 17, 27, 32, 40, 45], [0, 10, 10, -6, -6, 0], easeInOut);
+  const zoom = ip(f, [66, 90], [1, 34], easeInExpo);
   const almond = `M${-W},0 Q0,${-2 * H * a} ${W},0 Q0,${1.5 * H * a} ${-W},0 Z`;
   const lid = (s: number) => {
     const x = (1 - s) ** 2 * -W + s ** 2 * W;
@@ -24,9 +24,13 @@ export const SightScene: React.FC = () => {
     return { x, y };
   };
   return (
-    <SceneFrame bg={colors.cream}>
-      <AbsoluteFill style={{ opacity: ip(f, [70, 78], [1, 0]) }}>
-        <SenseTitle label="чувство четвёртое" word="Взгляд" caption="тот самый взгляд в зеркало утром" fg={colors.ink} accent={colors.coralDeep} />
+    <SceneFrame bg={colors.cream} enter="circle" origin={[540, 1060]}>
+      <AbsoluteFill style={{ opacity: ip(f, [62, 70], [1, 0]) }}>
+        <Marquee text="ВЗГЛЯД" color="#EDE2D3" y={700} />
+      </AbsoluteFill>
+      <AbsoluteFill style={{ opacity: ip(f, [62, 70], [1, 0]) }}>
+        <SenseTitle label="чувство №4" word="ВЗГЛЯД" caption="тот самый взгляд *в_зеркало* утром" fg={colors.ink} accent={colors.coralDeep} hiFg={colors.cream} />
+        <Progress index={3} color={colors.ink} />
       </AbsoluteFill>
       <svg width={1080} height={1920} style={{ position: "absolute" }}>
         <defs>
@@ -55,7 +59,7 @@ export const SightScene: React.FC = () => {
                 })}
                 <circle r={150} fill="none" stroke={colors.wine} strokeWidth={10} />
                 <circle r={68} fill={colors.wine} />
-                <circle cx={-44} cy={-48} r={20} fill={colors.cream} opacity={ip(f, [74, 80], [1, 0])} />
+                <circle cx={-44} cy={-48} r={20} fill={colors.cream} opacity={ip(f, [66, 72], [1, 0])} />
               </g>
             </g>
             <path d={almond} fill="none" stroke={colors.ink} strokeWidth={8} strokeLinejoin="round" />

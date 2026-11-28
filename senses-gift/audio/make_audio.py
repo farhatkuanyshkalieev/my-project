@@ -6,7 +6,7 @@ from scipy.signal import butter, sosfilt, fftconvolve
 from scipy.io import wavfile
 
 SR = 44100
-LEN = 21.5
+LEN = 19.0
 N = int(SR * LEN)
 BEAT = 0.5
 BAR = 2.0
@@ -124,9 +124,9 @@ ROOT = {"D": 38, "Bm": 35, "G": 31, "A": 33}
 ARP = [0, 2, 4, 3, 1, 3, 2, 4]
 
 def drums_on(t):
-    return 2.0 <= t < 11.0 or 15.0 <= t < 20.0
+    return 2.0 <= t < 9.5 or 13.5 <= t < 18.0
 
-for b in range(11):
+for b in range(10):
     t0 = b * BAR
     ch = CH[prog[b]]
     for i, m in enumerate(ch):
@@ -136,16 +136,16 @@ for b in range(11):
         tt = t0 + e * BEAT / 2
         if b == 0 and e % 2:  # sparse intro
             continue
-        if 14.0 <= tt < 15.0:  # breath before the reveal
+        if 12.5 <= tt < 13.5:  # breath before the reveal
             continue
         vel = (0.9 if e % 2 == 0 else 0.6) * rng.uniform(0.85, 1.0)
         place(music, epiano(top[ARP[e]], vel), tt + rng.uniform(0, 0.008), 1.0, pan=rng.uniform(-0.4, 0.4))
-    if b >= 1 and not (14.0 <= t0 < 15.0):
+    if b >= 1:
         place(music, bass(ROOT[prog[b]], 1.4), t0)
         place(music, bass(ROOT[prog[b]] + 7, 0.4), t0 + 1.25, 0.6)
     for s in range(16):
         tt = t0 + s * BEAT / 4 + (0.02 if s % 2 else 0)
-        if drums_on(tt) or 11.0 <= tt < 14.0:
+        if drums_on(tt) or 9.5 <= tt < 12.5:
             place(music, shaker(s % 4 == 2), tt, 1.0, pan=0.3)
     for q in range(4):
         tt = t0 + q * BEAT
@@ -154,16 +154,16 @@ for b in range(11):
                 place(music, kick(), tt)
             if q in (1, 3):
                 place(music, snap(), tt, 1.0, pan=-0.1)
-        elif 11.0 <= tt < 14.0 and q in (1, 3):
+        elif 9.5 <= tt < 12.5 and q in (1, 3):
             place(music, snap(), tt, 0.5)
     if drums_on(t0 + 1.25) and b % 2:
         place(music, kick(), t0 + 1.25, 0.6)
 
 # riser into the reveal + final ring-out chord
-place(music, noise_sweep(1.0, 400, 9000, "rise"), 14.0, 0.05)
+place(music, noise_sweep(1.0, 400, 9000, "rise"), 12.5, 0.05)
 for i, m in enumerate([74, 78, 81, 85, 86]):
-    place(music, bell(m, 0.8, 1.5), 20.0 + i * 0.06, 1.0, pan=(i - 2) * 0.3)
-place(music, kick(), 20.0, 0.8)
+    place(music, bell(m, 0.8, 1.5), 18.0 + i * 0.06, 1.0, pan=(i - 2) * 0.3)
+place(music, kick(), 18.0, 0.8)
 
 ir = make_ir()
 music = reverb(music, 0.35, ir)
@@ -199,28 +199,33 @@ def rustle(d):
     env = np.minimum(tt / 0.3, 1) * np.minimum((d - tt) / 0.4, 1)
     return n * am * env * 0.07
 
-# hook: each word lands on a beat
-for i, t in enumerate((0.0, 0.5, 1.0)):
-    place(sfx, tap(880 + i * 140), t + 0.02)
-# soft whooshes on the wipes
-for t in (2.0, 5.0, 8.0, 11.0, 18.0):
-    place(sfx, noise_sweep(0.45, 500, 6000, "swell"), t - 0.15, 0.18, pan=-0.3)
-place(sfx, rustle(3.0), 2.0)                      # satin ribbon
-place(sfx, drop(), 6.0)                           # touch
-place(sfx, noise_sweep(0.9, 300, 5000, "swell"), 8.05, 0.2)  # bloom
+# hook: question words pop, then the "5" slams on beat 3 (1.0 s)
+for i, t in enumerate((0.0, 0.27, 0.4)):
+    place(sfx, tap(880 + i * 140), t + 0.01)
+place(sfx, noise_sweep(0.3, 2000, 200, "rise"), 0.7, 0.25)
+place(sfx, thump(), 1.0, 1.0)
+place(sfx, kick(), 1.0, 0.9)
+# whooshes on every transition
+for t in (2.0, 4.5, 7.0, 9.5, 16.0):
+    place(sfx, noise_sweep(0.4, 500, 6500, "swell"), t - 0.12, 0.22, pan=-0.3)
+place(sfx, rustle(2.5), 2.0)                      # satin ribbon
+place(sfx, drop(), 5.0)                           # touch
+place(sfx, noise_sweep(0.7, 300, 5000, "swell"), 7.0, 0.2)  # bloom
 for i, m in enumerate((93, 97, 100)):
-    place(sfx, bell(m, 0.5, 1.2), 8.45 + i * 0.09, 1.0, pan=(i - 1) * 0.5)
-place(sfx, tap(420, 0.8), 11.05)                  # eye opens
-for t in (13.07, 13.22):                          # blink
+    place(sfx, bell(m, 0.5, 1.2), 7.3 + i * 0.07, 1.0, pan=(i - 1) * 0.5)
+place(sfx, tap(420, 0.8), 9.7)                    # eye opens
+for t in (9.9, 10.4, 10.83):                      # glances
+    place(sfx, tap(1600, 0.35), t)
+for t in (11.1, 11.23):                           # blink
     place(sfx, tap(1300, 0.6), t)
-place(sfx, noise_sweep(0.55, 300, 8000, "rise"), 13.45, 0.35)  # zoom into the pupil
-place(sfx, thump(), 14.0, 0.8)
-for i, t in enumerate((14.0, 14.27, 14.5, 14.73)):  # sense words land
+place(sfx, noise_sweep(0.8, 300, 8000, "rise"), 11.7, 0.35)  # dive into the pupil
+place(sfx, thump(), 12.5, 0.8)
+for i, t in enumerate((12.5, 12.7, 12.9, 13.1)):  # sense words land
     place(sfx, tap(700 + i * 120, 0.8), t, 1.0, pan=(-0.5, 0.5, -0.3, 0.3)[i])
 for i, m in enumerate((86, 90, 93, 98)):          # certificate reveal
-    place(sfx, bell(m, 0.9, 3.0), 15.0 + i * 0.045, 1.0, pan=(i - 1.5) * 0.3)
-place(sfx, thump(), 15.0)
-place(sfx, pop(), 19.5)                           # CTA button
+    place(sfx, bell(m, 0.9, 3.0), 13.5 + i * 0.045, 1.0, pan=(i - 1.5) * 0.3)
+place(sfx, thump(), 13.5)
+place(sfx, pop(), 17.0)                           # CTA button
 
 sfx = reverb(sfx, 0.3, make_ir(1.6, 4.0, 7000))
 

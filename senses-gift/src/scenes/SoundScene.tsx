@@ -1,5 +1,5 @@
 import { useCurrentFrame } from "remotion";
-import { SceneFrame, SenseTitle } from "../components/Kit";
+import { Marquee, Progress, SceneFrame, SenseTitle } from "../components/Kit";
 import { colors, ip } from "../theme";
 
 // A flat satin ribbon that twists like a sound wave. Front and back of the ribbon
@@ -40,14 +40,16 @@ const Ribbon: React.FC<{ f: number; amp: number; cy: number; thick: number; phas
 export const SoundScene: React.FC = () => {
   const f = useCurrentFrame();
   const pulse = Math.exp(-(f % 30) / 7);
-  const amp = ip(f, [0, 24], [0, 150]) + 40 * pulse * ip(f, [0, 10], [0, 1]);
+  const amp = ip(f, [0, 12], [0, 160]) + 55 * pulse * ip(f, [0, 6], [0, 1]);
   return (
-    <SceneFrame bg={colors.powder}>
+    <SceneFrame bg={colors.powder} enter="circle">
+      <Marquee text="ЗВУК" color="#E8B8AC" y={700} />
       <svg width={1080} height={1920} style={{ position: "absolute" }}>
         <Ribbon f={f} amp={amp * 0.8} cy={1010} thick={30} phase={2.4} front={colors.coral} back={colors.coralDeep} />
         <Ribbon f={f} amp={amp} cy={990} thick={52} phase={0} front={colors.wine} back={colors.wineDeep} />
       </svg>
-      <SenseTitle label="чувство первое" word="Звук" caption={"шорох ленты,\nкоторую развязывают для тебя"} fg={colors.wine} accent={colors.coralDeep} />
+      <SenseTitle label="чувство №1" word="ЗВУК" caption="шорох *ленты,* которую развязывают для тебя" fg={colors.wine} accent={colors.coralDeep} hiFg={colors.cream} />
+      <Progress index={0} color={colors.wine} />
     </SceneFrame>
   );
 };

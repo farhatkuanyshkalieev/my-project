@@ -1,49 +1,49 @@
 import { useCurrentFrame } from "remotion";
 import { Certificate } from "../components/Certificate";
-import { Line, SceneFrame } from "../components/Kit";
+import { Line, Marquee, PopWord, SceneFrame } from "../components/Kit";
 import { colors, easeBack, fonts, ip } from "../theme";
 
 export const CtaScene: React.FC = () => {
   const f = useCurrentFrame();
+  const bounce = f >= 30 ? Math.exp(-((f - 30) % 30) / 6) : 0;
   return (
-    <SceneFrame bg={colors.powder}>
+    <SceneFrame bg={colors.powder} enter="up">
+      <Marquee text="ПОДАРОК" color="#E8B8AC" y={1560} size={200} />
       <div
         style={{
           position: "absolute",
           left: 240,
-          top: 330,
-          rotate: `${-7 + Math.sin(f * 0.05) * 1.5}deg`,
-          translate: `0px ${ip(f, [2, 18], [-700, 0], easeBack) + Math.sin(f * 0.07) * 8}px`,
+          top: 300,
+          rotate: `${-7 + Math.sin(f * 0.08) * 2}deg`,
+          translate: `0px ${ip(f, [1, 12], [-800, 0], easeBack) + Math.sin(f * 0.09) * 10}px`,
         }}
       >
         <Certificate width={600} />
       </div>
-      <div style={{ position: "absolute", left: 90, right: 90, top: 860 }}>
-        <Line at={8}>
-          <div style={{ fontFamily: fonts.serif, fontSize: 176, lineHeight: 1, color: colors.ink }}>Подари</div>
+      <div style={{ position: "absolute", left: 90, right: 90, top: 850 }}>
+        <PopWord text="ПОДАРИ" at={5} size={150} color={colors.ink} stagger={1.2} />
+        <Line at={12}>
+          <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontWeight: 600, fontSize: 150, lineHeight: 1.05, color: colors.wine }}>ощущение</div>
         </Line>
-        <Line at={15}>
-          <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontSize: 196, lineHeight: 1, color: colors.wine }}>ощущение</div>
-        </Line>
-        <div style={{ height: 34 }} />
-        <Line at={26}>
-          <div style={{ fontFamily: fonts.sans, fontSize: 42, color: colors.ink }}>сертификат на любую сумму</div>
+        <div style={{ height: 24 }} />
+        <Line at={20}>
+          <div style={{ fontFamily: fonts.display, fontSize: 38, color: colors.ink }}>сертификат на любую сумму</div>
         </Line>
         <div
           style={{
             display: "inline-block",
-            marginTop: 50,
-            padding: "28px 58px",
+            marginTop: 46,
+            padding: "30px 60px",
             borderRadius: 999,
             background: colors.wine,
             color: colors.cream,
-            fontFamily: fonts.sans,
-            fontSize: 40,
-            fontWeight: 600,
-            scale: String(ip(f, [45, 55], [0, 1], easeBack)),
+            fontFamily: fonts.display,
+            fontSize: 38,
+            fontWeight: 700,
+            scale: String(ip(f, [30, 38], [0, 1], easeBack) * (1 + 0.05 * bounce)),
           }}
         >
-          Заказать в Direct
+          Заказать в Direct →
         </div>
       </div>
     </SceneFrame>

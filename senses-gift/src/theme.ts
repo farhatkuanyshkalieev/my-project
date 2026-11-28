@@ -23,7 +23,11 @@ if (typeof document !== "undefined") {
     });
 }
 
-export const fonts = { serif: "'Cormorant Garamond', serif", sans: "'Manrope', sans-serif" };
+export const fonts = {
+  display: "'Unbounded', sans-serif",
+  serif: "'Playfair Display', serif",
+  sans: "'Manrope', sans-serif",
+};
 
 // Placeholder palette — swap for the clinic's brand colors.
 export const colors = {

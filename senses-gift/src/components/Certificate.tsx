@@ -21,11 +21,11 @@ export const Certificate: React.FC<{ width?: number }> = ({ width = 860 }) => {
         <div style={{ position: "absolute", left: band, top: 0, width: 48 * s, height: "100%", background: colors.coral }} />
         <div style={{ position: "absolute", left: band + 10 * s, top: 0, width: 4 * s, height: "100%", background: colors.coralDeep, opacity: 0.5 }} />
         <div style={{ position: "absolute", left: 290 * s, right: 50 * s, top: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", color: colors.ink }}>
-          <div style={{ fontFamily: fonts.sans, fontSize: 22 * s, letterSpacing: 7 * s, fontWeight: 600, color: colors.coralDeep }}>
+          <div style={{ fontFamily: fonts.display, fontSize: 19 * s, letterSpacing: 5 * s, fontWeight: 700, color: colors.coralDeep }}>
             ПОДАРОЧНЫЙ СЕРТИФИКАТ
           </div>
-          <div style={{ fontFamily: fonts.serif, fontSize: 104 * s, letterSpacing: 14 * s, lineHeight: 1, marginTop: 18 * s, color: colors.wine }}>SENSES</div>
-          <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontSize: 54 * s, marginTop: 26 * s }}>на любую сумму</div>
+          <div style={{ fontFamily: fonts.display, fontWeight: 900, fontSize: 84 * s, letterSpacing: 6 * s, lineHeight: 1, marginTop: 20 * s, color: colors.wine }}>SENSES</div>
+          <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontSize: 50 * s, marginTop: 24 * s }}>на любую сумму</div>
         </div>
         <div style={{ position: "absolute", right: 44 * s, bottom: 36 * s, fontFamily: fonts.sans, fontSize: 20 * s, letterSpacing: 4 * s, color: colors.wine, opacity: 0.6 }}>№ 0001</div>
       </div>
