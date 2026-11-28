@@ -1,44 +1,43 @@
 import { colors, fonts } from "../theme";
 
-// The gift card itself. Brand name and amount are placeholders.
-export const Certificate: React.FC<{ shine: number; width?: number }> = ({ shine, width = 860 }) => {
-  const h = width * 0.6;
+// The gift card: cream stock, coral satin band with a bow, hard print-style shadow.
+// "SENSES", the amount and the number are placeholders.
+export const Certificate: React.FC<{ width?: number }> = ({ width = 860 }) => {
   const s = width / 860;
+  const h = 520 * s;
+  const band = 170 * s;
   return (
-    <div
-      style={{
-        width,
-        height: h,
-        borderRadius: 32 * s,
-        position: "relative",
-        overflow: "hidden",
-        background: `linear-gradient(135deg, #F3E5CC 0%, ${colors.goldLight} 35%, ${colors.gold} 70%, #E9D3AC 100%)`,
-        boxShadow: "0 60px 120px rgba(90,60,30,0.35), 0 10px 30px rgba(90,60,30,0.25)",
-      }}
-    >
-      {/* satin ribbon band */}
-      <div style={{ position: "absolute", left: 150 * s, top: 0, width: 46 * s, height: "100%", background: `linear-gradient(90deg, ${colors.goldDeep}, #B9895A 50%, ${colors.goldDeep})` }} />
-      <div style={{ position: "absolute", inset: 22 * s, border: `${1.5 * s}px solid rgba(255,255,255,0.65)`, borderRadius: 20 * s }} />
-      <div style={{ position: "absolute", left: 250 * s, right: 50 * s, top: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", color: colors.ink }}>
-        <div style={{ fontFamily: fonts.serif, fontSize: 96 * s, letterSpacing: 18 * s, lineHeight: 1 }}>SENSES</div>
-        <div style={{ fontFamily: fonts.sans, fontSize: 24 * s, letterSpacing: 7 * s, fontWeight: 600, marginTop: 26 * s, color: colors.goldDeep }}>
-          ПОДАРОЧНЫЙ СЕРТИФИКАТ
-        </div>
-        <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontSize: 54 * s, marginTop: 34 * s }}>на любую сумму</div>
-      </div>
-      <div style={{ position: "absolute", right: 46 * s, bottom: 40 * s, fontFamily: fonts.sans, fontSize: 20 * s, letterSpacing: 4 * s, color: colors.goldDeep }}>№ 0001</div>
-      {/* moving glare */}
+    <div style={{ position: "relative", width, height: h }}>
       <div
         style={{
           position: "absolute",
-          top: -h,
-          left: shine * width * 1.6 - width * 0.6,
-          width: 180 * s,
-          height: h * 3,
-          rotate: "25deg",
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent)",
+          inset: 0,
+          borderRadius: 26 * s,
+          overflow: "hidden",
+          background: colors.cream,
+          boxShadow: `${22 * s}px ${26 * s}px 0 rgba(20,8,10,0.28)`,
         }}
-      />
+      >
+        <div style={{ position: "absolute", left: band, top: 0, width: 48 * s, height: "100%", background: colors.coral }} />
+        <div style={{ position: "absolute", left: band + 10 * s, top: 0, width: 4 * s, height: "100%", background: colors.coralDeep, opacity: 0.5 }} />
+        <div style={{ position: "absolute", left: 290 * s, right: 50 * s, top: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", color: colors.ink }}>
+          <div style={{ fontFamily: fonts.sans, fontSize: 22 * s, letterSpacing: 7 * s, fontWeight: 600, color: colors.coralDeep }}>
+            ПОДАРОЧНЫЙ СЕРТИФИКАТ
+          </div>
+          <div style={{ fontFamily: fonts.serif, fontSize: 104 * s, letterSpacing: 14 * s, lineHeight: 1, marginTop: 18 * s, color: colors.wine }}>SENSES</div>
+          <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontSize: 54 * s, marginTop: 26 * s }}>на любую сумму</div>
+        </div>
+        <div style={{ position: "absolute", right: 44 * s, bottom: 36 * s, fontFamily: fonts.sans, fontSize: 20 * s, letterSpacing: 4 * s, color: colors.wine, opacity: 0.6 }}>№ 0001</div>
+      </div>
+      {/* bow sits on the top edge, outside the clipped card */}
+      <svg width={260 * s} height={170 * s} viewBox="-130 -110 260 170" style={{ position: "absolute", left: band + 24 * s - 130 * s, top: -110 * s }}>
+        <path d="M0,0 C-30,-90 -120,-80 -105,-20 C-95,15 -40,10 0,0 Z" fill={colors.coral} />
+        <path d="M0,0 C30,-90 120,-80 105,-20 C95,15 40,10 0,0 Z" fill={colors.coral} />
+        <path d="M0,0 C-20,-50 -70,-50 -70,-22 C-60,-5 -30,-2 0,0 Z" fill={colors.coralDeep} opacity={0.55} />
+        <path d="M0,0 C20,-50 70,-50 70,-22 C60,-5 30,-2 0,0 Z" fill={colors.coralDeep} opacity={0.55} />
+        <path d="M-6,4 L-40,58 L-22,52 L-12,60 Z M6,4 L40,58 L22,52 L12,60 Z" fill={colors.coralDeep} />
+        <rect x={-18} y={-16} width={36} height={30} rx={8} fill={colors.coralDeep} />
+      </svg>
     </div>
   );
 };

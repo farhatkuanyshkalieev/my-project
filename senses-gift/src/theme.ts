@@ -27,18 +27,20 @@ export const fonts = { serif: "'Cormorant Garamond', serif", sans: "'Manrope', s
 
 // Placeholder palette — swap for the clinic's brand colors.
 export const colors = {
-  cream: "#F5EFE7",
-  sand: "#EADFD2",
-  blush: "#E8CFC4",
-  gold: "#B8925F",
-  goldLight: "#E6CFA6",
-  goldDeep: "#8C6A3F",
-  ink: "#2B221D",
-  inkSoft: "#6B5B50",
+  cream: "#F3ECE2",
+  powder: "#EFC9BF",
+  coral: "#D7654A",
+  coralDeep: "#A8432F",
+  wine: "#5A1A29",
+  wineDeep: "#3A0E19",
+  ink: "#1F1716",
+  butter: "#F2D58A",
 };
 
 export const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
 export const easeInOut = Easing.bezier(0.65, 0, 0.35, 1);
+export const easeBack = Easing.bezier(0.34, 1.56, 0.64, 1);
+export const easeInExpo = Easing.bezier(0.7, 0, 0.84, 0);
 
 export const ip = (
   frame: number,

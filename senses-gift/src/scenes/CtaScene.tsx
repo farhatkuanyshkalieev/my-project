@@ -1,79 +1,51 @@
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { useCurrentFrame } from "remotion";
 import { Certificate } from "../components/Certificate";
-import { colors, fonts, ip } from "../theme";
+import { Line, SceneFrame } from "../components/Kit";
+import { colors, easeBack, fonts, ip } from "../theme";
 
 export const CtaScene: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <AbsoluteFill style={{ alignItems: "center" }}>
+    <SceneFrame bg={colors.powder}>
       <div
         style={{
           position: "absolute",
-          top: 300,
-          rotate: `${-6 + Math.sin(f * 0.05) * 2}deg`,
-          translate: `0px ${Math.sin(f * 0.07) * 12}px`,
-          scale: String(ip(f, [0, 20], [1.25, 1])),
+          left: 240,
+          top: 330,
+          rotate: `${-7 + Math.sin(f * 0.05) * 1.5}deg`,
+          translate: `0px ${ip(f, [2, 18], [-700, 0], easeBack) + Math.sin(f * 0.07) * 8}px`,
         }}
       >
-        <Certificate width={600} shine={ip(f, [20, 60], [0, 1], (t) => t)} />
+        <Certificate width={600} />
       </div>
-      <div style={{ position: "absolute", top: 860, width: "100%", textAlign: "center" }}>
-        <div
-          style={{
-            fontFamily: fonts.serif,
-            fontSize: 150,
-            lineHeight: 1,
-            color: colors.ink,
-            opacity: ip(f, [8, 24], [0, 1]),
-            translate: `0px ${ip(f, [8, 28], [40, 0])}px`,
-          }}
-        >
-          Подари
-        </div>
-        <div
-          style={{
-            fontFamily: fonts.serif,
-            fontStyle: "italic",
-            fontSize: 170,
-            lineHeight: 1.05,
-            color: colors.goldDeep,
-            opacity: ip(f, [16, 32], [0, 1]),
-            translate: `0px ${ip(f, [16, 36], [40, 0])}px`,
-            filter: `blur(${ip(f, [16, 34], [10, 0])}px)`,
-          }}
-        >
-          ощущение
-        </div>
-        <div
-          style={{
-            fontFamily: fonts.sans,
-            fontSize: 44,
-            color: colors.inkSoft,
-            marginTop: 40,
-            opacity: ip(f, [30, 46], [0, 1]),
-          }}
-        >
-          подарочные сертификаты SENSES
-        </div>
+      <div style={{ position: "absolute", left: 90, right: 90, top: 860 }}>
+        <Line at={8}>
+          <div style={{ fontFamily: fonts.serif, fontSize: 176, lineHeight: 1, color: colors.ink }}>Подари</div>
+        </Line>
+        <Line at={15}>
+          <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontSize: 196, lineHeight: 1, color: colors.wine }}>ощущение</div>
+        </Line>
+        <div style={{ height: 34 }} />
+        <Line at={26}>
+          <div style={{ fontFamily: fonts.sans, fontSize: 42, color: colors.ink }}>сертификат на любую сумму</div>
+        </Line>
         <div
           style={{
             display: "inline-block",
-            marginTop: 56,
-            padding: "26px 54px",
+            marginTop: 50,
+            padding: "28px 58px",
             borderRadius: 999,
-            background: colors.ink,
+            background: colors.wine,
             color: colors.cream,
             fontFamily: fonts.sans,
             fontSize: 40,
-            fontWeight: 500,
-            letterSpacing: 1,
-            opacity: ip(f, [40, 56], [0, 1]),
-            scale: String(ip(f, [40, 60], [0.85, 1])),
+            fontWeight: 600,
+            scale: String(ip(f, [45, 55], [0, 1], easeBack)),
           }}
         >
-          Заказать — в Direct
+          Заказать в Direct
         </div>
       </div>
-    </AbsoluteFill>
+    </SceneFrame>
   );
 };

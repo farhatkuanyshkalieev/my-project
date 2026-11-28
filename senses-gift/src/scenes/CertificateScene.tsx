@@ -1,71 +1,49 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { Certificate } from "../components/Certificate";
-import { SenseTitle } from "../components/SenseTitle";
-import { colors, easeInOut, fonts, ip } from "../theme";
+import { Line, SceneFrame, SenseTitle } from "../components/Kit";
+import { colors, easeBack, easeInOut, fonts, ip } from "../theme";
 
-// The four senses fly together and collapse into the gift card = the fifth sense.
+// Continues from the pupil (same wine field). The four senses stack up on the beats,
+// fold away, and the card flips in on the downbeat (frame 30 = the chime).
 const SENSES = ["звук", "касание", "аромат", "взгляд"];
+const LAND = [0, 8, 15, 22];
 
 export const CertificateScene: React.FC = () => {
   const f = useCurrentFrame();
-  const merge = ip(f, [14, 36], [0, 1], easeInOut);
-  const cardIn = ip(f, [34, 62], [0, 1]);
+  const fold = ip(f, [26, 32], [1, 0], easeInOut);
   return (
-    <AbsoluteFill>
-      {SENSES.map((s, i) => {
-        const a = (i / SENSES.length) * Math.PI * 2 - Math.PI / 4;
-        const r = 330 * (1 - merge);
-        return (
-          <div
-            key={s}
-            style={{
-              position: "absolute",
-              left: 540 + Math.cos(a) * r,
-              top: 960 + Math.sin(a) * r * 1.2,
-              translate: "-50% -50%",
-              fontFamily: fonts.serif,
-              fontStyle: "italic",
-              fontSize: 64,
-              color: colors.goldDeep,
-              whiteSpace: "nowrap",
-              opacity: ip(f, [0, 10], [0, 1]) * (1 - merge),
-              scale: String(1 - merge * 0.7),
-            }}
-          >
-            {s}
+    <SceneFrame bg={colors.wine} wipe={false}>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", scale: `1 ${fold}`, opacity: fold > 0.02 ? 1 : 0 }}>
+        {SENSES.map((w, i) => (
+          <div key={w} style={{ translate: `${ip(f, [LAND[i], LAND[i] + 8], [i % 2 ? 300 : -300, 0])}px 0px`, opacity: f >= LAND[i] ? 1 : 0 }}>
+            <Line at={LAND[i]} dur={8}>
+              <div style={{ fontFamily: fonts.serif, fontStyle: "italic", fontSize: 130, lineHeight: 1.05, color: i % 2 ? colors.coral : colors.powder }}>{w}</div>
+            </Line>
           </div>
-        );
-      })}
-      {/* flash at the merge point */}
-      <div
-        style={{
-          position: "absolute",
-          left: 540,
-          top: 960,
-          width: 900,
-          height: 900,
-          translate: "-50% -50%",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 60%)",
-          opacity: ip(f, [30, 36, 56], [0, 1, 0]),
-          scale: String(ip(f, [30, 50], [0.2, 1.3])),
-        }}
-      />
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", perspective: 1400 }}>
+        ))}
+      </AbsoluteFill>
+      {/* ring burst instead of a glow */}
+      <svg width={1080} height={1920} style={{ position: "absolute" }}>
+        {[0, 1].map((k) => {
+          const r = ip(f, [30 + k * 4, 60 + k * 4], [0, 720]);
+          return <circle key={k} cx={540} cy={1000} r={r} fill="none" stroke={k ? colors.coral : colors.powder} strokeWidth={ip(f, [30, 60], [26, 1])} opacity={r > 0 && r < 719 ? 1 : 0} />;
+        })}
+      </svg>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", perspective: 1600, paddingTop: 80 }}>
         <div
           style={{
-            opacity: cardIn,
-            scale: String(ip(f, [34, 62], [0.6, 1])),
-            rotate: `y ${ip(f, [34, 70], [-75, -6]) + Math.sin(f * 0.05) * 4}deg`,
-            translate: `0px ${Math.sin(f * 0.06) * 10}px`,
+            opacity: f >= 30 ? 1 : 0,
+            rotate: `y ${ip(f, [30, 48], [100, -8], easeBack) + Math.sin(f * 0.05) * 3}deg`,
+            scale: String(ip(f, [30, 46], [0.7, 1], easeBack)),
+            translate: `0px ${Math.sin(f * 0.07) * 10}px`,
           }}
         >
-          <div style={{ rotate: `x ${8 + Math.cos(f * 0.05) * 3}deg` }}>
-            <Certificate shine={ip(f, [64, 100], [0, 1], (t) => t)} />
+          <div style={{ rotate: `${-3 + Math.cos(f * 0.05) * 1.5}deg` }}>
+            <Certificate />
           </div>
         </div>
       </AbsoluteFill>
-      <SenseTitle index={5} word="Ощущение" caption="всё это — в одном подарке" />
-    </AbsoluteFill>
+      <SenseTitle label="чувство пятое" word="Ощущение" caption="все пять в одном подарке" fg={colors.cream} accent={colors.coral} at={36} />
+    </SceneFrame>
   );
 };

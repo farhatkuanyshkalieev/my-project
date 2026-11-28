@@ -1,7 +1,6 @@
-import { AbsoluteFill } from "remotion";
-import { TransitionSeries, linearTiming } from "@remotion/transitions";
-import { fade } from "@remotion/transitions/fade";
-import { Background, Grain } from "./components/Background";
+import { AbsoluteFill, Sequence, staticFile } from "remotion";
+import { Audio } from "@remotion/media";
+import { Grain } from "./components/Kit";
 import { HookScene } from "./scenes/HookScene";
 import { SoundScene } from "./scenes/SoundScene";
 import { TouchScene } from "./scenes/TouchScene";
@@ -10,38 +9,37 @@ import { SightScene } from "./scenes/SightScene";
 import { CertificateScene } from "./scenes/CertificateScene";
 import { CtaScene } from "./scenes/CtaScene";
 
+// 120 BPM soundtrack: 1 beat = 15 frames, every cut sits on a beat.
 export const SCENES = [
-  { name: "Hook", component: HookScene, durationInFrames: 75 },
+  { name: "Hook", component: HookScene, durationInFrames: 60 },
   { name: "Sound", component: SoundScene, durationInFrames: 90 },
   { name: "Touch", component: TouchScene, durationInFrames: 90 },
   { name: "Scent", component: ScentScene, durationInFrames: 90 },
   { name: "Sight", component: SightScene, durationInFrames: 90 },
-  { name: "Certificate", component: CertificateScene, durationInFrames: 135 },
+  { name: "Certificate", component: CertificateScene, durationInFrames: 120 },
   { name: "Cta", component: CtaScene, durationInFrames: 105 },
 ];
-export const TRANSITION = 15;
-export const TOTAL =
-  SCENES.reduce((s, x) => s + x.durationInFrames, 0) - TRANSITION * (SCENES.length - 1);
+const OVERLAP = 12; // previous scene stays underneath while the next one wipes in
+export const TOTAL = SCENES.reduce((s, x) => s + x.durationInFrames, 0);
 
-export const SensesGift: React.FC = () => (
-  <AbsoluteFill>
-    <Background />
-    <TransitionSeries>
-      {SCENES.flatMap((s, i) => {
+export const SensesGift: React.FC = () => {
+  let from = 0;
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#1F1716" }}>
+      {SCENES.map((s, i) => {
         const C = s.component;
-        const seq = (
-          <TransitionSeries.Sequence key={s.name} name={s.name} durationInFrames={s.durationInFrames}>
+        const start = from;
+        from += s.durationInFrames;
+        const last = i === SCENES.length - 1;
+        return (
+          <Sequence key={s.name} name={s.name} from={start} durationInFrames={s.durationInFrames + (last ? 0 : OVERLAP)}>
             <C />
-          </TransitionSeries.Sequence>
+          </Sequence>
         );
-        return i === 0
-          ? [seq]
-          : [
-              <TransitionSeries.Transition key={`t${i}`} presentation={fade()} timing={linearTiming({ durationInFrames: TRANSITION })} />,
-              seq,
-            ];
       })}
-    </TransitionSeries>
-    <Grain />
-  </AbsoluteFill>
-);
+      <Grain />
+      <Audio src={staticFile("audio/music.wav")} volume={1} />
+      <Audio src={staticFile("audio/sfx.wav")} volume={1} />
+    </AbsoluteFill>
+  );
+};
